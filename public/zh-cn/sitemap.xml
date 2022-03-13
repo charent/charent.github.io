@@ -2,71 +2,71 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://charent.github.io/</loc>
+    <loc>/</loc>
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://charent.github.io/en/"
+                href="/en/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://charent.github.io/"
+                href="/"
                 />
   </url><url>
-    <loc>https://charent.github.io/categories/</loc>
+    <loc>/categories/</loc>
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://charent.github.io/en/categories/"
+                href="/en/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://charent.github.io/categories/"
+                href="/categories/"
                 />
   </url><url>
-    <loc>https://charent.github.io/p/test-chinese/</loc>
+    <loc>/p/test-chinese/</loc>
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/post/</loc>
+    <loc>/post/</loc>
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/categories/%E6%B5%8B%E8%AF%95%E5%88%86%E7%B1%BB/</loc>
+    <loc>/categories/%E6%B5%8B%E8%AF%95%E5%88%86%E7%B1%BB/</loc>
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/page/</loc>
+    <loc>/page/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/archives/</loc>
+    <loc>/archives/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/tags/emoji/</loc>
+    <loc>/tags/emoji/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/emoji-support/</loc>
+    <loc>/p/emoji-support/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/tags/</loc>
+    <loc>/tags/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://charent.github.io/en/tags/"
+                href="/en/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://charent.github.io/tags/"
+                href="/tags/"
                 />
   </url><url>
-    <loc>https://charent.github.io/categories/test/</loc>
+    <loc>/categories/test/</loc>
     <lastmod>2019-03-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/%E5%85%B3%E4%BA%8E/</loc>
+    <loc>/%E5%85%B3%E4%BA%8E/</loc>
   </url><url>
-    <loc>https://charent.github.io/search/</loc>
+    <loc>/search/</loc>
   </url>
 </urlset>
