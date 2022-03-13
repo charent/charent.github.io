@@ -1,0 +1,1 @@
+hugo --theme=hugo-theme-stack --baseUrl="https://charent.github.io/"
