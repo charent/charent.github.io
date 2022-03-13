@@ -1,5 +1,4 @@
-# Welcome to GitHub Desktop!
+# charent-chen 的个人博客项目
 
-This is your README. READMEs are where you can communicate what your project is and how to use it.
-
-Write your name on line 6, save it, and then head back to GitHub Desktop.
+* 不定期更新，回复随缘
+* 一些博客是自己以前的笔记，技术可能比较老了，也一起般过来吧
