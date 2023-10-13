@@ -1,1 +1,1 @@
-hugo --theme=hugo-theme-stack --baseUrl="https://charent.github.io/" -d docs
+hugo --theme=hugo-theme-stack --baseURL="https://charent.github.io/" -d docs

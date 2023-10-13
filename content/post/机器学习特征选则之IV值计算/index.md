@@ -3,12 +3,10 @@ title: 机器学习特征选择之IV值计算
 description: 这是一个副标题
 date: 2022-04-16
 # slug: markdown test
-image: before_woe.png
+# image: before_woe.png
 categories:
     - 机器学习
     - 特征选择
-tags:
-  - 机器学习
 ---
 
 ## 前言

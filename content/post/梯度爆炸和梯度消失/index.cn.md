@@ -3,11 +3,9 @@ title: 深度学习中的梯度爆炸和梯度消失
 # description: 这是一个副标题
 date: 2018-10-01
 # slug: markdown test
-image: clipboard.png
+# image: clipboard.png
 categories:
     - 深度学习
-tags:
-    - 梯度
 ---
 
 ## 梯度消失 

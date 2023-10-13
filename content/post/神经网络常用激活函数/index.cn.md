@@ -3,11 +3,9 @@ title: 深度学习常用激活函数
 # description: 这是一个副标题
 date: 2018-11-02
 # slug: markdown test
-image: 汇总图.png
+# image: 汇总图.png
 categories:
     - 深度学习
-tags:
-    - 激活函数
 ---
 
 ## 为什么需要激活函数？
@@ -47,7 +45,7 @@ $g(y)$ 为非线性激活函数。
 
     sigmoid函数缺点：当 x 值非常大或者非常小时，通过上图我们可以看到，sigmoid函数的导数 $g′(x)$ 将接近 0 。这会导致权重 W 的梯度将接近 0 ，使得梯度更新十分缓慢，即梯度消失。
 
-![sigmoid函数](sigmiod.png)  
+![sigmoid函数](sigmoid.png)  
 
 
 2. tanh函数  
@@ -88,3 +86,6 @@ $g(y)$ 为非线性激活函数。
     Leaky ReLU函数解决了ReLU函数在输入为负的情况下产生的梯度消失问题。
 
 ![leaky_relu函数](leaky_relu.png)
+
+#### 汇总
+![汇总图](汇总图.png)

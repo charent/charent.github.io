@@ -12,7 +12,7 @@
         <pubDate>Sat, 16 Apr 2022 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/</guid>
-        <description>&lt;img src="https://charent.github.io/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/before_woe.png" alt="Featured image of post 机器学习特征选择之IV值计算" /&gt;&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+        <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;  IV值（Information Value），信息价值指标，是评价一个特征好不好的指标之一。在金融风控领域广泛应用，尤其是在特征选择的场景下，会经常使用这个指标，特征选择得好不好，将直接影响模型的效果。&lt;/p&gt;
 &lt;p&gt;  在金融风控领域，我们处理的更多是二分类问题，即是判断一个账号黑账户还是白账户。风险识别模型的效果很大程度上取决于对黑账户特征的分析，分析的黑账户越多，特征经验越丰富，模型效果越好。但是如何挑选分析得到的特征呢？用什么样的标准去判断这个特征能不能用呢？最方便的方法当然是拿所有的特征去训练一个模型，看看特征重要性，但这不是本文讨论的内容，我们要在特征做完之后，立刻判断这个特征能不能用，而不是等所有特征做完再去看特征重要性。用IV值！&lt;/p&gt;
 &lt;h2 id=&#34;iv值先验知识1分箱&#34;&gt;IV值先验知识1：分箱&lt;/h2&gt;

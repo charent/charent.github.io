@@ -12,7 +12,7 @@
         <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/</guid>
-        <description>&lt;img src="https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/%E6%B1%87%E6%80%BB%E5%9B%BE.png" alt="Featured image of post 深度学习常用激活函数" /&gt;&lt;h2 id=&#34;为什么需要激活函数&#34;&gt;为什么需要激活函数？&lt;/h2&gt;
+        <description>&lt;h2 id=&#34;为什么需要激活函数&#34;&gt;为什么需要激活函数？&lt;/h2&gt;
 &lt;ol&gt;
 &lt;li&gt;激活函数对模型学习、理解非常复杂和非线性的函数具有重要作用。&lt;/li&gt;
 &lt;li&gt;激活函数可以引入非线性因素。如果不使用激活函数，则输出信号仅是一个简单的线性函数。线性函数一个一级多项式，线性方程的复杂度有限，从数据中学习复杂函数映射的能力很小。没有激活函数，神经网络将无法学习和模拟其他复杂类型的数据，例如图像、视频、音频、语音等。&lt;/li&gt;
@@ -144,6 +144,21 @@ Leaky ReLU函数解决了ReLU函数在输入为负的情况下产生的梯度消
 		class=&#34;gallery-image&#34; 
 		data-flex-grow=&#34;119&#34;
 		data-flex-basis=&#34;285px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;汇总&#34;&gt;汇总&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/%E6%B1%87%E6%80%BB%E5%9B%BE.png&#34;
+	width=&#34;640&#34;
+	height=&#34;473&#34;
+	srcset=&#34;https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/%E6%B1%87%E6%80%BB%E5%9B%BE_hu9a7cd64bf0e23761fe59e554279c5199_70659_480x0_resize_box_3.png 480w, https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/%E6%B1%87%E6%80%BB%E5%9B%BE_hu9a7cd64bf0e23761fe59e554279c5199_70659_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;汇总图&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;135&#34;
+		data-flex-basis=&#34;324px&#34;
 	
 &gt;&lt;/p&gt;
 </description>

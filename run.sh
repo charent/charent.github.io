@@ -1,1 +1,1 @@
-hugo server --theme=hugo-theme-stack --buildDrafts
+hugo server --theme=hugo-theme-stack --buildDrafts --bind=127.0.0.1 --baseURL=http://127.0.0.1 --port=8123

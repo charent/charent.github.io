@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='TensorFolw 实战Google深度学习框架 用深度神经解决分类问题主要分为以下4个步骤：
+提取问题中实体的特征向量作为神经网络的输入 定义神经网络结构，并定义如何从神经网络的输入得到输出 训练神经网络，通过训练数据来调整神经网络中参数的取值 使用训练好的神经网络来预测未知数据 训练数据集、验证数据集、测试数据集最好来自于同一分布（训练集主要用户进行模型训练，验证集主要进行参数调整，测试集主要进行模型性能的评估） #####激活函数： 对于分类问题，现实中大部分数据都无法通过线性函数进行划分，使用激活函数实现去线性化，如：ReLU(max(x,0))函数，sigmoid函数，tanh函数。
+sigmoid函数和tanh函数很像，sigmoid函数使得函数输出范围在[0, 1]，左侧倒数从0开始趋向于0，容易造成梯度消失现象。而tanh函数的函数值域是[-1, 1]，特征相差明显时的效果会很好，在循环过程中会不断扩大特征效果。与 sigmoid 的区别是，tanh 是 0 均值的，因此实际应用中 tanh 会比sigmoid 更好。
+损失函数： 交叉熵用来判断一个输出向量和期望的向量有多接近，刻画了连个概率分布直接的距离，是分类问题中使用比较广泛的损失函数，给定两个概率分布：p,q交叉熵: $$ H(p, q) = -∑ p(x) · log(q(x)) $$ , 求和范围为所有$x$,通过最小化交叉熵，使得正确分类和预测分类的概率分布接近。
+在原有的输出层增加一个额外的处理层，可以将神经网络变成一个概率分布，原始神经网络的输出被用作置信度来生成新的输出。
+分类问题： 经典损失函数：softmax，通过对原始输出层输出的数值进行求和，再用某一输出神经元的输出除以该和，得到预测值，所有输出神经元的预测值构成预测向量，再通过计算正确分类向量和预测向量的交叉熵，较小交叉熵的预测向量要优于较大交叉的预测向量
+对于回归问题（具体数值的预测，一般只有一个输出神经元），最常用的损失函数是均方误差（MSE）
+神经网络优化算法： 梯度下降法和反向传播法：先通过前向传播法计算得到预测值，并比较预测值和真实值之间的差距，再用反向传播算法计算每一个参数的梯度，最后根据每个参数的梯度和学习率使用梯度下降法更新每一个参数
+学习率设置：使用TensorFlow的指数衰减法（tf.train.exponential_decay），用较大学习率快速得到一个比较优的解，随着迭代次数增加，逐步减少学习率，使得模型在训练后更加稳定
+过拟合问题： 原因：1，训练数据太少；2，神经网络过于复杂。 解决办法:
+正则化：在损失函数中加入刻画模型复杂度的指标。是模型的复杂度，λ是模型复杂损失在总损失中的比例。 $$ j&amp;rsquo;(θ) = j(θ) &#43; λ · R(w)，R(w) $$ 刻画模型复杂度的函数有两种，$w$为边上的权重，一是L1正则化： $$R(w) = ||w||1 = ∑|wi|$$ 二是L2正则化: $$ R(w) = ||w||2 ^ 2 = ∑|wi ^ 2| $$ L1正则化不可导，L2正则化比较复杂，一般L1和L2同时使用: $$ R(w) =∑ α · ||wi|| &#43; (1 - α) · wi ^ 2 $$ 使用dropout，dropout使得神经网络的部分神经元的权值等于0或者接近于0，相当于删除该神经元=简化神经网络。tf.'><title>Tensorflow笔记</title>
+
+<link rel='canonical' href='https://charent.github.io/p/tensorflow%E7%AC%94%E8%AE%B0/'>
+
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='Tensorflow笔记'>
+<meta property='og:description' content='TensorFolw 实战Google深度学习框架 用深度神经解决分类问题主要分为以下4个步骤：
+提取问题中实体的特征向量作为神经网络的输入 定义神经网络结构，并定义如何从神经网络的输入得到输出 训练神经网络，通过训练数据来调整神经网络中参数的取值 使用训练好的神经网络来预测未知数据 训练数据集、验证数据集、测试数据集最好来自于同一分布（训练集主要用户进行模型训练，验证集主要进行参数调整，测试集主要进行模型性能的评估） #####激活函数： 对于分类问题，现实中大部分数据都无法通过线性函数进行划分，使用激活函数实现去线性化，如：ReLU(max(x,0))函数，sigmoid函数，tanh函数。
+sigmoid函数和tanh函数很像，sigmoid函数使得函数输出范围在[0, 1]，左侧倒数从0开始趋向于0，容易造成梯度消失现象。而tanh函数的函数值域是[-1, 1]，特征相差明显时的效果会很好，在循环过程中会不断扩大特征效果。与 sigmoid 的区别是，tanh 是 0 均值的，因此实际应用中 tanh 会比sigmoid 更好。
+损失函数： 交叉熵用来判断一个输出向量和期望的向量有多接近，刻画了连个概率分布直接的距离，是分类问题中使用比较广泛的损失函数，给定两个概率分布：p,q交叉熵: $$ H(p, q) = -∑ p(x) · log(q(x)) $$ , 求和范围为所有$x$,通过最小化交叉熵，使得正确分类和预测分类的概率分布接近。
+在原有的输出层增加一个额外的处理层，可以将神经网络变成一个概率分布，原始神经网络的输出被用作置信度来生成新的输出。
+分类问题： 经典损失函数：softmax，通过对原始输出层输出的数值进行求和，再用某一输出神经元的输出除以该和，得到预测值，所有输出神经元的预测值构成预测向量，再通过计算正确分类向量和预测向量的交叉熵，较小交叉熵的预测向量要优于较大交叉的预测向量
+对于回归问题（具体数值的预测，一般只有一个输出神经元），最常用的损失函数是均方误差（MSE）
+神经网络优化算法： 梯度下降法和反向传播法：先通过前向传播法计算得到预测值，并比较预测值和真实值之间的差距，再用反向传播算法计算每一个参数的梯度，最后根据每个参数的梯度和学习率使用梯度下降法更新每一个参数
+学习率设置：使用TensorFlow的指数衰减法（tf.train.exponential_decay），用较大学习率快速得到一个比较优的解，随着迭代次数增加，逐步减少学习率，使得模型在训练后更加稳定
+过拟合问题： 原因：1，训练数据太少；2，神经网络过于复杂。 解决办法:
+正则化：在损失函数中加入刻画模型复杂度的指标。是模型的复杂度，λ是模型复杂损失在总损失中的比例。 $$ j&amp;rsquo;(θ) = j(θ) &#43; λ · R(w)，R(w) $$ 刻画模型复杂度的函数有两种，$w$为边上的权重，一是L1正则化： $$R(w) = ||w||1 = ∑|wi|$$ 二是L2正则化: $$ R(w) = ||w||2 ^ 2 = ∑|wi ^ 2| $$ L1正则化不可导，L2正则化比较复杂，一般L1和L2同时使用: $$ R(w) =∑ α · ||wi|| &#43; (1 - α) · wi ^ 2 $$ 使用dropout，dropout使得神经网络的部分神经元的权值等于0或者接近于0，相当于删除该神经元=简化神经网络。tf.'>
+<meta property='og:url' content='https://charent.github.io/p/tensorflow%E7%AC%94%E8%AE%B0/'>
+<meta property='og:site_name' content='Charent的博客'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2018-09-12T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2018-09-12T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="Tensorflow笔记">
+<meta name="twitter:description" content="TensorFolw 实战Google深度学习框架 用深度神经解决分类问题主要分为以下4个步骤：
+提取问题中实体的特征向量作为神经网络的输入 定义神经网络结构，并定义如何从神经网络的输入得到输出 训练神经网络，通过训练数据来调整神经网络中参数的取值 使用训练好的神经网络来预测未知数据 训练数据集、验证数据集、测试数据集最好来自于同一分布（训练集主要用户进行模型训练，验证集主要进行参数调整，测试集主要进行模型性能的评估） #####激活函数： 对于分类问题，现实中大部分数据都无法通过线性函数进行划分，使用激活函数实现去线性化，如：ReLU(max(x,0))函数，sigmoid函数，tanh函数。
+sigmoid函数和tanh函数很像，sigmoid函数使得函数输出范围在[0, 1]，左侧倒数从0开始趋向于0，容易造成梯度消失现象。而tanh函数的函数值域是[-1, 1]，特征相差明显时的效果会很好，在循环过程中会不断扩大特征效果。与 sigmoid 的区别是，tanh 是 0 均值的，因此实际应用中 tanh 会比sigmoid 更好。
+损失函数： 交叉熵用来判断一个输出向量和期望的向量有多接近，刻画了连个概率分布直接的距离，是分类问题中使用比较广泛的损失函数，给定两个概率分布：p,q交叉熵: $$ H(p, q) = -∑ p(x) · log(q(x)) $$ , 求和范围为所有$x$,通过最小化交叉熵，使得正确分类和预测分类的概率分布接近。
+在原有的输出层增加一个额外的处理层，可以将神经网络变成一个概率分布，原始神经网络的输出被用作置信度来生成新的输出。
+分类问题： 经典损失函数：softmax，通过对原始输出层输出的数值进行求和，再用某一输出神经元的输出除以该和，得到预测值，所有输出神经元的预测值构成预测向量，再通过计算正确分类向量和预测向量的交叉熵，较小交叉熵的预测向量要优于较大交叉的预测向量
+对于回归问题（具体数值的预测，一般只有一个输出神经元），最常用的损失函数是均方误差（MSE）
+神经网络优化算法： 梯度下降法和反向传播法：先通过前向传播法计算得到预测值，并比较预测值和真实值之间的差距，再用反向传播算法计算每一个参数的梯度，最后根据每个参数的梯度和学习率使用梯度下降法更新每一个参数
+学习率设置：使用TensorFlow的指数衰减法（tf.train.exponential_decay），用较大学习率快速得到一个比较优的解，随着迭代次数增加，逐步减少学习率，使得模型在训练后更加稳定
+过拟合问题： 原因：1，训练数据太少；2，神经网络过于复杂。 解决办法:
+正则化：在损失函数中加入刻画模型复杂度的指标。是模型的复杂度，λ是模型复杂损失在总损失中的比例。 $$ j&amp;rsquo;(θ) = j(θ) &#43; λ · R(w)，R(w) $$ 刻画模型复杂度的函数有两种，$w$为边上的权重，一是L1正则化： $$R(w) = ||w||1 = ∑|wi|$$ 二是L2正则化: $$ R(w) = ||w||2 ^ 2 = ∑|wi ^ 2| $$ L1正则化不可导，L2正则化比较复杂，一般L1和L2同时使用: $$ R(w) =∑ α · ||wi|| &#43; (1 - α) · wi ^ 2 $$ 使用dropout，dropout使得神经网络的部分神经元的权值等于0或者接近于0，相当于删除该神经元=简化神经网络。tf.">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">😆</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Charent的博客</a></h1>
+            <h2 class="site-description">不积硅步，无以至千里</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://github.com/charent'
+                        target="_blank"
+                        title="GitHub"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+
+        <li >
+            <a href='/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+                <li id="i18n-switch">  
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
+                        
+                            <option value="https://charent.github.io/" selected>中文</option>
+                        
+                            <option value="https://charent.github.io/en/" >English</option>
+                        
+                    </select>
+                </li>
+            
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+<main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/tensorflow/" >
+                Tensorflow
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/tensorflow%E7%AC%94%E8%AE%B0/">Tensorflow笔记</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2018-09-12</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+</header>
+
+    <section class="article-content">
+    
+    
+    <h4 id="tensorfolw-实战google深度学习框架">TensorFolw 实战Google深度学习框架</h4>
+<p>用深度神经解决分类问题主要分为以下4个步骤：</p>
+<ol>
+<li>提取问题中实体的特征向量作为神经网络的输入</li>
+<li>定义神经网络结构，并定义如何从神经网络的输入得到输出</li>
+<li>训练神经网络，通过训练数据来调整神经网络中参数的取值</li>
+<li>使用训练好的神经网络来预测未知数据</li>
+<li>训练数据集、验证数据集、测试数据集最好来自于同一分布（训练集主要用户进行模型训练，验证集主要进行参数调整，测试集主要进行模型性能的评估）</li>
+</ol>
+<p>#####激活函数：
+对于分类问题，现实中大部分数据都无法通过线性函数进行划分，使用激活函数实现去线性化，如：<code>ReLU(max(x,0))</code>函数，<code>sigmoid</code>函数，<code>tanh</code>函数。</p>
+<p><code>sigmoid</code>函数和tanh函数很像，<code>sigmoid</code>函数使得函数输出范围在<code>[0, 1]</code>，左侧倒数从0开始趋向于0，容易造成梯度消失现象。而tanh函数的函数值域是<code>[-1, 1]</code>，特征相差明显时的效果会很好，在循环过程中会不断扩大特征效果。与 <code>sigmoid</code> 的区别是，<code>tanh</code> 是 0 均值的，因此实际应用中 <code>tanh</code> 会比<code>sigmoid</code> 更好。</p>
+<h4 id="损失函数">损失函数：</h4>
+<p>交叉熵用来判断一个输出向量和期望的向量有多接近，刻画了连个概率分布直接的距离，是分类问题中使用比较广泛的损失函数，给定两个概率分布：<code>p,q</code>交叉熵:
+$$ H(p, q) = -∑ p(x) · log(q(x)) $$
+, 求和范围为所有$x$,通过最小化交叉熵，使得正确分类和预测分类的概率分布接近。</p>
+<p>在原有的输出层增加一个额外的处理层，可以将神经网络变成一个概率分布，原始神经网络的输出被用作置信度来生成新的输出。</p>
+<p>分类问题：
+经典损失函数：softmax，通过对原始输出层输出的数值进行求和，再用某一输出神经元的输出除以该和，得到预测值，所有输出神经元的预测值构成预测向量，再通过计算正确分类向量和预测向量的交叉熵，较小交叉熵的预测向量要优于较大交叉的预测向量</p>
+<p>对于回归问题（具体数值的预测，一般只有一个输出神经元），最常用的损失函数是均方误差（MSE）</p>
+<h4 id="神经网络优化算法">神经网络优化算法：</h4>
+<p>梯度下降法和反向传播法：先通过前向传播法计算得到预测值，并比较预测值和真实值之间的差距，再用反向传播算法计算每一个参数的梯度，最后根据每个参数的梯度和学习率使用梯度下降法更新每一个参数<br>
+学习率设置：使用TensorFlow的指数衰减法（tf.train.exponential_decay），用较大学习率快速得到一个比较优的解，随着迭代次数增加，逐步减少学习率，使得模型在训练后更加稳定</p>
+<h4 id="过拟合问题">过拟合问题：</h4>
+<p>原因：1，训练数据太少；2，神经网络过于复杂。
+解决办法:</p>
+<ol>
+<li>正则化：在损失函数中加入刻画模型复杂度的指标。是模型的复杂度，λ是模型复杂损失在总损失中的比例。
+$$ j&rsquo;(θ) = j(θ) + λ · R(w)，R(w) $$
+刻画模型复杂度的函数有两种，$w$为边上的权重，一是<code>L1</code>正则化：
+$$R(w) = ||w||1 = ∑|wi|$$
+二是L2正则化:
+$$ R(w) = ||w||2 ^ 2 = ∑|wi ^ 2| $$
+L1正则化不可导，L2正则化比较复杂，一般L1和L2同时使用:
+$$ R(w) =∑ α · ||wi|| + (1 - α)  · wi ^ 2 $$</li>
+<li>使用dropout，dropout使得神经网络的部分神经元的权值等于0或者接近于0，相当于删除该神经元=简化神经网络。<code>tf.nn.dropout(layer,keep_prob )</code>，<code>keep_prob=1.0</code>表示该层的神经元100%工作</li>
+</ol>
+<h4 id="滑动平均模型">滑动平均模型：</h4>
+<p>提高使用随机梯度下降法训练的神经网络模型在测试数据上的表现</p>
+<ol>
+<li>
+<p>深度神经网络（DNN）：
+即是最基本的多层全连接网络。前向传播法可以转化为基本的矩阵相乘来实现</p>
+</li>
+<li>
+<p>循环神经网络（RNN）：
+当前状态的输出ot由当前状态的输入xt和上一时刻的隐含状态ht-1所决定的，在输出ot时，RNN还生成全新的隐含状态ht。常用沿时间反向传播训练方法对循环神经网络进行训练。</p>
+</li>
+<li>
+<p>卷积神经网络（CNN）：
+解决全连接神经网络参数过多问题。一般组成：输入层-&gt;( 卷积层+  -&gt;  池化层? )+ -&gt; 全连接层+ -&gt;
+<code>softmax</code>层 -&gt; 输出层。+表示一个或多个，?表示可有可无。加入池化层的作用是加快计算速度和防止过拟合（有研究指出加入池化层对模型效果影响不大，但主流CNN中一般都有池化层）。</p>
+</li>
+<li>
+<p>卷积层过滤器：使用3x3或者5x5尺寸的过滤器进行前向传播运算，过滤器每次移动（tensorflowz中可设置移动步数）都生成一个固定深度的卷积层。卷积层中过滤器的参数是共享的，可以大幅减少神经网络上的参数。
+池化层：对卷积层进行分割，对分割的部分使用最大池化层或者平均池化层生成新的层。CNN比较适合处理图像，因为图像矩阵具有稠密性。高维、稀疏的向量不适合作为CNN的输入。
+输入层是图像的像素点，且图片中的单个物体像素点是连续的，卷积核在输入层滑动时可以方便的提取到图片中的物体特征；另外，图片的像素点组成一个矩阵，这便于卷积核上下左右滑动提取特征。然而对于文本数据，文本中的词语却是离散的，比如“虽然……但是……”，这里“虽然”和“但是”显然具有关联的关系，但是它们之间却可能在句子中相隔很远，卷积核很难提取到这样的具有长距离依赖的词语之间的关系。
+卷积操作其实就是卷积核矩阵和对应的输入层中一小块矩阵的点积相乘，卷积核通过权重共享的方式，按照步幅上下左右的在输入层滑动提取特征，以此将输入层做特征映射（features map）作为输出层，但在 NLP 中，由于词嵌入层中每一行都表示一个词语，我们在句子里面提取有利于分类的特征肯定是需要从词语（word）或者字符（char）级别去提取，也就是卷积宽口的宽度应该覆盖完全单个词向量，也就是 CNN 的卷积核宽度必须要等于词向量的维度
+对于NPL，滑动窗口无法捕获远距离的特征</p>
+</li>
+</ol>
+<h4 id="自编码器ae">自编码器（AE）：</h4>
+<h4 id="其它">其它：</h4>
+<p>axis=0：矩阵的列
+axis=1：矩阵的行</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ]
+        });})
+</script>
+    
+</article>
+
+    
+
+    
+
+<aside class="related-contents--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-contents">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">孪生网络实现多分类（Siamese Network）</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
+    <a href="/p/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">使用二分类实现多分类</h2>
+        </div>
+    </a>
+</article>
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2023 Charent的博客
+    </section>
+    
+    <section class="powerby">
+         <br />
+        
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+            >
+
+            </main>
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#tensorfolw-实战google深度学习框架">TensorFolw 实战Google深度学习框架</a></li>
+            <li><a href="#损失函数">损失函数：</a></li>
+            <li><a href="#神经网络优化算法">神经网络优化算法：</a></li>
+            <li><a href="#过拟合问题">过拟合问题：</a></li>
+            <li><a href="#滑动平均模型">滑动平均模型：</a></li>
+            <li><a href="#自编码器ae">自编码器（AE）：</a></li>
+            <li><a href="#其它">其它：</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
