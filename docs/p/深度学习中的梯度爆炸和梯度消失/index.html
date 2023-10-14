@@ -286,10 +286,10 @@
 <p>  梯度消失是指通过隐藏层从后向前看，梯度会变的越来越小，说明前面层的学习会显著慢于后面层的学习，所以学习会卡住，除非梯度变大。
 通俗来讲就是多个小于1的参数多次连乘，导致结果非常小。如图中蓝色线条所示。</p>
 <p>  梯度消失的原因受到多种因素影响，例如学习率的大小，网络参数的初始化，激活函数的边缘效应等。在深层神经网络中，每一个神经元计算得到的梯度都会传递给前一层，较浅层的神经元接收到的梯度受到之前所有层梯度的影响。如果计算得到的梯度值非常小，随着层数增多，求出的梯度更新信息将会以指数形式衰减，就会发生梯度消失。下图是不同隐含层的学习速率。</p>
-<p><img src="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E5%92%8C%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1/clipboard.png"
+<p><img src="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E5%92%8C%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1/1.png"
 	width="800"
 	height="600"
-	srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E5%92%8C%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1/clipboard_huf8d34ee47161ea8975f770e8f06e63a8_47600_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E5%92%8C%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1/clipboard_huf8d34ee47161ea8975f770e8f06e63a8_47600_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E5%92%8C%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1/1_huf8d34ee47161ea8975f770e8f06e63a8_47600_480x0_resize_box_3.png 480w, /p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E5%92%8C%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1/1_huf8d34ee47161ea8975f770e8f06e63a8_47600_1024x0_resize_box_3.png 1024w"
 	loading="lazy"
 	
 		alt="梯度消失示意图"

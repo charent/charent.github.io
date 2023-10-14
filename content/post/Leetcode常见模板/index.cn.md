@@ -228,7 +228,43 @@ sort_heap(min.begin(),min.end(), greater<int>());
 //每一次都把小顶堆堆顶的元素往末尾放，没放一次end迭代器减1
 ```
 
+# cpp图的深度优先遍历
+```cpp
+/*
+用vivited[]数组记录哪些节点被访问过
+从0节点开始访问，依次访问未访问的相邻节点
+*/
+void dfs(int** G, int v)
+{
+    visited[v] = 1
+    vistt(v)
+    for (p in neighbour(G, v)))
+    {
+        if (!visited[p]) dfs(G, v);
+    }
+}
+```
 
-
-
-
+# cpp图的广度优先遍历
+```cpp
+/*
+用vivited[]数组记录哪些节点被访问过
+用队列que来存放每一层的顶点
+*/
+void bfs(int** G, v)
+{
+    que.push(v)
+    while (!que.empty())
+    {
+        s = que.top();que.pop();
+        for (s int neighbour(G, s))
+        {
+            if (!visited[s]) 
+            {
+                visited[s] = true;
+               que.push()
+            }
+        }
+    }
+}
+```

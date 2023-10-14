@@ -1,7 +1,7 @@
 baseurl: /
 languageCode: zh-cn
 theme: hugo-theme-stack
-paginate: 5
+paginate: 25
 title: Charent的博客
 
 languages:
@@ -150,7 +150,7 @@ params:
                   limit: 5
             - type: categories
               params:
-                  limit: 10
+                  limit: 20
             - type: tag-cloud
               params:
                   limit: 10

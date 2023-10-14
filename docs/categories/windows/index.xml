@@ -6,7 +6,86 @@
         <description>Recent content in Windows on Charent的博客</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Thu, 26 Mar 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://charent.github.io/categories/windows/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 26 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://charent.github.io/categories/windows/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>office公式居中</title>
+        <link>https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/</link>
+        <pubDate>Fri, 26 Feb 2021 00:00:00 +0000</pubDate>
+        
+        <guid>https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/</guid>
+        <description>&lt;h1 id=&#34;方法&#34;&gt;方法&lt;/h1&gt;
+&lt;ol&gt;
+&lt;li&gt;使用三列的表格实现公式居中&lt;/li&gt;
+&lt;li&gt;使用制表位实现公式居中&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;首先确定纸张大小和页边距：
+&lt;img src=&#34;https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/1.png&#34;
+	width=&#34;214&#34;
+	height=&#34;124&#34;
+	srcset=&#34;https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/1_hu5c8ca9c291adc285380460f66da0dbe2_3570_480x0_resize_box_3.png 480w, https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/1_hu5c8ca9c291adc285380460f66da0dbe2_3570_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;1&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;172&#34;
+		data-flex-basis=&#34;414px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;A4：21x29.7 厘米
+页边距：一般是上下：2.54厘米，左右：3.18厘米
+第一个制表位：设置在页面中间，计算公式为:
+$$
+(21cm - 3.18cm × 2) ÷ 2 = 7.32 cm
+$$
+第二个制表位：设置在页面右侧，计算公式为:
+$$
+21cm - 3.18cm x 2 = 14.64 cm
+$$
+新建一个样式，修改样式，把首行缩进设置为0，点击左下角的格式，选择制表位。
+设置第一个制表位，居中对齐:
+&lt;img src=&#34;https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/2.png&#34;
+	width=&#34;214&#34;
+	height=&#34;124&#34;
+	srcset=&#34;https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/2_hu5c8ca9c291adc285380460f66da0dbe2_3570_480x0_resize_box_3.png 480w, https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/2_hu5c8ca9c291adc285380460f66da0dbe2_3570_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;2&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;172&#34;
+		data-flex-basis=&#34;414px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;设置第二个制表位，居右对齐:
+&lt;img src=&#34;https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/3.png&#34;
+	width=&#34;214&#34;
+	height=&#34;124&#34;
+	srcset=&#34;https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/3_hu5c8ca9c291adc285380460f66da0dbe2_3570_480x0_resize_box_3.png 480w, https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/3_hu5c8ca9c291adc285380460f66da0dbe2_3570_1024x0_resize_box_3.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;3&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;172&#34;
+		data-flex-basis=&#34;414px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;在编辑公式时应用新样式即可&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>刷题模板</title>
+        <link>https://charent.github.io/p/%E5%88%B7%E9%A2%98%E6%A8%A1%E6%9D%BF/</link>
+        <pubDate>Fri, 26 Feb 2021 00:00:00 +0000</pubDate>
+        
+        <guid>https://charent.github.io/p/%E5%88%B7%E9%A2%98%E6%A8%A1%E6%9D%BF/</guid>
+        <description>&lt;p&gt;##dd&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>win10下Linux子系统导入导出</title>
         <link>https://charent.github.io/p/win10%E4%B8%8Blinux%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/</link>
         <pubDate>Thu, 26 Mar 2020 00:00:00 +0000</pubDate>
