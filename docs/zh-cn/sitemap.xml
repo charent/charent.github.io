@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://charent.github.io/</loc>
-    <lastmod>2023-10-30T00:00:00+00:00</lastmod>
+    <lastmod>2023-11-05T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -15,14 +15,8 @@
                 href="https://charent.github.io/"
                 />
   </url><url>
-    <loc>https://charent.github.io/categories/c&#43;&#43;/</loc>
-    <lastmod>2023-10-30T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2023-10-30T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://charent.github.io/categories/</loc>
-    <lastmod>2023-10-30T00:00:00+00:00</lastmod>
+    <lastmod>2023-11-05T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -35,18 +29,30 @@
                 />
   </url><url>
     <loc>https://charent.github.io/post/</loc>
+    <lastmod>2023-11-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://charent.github.io/categories/pytorch/</loc>
+    <lastmod>2023-11-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://charent.github.io/p/pytorch%E5%8A%A0%E8%BD%BD%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%9B%86/</loc>
+    <lastmod>2023-11-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://charent.github.io/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</loc>
+    <lastmod>2023-11-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://charent.github.io/categories/%E6%95%B0%E6%8D%AE%E9%9B%86/</loc>
+    <lastmod>2023-11-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://charent.github.io/categories/c&#43;&#43;/</loc>
+    <lastmod>2023-10-30T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2023-10-30T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
     <lastmod>2023-10-30T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/categories/pytorch/</loc>
-    <lastmod>2023-10-09T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://charent.github.io/p/pytorch%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%9B%86num_workers%E5%A4%A7%E4%BA%8E1%E5%86%85%E5%AD%98%E7%BC%93%E6%85%A2%E5%A2%9E%E6%B6%A8/</loc>
-    <lastmod>2023-10-09T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://charent.github.io/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</loc>
     <lastmod>2023-10-09T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/p/parquet%E6%96%87%E4%BB%B6%E7%9A%84%E8%AF%BB%E5%86%99%E5%92%8C%E5%BE%AA%E7%8E%AF%E9%81%8D%E5%8E%86/</loc>
