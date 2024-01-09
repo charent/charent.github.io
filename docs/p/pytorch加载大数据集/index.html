@@ -410,16 +410,13 @@
 </span><span class="lnt">109
 </span><span class="lnt">110
 </span><span class="lnt">111
-</span><span class="lnt">112
-</span><span class="lnt">113
-</span><span class="lnt">114
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
 </span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">LongTensor</span>
-</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">tokenizers</span> <span class="kn">import</span> <span class="n">Tokenizer</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">PreTrainedTokenizerFast</span>
 </span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">pyarrow.parquet</span> <span class="k">as</span> <span class="nn">pq</span>
 </span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">int64</span>
 </span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">shuffle</span>
@@ -428,14 +425,14 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
 </span></span><span class="line"><span class="cl">                <span class="n">parquet_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">                <span class="n">tokenizer_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="n">tokenizer_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">                <span class="n">keep_in_memory</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">                <span class="n">max_seq_len</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="n">max_seq_len</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">                <span class="n">buffer_size</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">40960</span><span class="p">,</span>
 </span></span><span class="line"><span class="cl">            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">        <span class="s1">&#39;&#39;&#39;
 </span></span></span><span class="line"><span class="cl"><span class="s1">        keep_in_memory: 是否将parquet文件转换为pandas.DataFrame格式存放到内存, 
-</span></span></span><span class="line"><span class="cl"><span class="s1">            False将使用迭代生成器(迭代生成器仅支持打乱buffer_size内的数据)，减少大数据集内存占用
+</span></span></span><span class="line"><span class="cl"><span class="s1">            False将使用迭代生成器(迭代生成器不支持打乱数据)，减少大数据集内存占用
 </span></span></span><span class="line"><span class="cl"><span class="s1">        &#39;&#39;&#39;</span>
 </span></span><span class="line"><span class="cl">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl">
@@ -458,11 +455,7 @@
 </span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">parquet_table</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">        <span class="c1"># 初始化tokenizer</span>
-</span></span><span class="line"><span class="cl">        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">Tokenizer</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">tokenizer_file</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="n">tokenizer</span><span class="o">.</span><span class="n">enable_padding</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">max_seq_len</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="n">tokenizer</span><span class="o">.</span><span class="n">enable_truncation</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="n">max_seq_len</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
-</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">encode</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">PreTrainedTokenizerFast</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">tokenizer_dir</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">        <span class="c1"># 在这里初始化generator</span>
 </span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">sample_generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_generator</span><span class="p">()</span>
@@ -504,26 +497,27 @@
 </span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">            <span class="n">prompt</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_generator</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        <span class="n">encode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode</span>
-</span></span><span class="line"><span class="cl">        <span class="n">prompt_encoded</span><span class="p">,</span> <span class="n">response_encoded</span> <span class="o">=</span> <span class="n">encode</span><span class="p">(</span><span class="n">prompt</span><span class="p">),</span> <span class="n">encode</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">       
-</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">prompt_encoded</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">prompt_encoded</span><span class="o">.</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">response_encoded</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span> <span class="n">response_encoded</span><span class="o">.</span><span class="n">attention_mask</span>
+</span></span><span class="line"><span class="cl">        <span class="n">max_seq_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_seq_len</span> <span class="o">-</span> <span class="mi">5</span> <span class="c1"># len(&#39;[EOS]&#39;) = 5</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># add an eos token note that end of resopnse, using in generate.</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="sa">f</span><span class="s2">&#34;</span><span class="si">{</span><span class="n">prompt</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span> <span class="n">max_seq_len</span><span class="p">]</span><span class="si">}</span><span class="s2">[EOS]&#34;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&#34;</span><span class="si">{</span><span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span> <span class="n">max_seq_len</span><span class="p">]</span><span class="si">}</span><span class="s2">[EOS]&#34;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="nd">@staticmethod</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">collate_fn</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">collate_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 </span></span><span class="line"><span class="cl">        <span class="s1">&#39;&#39;&#39;
 </span></span></span><span class="line"><span class="cl"><span class="s1">        合并一个批次数据返回
 </span></span></span><span class="line"><span class="cl"><span class="s1">        &#39;&#39;&#39;</span>
-</span></span><span class="line"><span class="cl">        <span class="n">input_ids</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int64</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="n">input_mask</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int64</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="n">target_ids</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int64</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="n">target_mask</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int64</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">tokenizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">prompt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_token_type_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">response</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">],</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_token_type_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">input_ids</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">prompt</span><span class="o">.</span><span class="n">input_ids</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int64</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">input_mask</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">prompt</span><span class="o">.</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int64</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">target_ids</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">input_ids</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int64</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">        <span class="n">ret</span> <span class="o">=</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">            <span class="s1">&#39;input_ids&#39;</span><span class="p">:</span> <span class="n">LongTensor</span><span class="p">(</span><span class="n">input_ids</span><span class="p">),</span>
 </span></span><span class="line"><span class="cl">            <span class="s1">&#39;input_mask&#39;</span><span class="p">:</span> <span class="n">LongTensor</span><span class="p">(</span><span class="n">input_mask</span><span class="p">),</span>
 </span></span><span class="line"><span class="cl">            <span class="s1">&#39;target_ids&#39;</span><span class="p">:</span> <span class="n">LongTensor</span><span class="p">(</span><span class="n">target_ids</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">            <span class="s1">&#39;target_mask&#39;</span><span class="p">:</span> <span class="n">LongTensor</span><span class="p">(</span><span class="n">target_mask</span><span class="p">),</span>
 </span></span><span class="line"><span class="cl">        <span class="p">}</span>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">ret</span>
 </span></span><span class="line"><span class="cl">    
@@ -578,6 +572,18 @@
             
                 
 <article class="">
+    <a href="/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E6%8E%A8%E5%AF%BC/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">深度学习反向传播推导</h2>
+        </div>
+    </a>
+</article>
+            
+                
+<article class="">
     <a href="/p/pytorch%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%9B%86num_workers%E5%A4%A7%E4%BA%8E1%E5%86%85%E5%AD%98%E7%BC%93%E6%85%A2%E5%A2%9E%E6%B6%A8/">
         
         
@@ -624,18 +630,6 @@
     </a>
 </article>
             
-                
-<article class="">
-    <a href="/p/%E5%A4%9A%E6%A0%87%E7%AD%BE%E5%88%86%E7%B1%BB/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">多标签分类</h2>
-        </div>
-    </a>
-</article>
-            
         </div>
     </div>
 </aside>
@@ -651,7 +645,7 @@
         
             2018 - 
         
-        2023 Charent的博客
+        2024 Charent的博客
     </section>
     
     <section class="powerby">

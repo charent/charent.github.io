@@ -23,7 +23,7 @@ from typing import Union
 
 from torch.utils.data import Dataset
 from torch import LongTensor
-from tokenizers import Tokenizer
+from transformers import PreTrainedTokenizerFast
 import pyarrow.parquet as pq
 from numpy import array, int64
 from numpy.random import shuffle
@@ -32,14 +32,14 @@ class MyDataset(Dataset):
 
     def __init__(self, 
                 parquet_file: str,
-                tokenizer_file: str,
+                tokenizer_dir: str,
                 keep_in_memory: bool=False,
-                max_seq_len: int=256,
+                max_seq_len: int=512,
                 buffer_size: int=40960,
             ) -> None:
         '''
         keep_in_memory: 是否将parquet文件转换为pandas.DataFrame格式存放到内存, 
-            False将使用迭代生成器(迭代生成器仅支持打乱buffer_size内的数据)，减少大数据集内存占用
+            False将使用迭代生成器(迭代生成器不支持打乱数据)，减少大数据集内存占用
         '''
         super().__init__()
 
@@ -62,11 +62,7 @@ class MyDataset(Dataset):
             self.data = parquet_table
 
         # 初始化tokenizer
-        tokenizer = Tokenizer.from_file(tokenizer_file)
-        tokenizer.enable_padding(length=max_seq_len)
-        tokenizer.enable_truncation(max_length=max_seq_len)
-        self.tokenizer = tokenizer
-        self.encode = tokenizer.encode
+        self.tokenizer = PreTrainedTokenizerFast.from_pretrained(tokenizer_dir)
 
         # 在这里初始化generator
         self.sample_generator = self.item_generator()
@@ -108,26 +104,27 @@ class MyDataset(Dataset):
         else:
             prompt, response = next(self.sample_generator)
 
-        encode = self.encode
-        prompt_encoded, response_encoded = encode(prompt), encode(response)
-       
-        return prompt_encoded.ids, prompt_encoded.attention_mask, response_encoded.ids, response_encoded.attention_mask
+        max_seq_len = self.max_seq_len - 5 # len('[EOS]') = 5
+        # add an eos token note that end of resopnse, using in generate.
+        return f"{prompt[0: max_seq_len]}[EOS]", f"{response[0: max_seq_len]}[EOS]"
 
-    @staticmethod
-    def collate_fn(data: list[list]) -> dict:
+    def collate_fn(self, data: list[list]) -> dict:
         '''
         合并一个批次数据返回
         '''
-        input_ids = array([item[0] for item in data], dtype=int64)
-        input_mask = array([item[1] for item in data], dtype=int64)
-        target_ids = array([item[2] for item in data], dtype=int64)
-        target_mask = array([item[3] for item in data], dtype=int64)
+        tokenizer = self.tokenizer
+
+        prompt = tokenizer([item[0] for item in data], padding=True, return_token_type_ids=False)
+        response = tokenizer([item[1] for item in data], padding=True, return_token_type_ids=False)
+
+        input_ids = array(prompt.input_ids, dtype=int64)
+        input_mask = array(prompt.attention_mask, dtype=int64)
+        target_ids = array(response.input_ids, dtype=int64)
 
         ret = {
             'input_ids': LongTensor(input_ids),
             'input_mask': LongTensor(input_mask),
             'target_ids': LongTensor(target_ids),
-            'target_mask': LongTensor(target_mask),
         }
         return ret
     

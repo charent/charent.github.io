@@ -6,20 +6,36 @@
         <description>Recent content in Categories on Charent的博客</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Sun, 05 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://charent.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>pytorch</title>
-        <link>https://charent.github.io/categories/pytorch/</link>
-        <pubDate>Sun, 05 Nov 2023 00:00:00 +0000</pubDate>
+        <lastBuildDate>Tue, 09 Jan 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://charent.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>反向传播</title>
+        <link>https://charent.github.io/categories/%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/</link>
+        <pubDate>Tue, 09 Jan 2024 00:00:00 +0000</pubDate>
         
-        <guid>https://charent.github.io/categories/pytorch/</guid>
+        <guid>https://charent.github.io/categories/%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>机器学习</title>
+        <link>https://charent.github.io/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/</link>
+        <pubDate>Tue, 09 Jan 2024 00:00:00 +0000</pubDate>
+        
+        <guid>https://charent.github.io/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/</guid>
         <description></description>
         </item>
         <item>
         <title>深度学习</title>
         <link>https://charent.github.io/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</link>
-        <pubDate>Sun, 05 Nov 2023 00:00:00 +0000</pubDate>
+        <pubDate>Tue, 09 Jan 2024 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>pytorch</title>
+        <link>https://charent.github.io/categories/pytorch/</link>
+        <pubDate>Sun, 05 Nov 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://charent.github.io/categories/pytorch/</guid>
         <description></description>
         </item>
         <item>
@@ -60,14 +76,6 @@
         <pubDate>Wed, 17 May 2023 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/categories/leetcode/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>机器学习</title>
-        <link>https://charent.github.io/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/</link>
-        <pubDate>Sat, 16 Apr 2022 00:00:00 +0000</pubDate>
-        
-        <guid>https://charent.github.io/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/</guid>
         <description></description>
         </item>
         <item>
