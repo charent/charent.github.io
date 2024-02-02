@@ -580,6 +580,268 @@ $γ$是可学习的参数</p>
 </span></span><span class="line"><span class="cl">        <span class="n">qkv</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span>
 </span></span></code></pre></td></tr></table>
 </div>
+</div><h2 id="4-用silu激活函数代替relugelu">4. 用SiLU激活函数代替RELU/GELU</h2>
+<p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun.png"
+	width="720"
+	height="561"
+	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu1bf631b7966cd0dd3d56cd597aac1f28_72453_480x0_resize_box_3.png 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu1bf631b7966cd0dd3d56cd597aac1f28_72453_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="act fun"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="128"
+		data-flex-basis="308px"
+	
+>
+这里先介绍Swish激活函数，计算公式如下：
+$$
+Swish(x) = x · \sigma (\beta x)
+$$</p>
+<p>$$
+\sigma (x) = \frac{1} {1 + e^{-x} }
+$$</p>
+<p>其中，$σ$是<code>Sigmoid</code>函数， $\beta$ 是一个参数，上图为$β=0.5$时的函数图像。当$β=1$时，Swish函数就是SiLU函数。</p>
+<h2 id="5-使用分组查询注意力-grouped-query-attention-gqa">5. 使用分组查询注意力 (Grouped Query Attention, GQA)</h2>
+<p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa.png"
+	width="1080"
+	height="349"
+	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu4b2c50f6cc9ed5691ca0aeb990bfde87_51507_480x0_resize_box_3.png 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu4b2c50f6cc9ed5691ca0aeb990bfde87_51507_1024x0_resize_box_3.png 1024w"
+	loading="lazy"
+	
+		alt="maq_gqa"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="309"
+		data-flex-basis="742px"
+	
+></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># copied from llama2</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">repeat_kv</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">n_rep</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;torch.repeat_interleave(x, dim=2, repeats=n_rep)&#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">bs</span><span class="p">,</span> <span class="n">slen</span><span class="p">,</span> <span class="n">n_kv_heads</span><span class="p">,</span> <span class="n">head_dim</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="n">n_rep</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># MHA</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">x</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span> <span class="c1"># MQA / GQA</span>
+</span></span><span class="line"><span class="cl">        <span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">slen</span><span class="p">,</span> <span class="n">n_kv_heads</span><span class="p">,</span> <span class="n">n_rep</span><span class="p">,</span> <span class="n">head_dim</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">bs</span><span class="p">,</span> <span class="n">slen</span><span class="p">,</span> <span class="n">n_kv_heads</span> <span class="o">*</span> <span class="n">n_rep</span><span class="p">,</span> <span class="n">head_dim</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">Attention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">ModelArgs</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">n_kv_heads</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">n_heads</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">n_kv_heads</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">args</span><span class="o">.</span><span class="n">n_kv_heads</span>
+</span></span><span class="line"><span class="cl">        <span class="n">model_parallel_size</span> <span class="o">=</span> <span class="n">fs_init</span><span class="o">.</span><span class="n">get_model_parallel_world_size</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">n_local_heads</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">n_heads</span> <span class="o">//</span> <span class="n">model_parallel_size</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">n_local_kv_heads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_kv_heads</span> <span class="o">//</span> <span class="n">model_parallel_size</span> <span class="c1"># 此处 </span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">n_rep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_local_heads</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_local_kv_heads</span> <span class="c1"># 此处 几个组</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">dim</span> <span class="o">//</span> <span class="n">args</span><span class="o">.</span><span class="n">n_heads</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">wq</span> <span class="o">=</span> <span class="n">ColumnParallelLinear</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">args</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">args</span><span class="o">.</span><span class="n">n_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">gather_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">init_method</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">wk</span> <span class="o">=</span> <span class="n">ColumnParallelLinear</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">args</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">n_kv_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">,</span> <span class="c1"># 初始化为单个组内的一份</span>
+</span></span><span class="line"><span class="cl">            <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">gather_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">init_method</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">wv</span> <span class="o">=</span> <span class="n">ColumnParallelLinear</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">args</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="bp">self</span><span class="o">.</span><span class="n">n_kv_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">,</span> <span class="c1"># # 初始化为单个组内的一份</span>
+</span></span><span class="line"><span class="cl">            <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">gather_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">init_method</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">wo</span> <span class="o">=</span> <span class="n">RowParallelLinear</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="n">args</span><span class="o">.</span><span class="n">n_heads</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">args</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">input_is_parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="n">init_method</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">cache_k</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="n">args</span><span class="o">.</span><span class="n">max_batch_size</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="n">args</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="bp">self</span><span class="o">.</span><span class="n">n_local_kv_heads</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">cache_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="p">(</span>
+</span></span><span class="line"><span class="cl">                <span class="n">args</span><span class="o">.</span><span class="n">max_batch_size</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="n">args</span><span class="o">.</span><span class="n">max_seq_len</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="bp">self</span><span class="o">.</span><span class="n">n_local_kv_heads</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">            <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">start_pos</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">freqs_cis</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">    <span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="n">bsz</span><span class="p">,</span> <span class="n">seqlen</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+</span></span><span class="line"><span class="cl">        <span class="n">xq</span><span class="p">,</span> <span class="n">xk</span><span class="p">,</span> <span class="n">xv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wq</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">wk</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">wv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">xq</span> <span class="o">=</span> <span class="n">xq</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">bsz</span><span class="p">,</span> <span class="n">seqlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_local_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">xk</span> <span class="o">=</span> <span class="n">xk</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">bsz</span><span class="p">,</span> <span class="n">seqlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_local_kv_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">xv</span> <span class="o">=</span> <span class="n">xv</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">bsz</span><span class="p">,</span> <span class="n">seqlen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_local_kv_heads</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">xq</span><span class="p">,</span> <span class="n">xk</span> <span class="o">=</span> <span class="n">apply_rotary_emb</span><span class="p">(</span><span class="n">xq</span><span class="p">,</span> <span class="n">xk</span><span class="p">,</span> <span class="n">freqs_cis</span><span class="o">=</span><span class="n">freqs_cis</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">cache_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_k</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">xq</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">cache_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_v</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">xq</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">cache_k</span><span class="p">[:</span><span class="n">bsz</span><span class="p">,</span> <span class="n">start_pos</span> <span class="p">:</span> <span class="n">start_pos</span> <span class="o">+</span> <span class="n">seqlen</span><span class="p">]</span> <span class="o">=</span> <span class="n">xk</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">cache_v</span><span class="p">[:</span><span class="n">bsz</span><span class="p">,</span> <span class="n">start_pos</span> <span class="p">:</span> <span class="n">start_pos</span> <span class="o">+</span> <span class="n">seqlen</span><span class="p">]</span> <span class="o">=</span> <span class="n">xv</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_k</span><span class="p">[:</span><span class="n">bsz</span><span class="p">,</span> <span class="p">:</span> <span class="n">start_pos</span> <span class="o">+</span> <span class="n">seqlen</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_v</span><span class="p">[:</span><span class="n">bsz</span><span class="p">,</span> <span class="p">:</span> <span class="n">start_pos</span> <span class="o">+</span> <span class="n">seqlen</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="c1"># repeat k/v heads if n_kv_heads &lt; n_heads # 单个组扩展为完整head</span>
+</span></span><span class="line"><span class="cl">        <span class="n">keys</span> <span class="o">=</span> <span class="n">repeat_kv</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_rep</span><span class="p">)</span>  <span class="c1"># (bs, seqlen, n_local_heads, head_dim)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">values</span> <span class="o">=</span> <span class="n">repeat_kv</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_rep</span><span class="p">)</span>  <span class="c1"># (bs, seqlen, n_local_heads, head_dim)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">xq</span> <span class="o">=</span> <span class="n">xq</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># (bs, n_local_heads, seqlen, head_dim)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">keys</span> <span class="o">=</span> <span class="n">keys</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">scores</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">xq</span><span class="p">,</span> <span class="n">keys</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">head_dim</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span> <span class="o">+</span> <span class="n">mask</span>  <span class="c1"># (bs, n_local_heads, seqlen, cache_len + seqlen)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">scores</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">type_as</span><span class="p">(</span><span class="n">xq</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">output</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>  <span class="c1"># (bs, n_local_heads, seqlen, head_dim)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">bsz</span><span class="p">,</span> <span class="n">seqlen</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wo</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
 </div>
 </section>
 
@@ -745,6 +1007,8 @@ $γ$是可学习的参数</p>
     <li><a href="#1-将layer_norm更换为rms_norm">1. 将Layer_norm更换为RMS_norm</a></li>
     <li><a href="#2-q在与k相乘之前先使用rope进行位置编码">2. Q在与K相乘之前，先使用RoPE进行位置编码</a></li>
     <li><a href="#3-引入kv-cache并采用group-query-attention">3. 引入KV Cache，并采用Group Query Attention</a></li>
+    <li><a href="#4-用silu激活函数代替relugelu">4. 用SiLU激活函数代替RELU/GELU</a></li>
+    <li><a href="#5-使用分组查询注意力-grouped-query-attention-gqa">5. 使用分组查询注意力 (Grouped Query Attention, GQA)</a></li>
   </ol>
 </nav>
         </div>
