@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='一个实现C&#43;&#43;快排的算法 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 #include &amp;lt;iostream&amp;gt; #include &amp;lt;thread&amp;gt; #include &amp;lt;ctime&amp;gt; using namespace std; #define N 10000000 void rand_nums(int* nums, int n) { srand((unsigned int)time(NULL)); for (int i = 0; i &amp;lt; n; &#43;&#43;i) { nums[i] = rand() % N; } } void quick_sort_sigle_thread(int* nums, int left, int right) { if (left &amp;gt;= right) return; int i = left, j = right, base = nums[left]; while (i &amp;lt; j) { while (i &amp;lt; j &amp;amp;&amp;amp; nums[j] &amp;gt;= base) --j; //找一个比base小的 while (i &amp;lt; j &amp;amp;&amp;amp; nums[i] &amp;lt;= base) &#43;&#43;i; //找一个比base大的 if (i &amp;lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); quick_sort_sigle_thread(nums, left, i - 1); quick_sort_sigle_thread(nums, i &#43; 1, right); } void quick_sort_multi_thread(int* nums, int left, int right) { if (left &amp;gt;= right) return; int i = left, j = right, base = nums[left]; while (i &amp;lt; j) { while (i &amp;lt; j &amp;amp;&amp;amp; nums[j] &amp;gt;= base) --j; //找一个比base小的 while (i &amp;lt; j &amp;amp;&amp;amp; nums[i] &amp;lt;= base) &#43;&#43;i; //找一个比base大的 if (i &amp;lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); thread threads[2]; if (right - left &amp;lt;= 100000) { //小于10w用递归 threads[0] = thread(quick_sort_sigle_thread, nums, left, i - 1); threads[1] = thread(quick_sort_sigle_thread, nums, i &#43; 1, right); } else { //大于10w继续用多线程分割 threads[0] = thread(quick_sort_multi_thread, nums, left, i - 1); threads[1] = thread(quick_sort_multi_thread, nums, i &#43; 1, right); } for (int i = 0; i &amp;lt; 2; &#43;&#43; i) threads[i].'><title>C&#43;&#43;多线程实现快速排序算法</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="一个实现C++快排的算法 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 #include &lt;iostream&gt; #include &lt;thread&gt; #include &lt;ctime&gt; using namespace std; #define N 10000000 void rand_nums(int* nums, int n) { srand((unsigned int)time(NULL)); for (int i = 0; i &lt; n; ++i) { nums[i] = rand() % N; } } void quick_sort_sigle_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); quick_sort_sigle_thread(nums, left, i - 1); quick_sort_sigle_thread(nums, i + 1, right); } void quick_sort_multi_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); thread threads[2]; if (right - left &lt;= 100000) { //小于10w用递归 threads[0] = thread(quick_sort_sigle_thread, nums, left, i - 1); threads[1] = thread(quick_sort_sigle_thread, nums, i + 1, right); } else { //大于10w继续用多线程分割 threads[0] = thread(quick_sort_multi_thread, nums, left, i - 1); threads[1] = thread(quick_sort_multi_thread, nums, i + 1, right); } for (int i = 0; i &lt; 2; ++ i) threads[i].join(); } void print_nums(int* nums, int end, int start = 0) { for (int i = start; i &lt; start + end; ++i) { cout &lt;&lt; nums[i] &lt;&lt; &#39; &#39;; } cout &lt;&lt; endl; } int main() { int *nums = new int[N]; rand_nums(nums, N); // print_nums(nums, N); cout &lt;&lt; &#34;数组大小：&#34; &lt;&lt; N &lt;&lt; endl; int start_time, end_time; start_time = clock(); quick_sort_sigle_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;单线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); rand_nums(nums, N); start_time = clock(); quick_sort_multi_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;多线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); delete[] nums; return 0; } ">
+<title>C&#43;&#43;多线程实现快速排序算法</title>
 
 <link rel='canonical' href='https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/'>
 
-<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='C&#43;&#43;多线程实现快速排序算法'>
-<meta property='og:description' content='一个实现C&#43;&#43;快排的算法 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 #include &amp;lt;iostream&amp;gt; #include &amp;lt;thread&amp;gt; #include &amp;lt;ctime&amp;gt; using namespace std; #define N 10000000 void rand_nums(int* nums, int n) { srand((unsigned int)time(NULL)); for (int i = 0; i &amp;lt; n; &#43;&#43;i) { nums[i] = rand() % N; } } void quick_sort_sigle_thread(int* nums, int left, int right) { if (left &amp;gt;= right) return; int i = left, j = right, base = nums[left]; while (i &amp;lt; j) { while (i &amp;lt; j &amp;amp;&amp;amp; nums[j] &amp;gt;= base) --j; //找一个比base小的 while (i &amp;lt; j &amp;amp;&amp;amp; nums[i] &amp;lt;= base) &#43;&#43;i; //找一个比base大的 if (i &amp;lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); quick_sort_sigle_thread(nums, left, i - 1); quick_sort_sigle_thread(nums, i &#43; 1, right); } void quick_sort_multi_thread(int* nums, int left, int right) { if (left &amp;gt;= right) return; int i = left, j = right, base = nums[left]; while (i &amp;lt; j) { while (i &amp;lt; j &amp;amp;&amp;amp; nums[j] &amp;gt;= base) --j; //找一个比base小的 while (i &amp;lt; j &amp;amp;&amp;amp; nums[i] &amp;lt;= base) &#43;&#43;i; //找一个比base大的 if (i &amp;lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); thread threads[2]; if (right - left &amp;lt;= 100000) { //小于10w用递归 threads[0] = thread(quick_sort_sigle_thread, nums, left, i - 1); threads[1] = thread(quick_sort_sigle_thread, nums, i &#43; 1, right); } else { //大于10w继续用多线程分割 threads[0] = thread(quick_sort_multi_thread, nums, left, i - 1); threads[1] = thread(quick_sort_multi_thread, nums, i &#43; 1, right); } for (int i = 0; i &amp;lt; 2; &#43;&#43; i) threads[i].'>
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="C++多线程实现快速排序算法">
+<meta property='og:description' content="一个实现C++快排的算法 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 #include &lt;iostream&gt; #include &lt;thread&gt; #include &lt;ctime&gt; using namespace std; #define N 10000000 void rand_nums(int* nums, int n) { srand((unsigned int)time(NULL)); for (int i = 0; i &lt; n; ++i) { nums[i] = rand() % N; } } void quick_sort_sigle_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); quick_sort_sigle_thread(nums, left, i - 1); quick_sort_sigle_thread(nums, i + 1, right); } void quick_sort_multi_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); thread threads[2]; if (right - left &lt;= 100000) { //小于10w用递归 threads[0] = thread(quick_sort_sigle_thread, nums, left, i - 1); threads[1] = thread(quick_sort_sigle_thread, nums, i + 1, right); } else { //大于10w继续用多线程分割 threads[0] = thread(quick_sort_multi_thread, nums, left, i - 1); threads[1] = thread(quick_sort_multi_thread, nums, i + 1, right); } for (int i = 0; i &lt; 2; ++ i) threads[i].join(); } void print_nums(int* nums, int end, int start = 0) { for (int i = start; i &lt; start + end; ++i) { cout &lt;&lt; nums[i] &lt;&lt; &#39; &#39;; } cout &lt;&lt; endl; } int main() { int *nums = new int[N]; rand_nums(nums, N); // print_nums(nums, N); cout &lt;&lt; &#34;数组大小：&#34; &lt;&lt; N &lt;&lt; endl; int start_time, end_time; start_time = clock(); quick_sort_sigle_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;单线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); rand_nums(nums, N); start_time = clock(); quick_sort_multi_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;多线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); delete[] nums; return 0; } ">
 <meta property='og:url' content='https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/'>
 <meta property='og:site_name' content='Charent的博客'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2023-10-30T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2023-10-30T00:00:00&#43;00:00'/>
-<meta name="twitter:title" content="C&#43;&#43;多线程实现快速排序算法">
-<meta name="twitter:description" content="一个实现C&#43;&#43;快排的算法 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 #include &amp;lt;iostream&amp;gt; #include &amp;lt;thread&amp;gt; #include &amp;lt;ctime&amp;gt; using namespace std; #define N 10000000 void rand_nums(int* nums, int n) { srand((unsigned int)time(NULL)); for (int i = 0; i &amp;lt; n; &#43;&#43;i) { nums[i] = rand() % N; } } void quick_sort_sigle_thread(int* nums, int left, int right) { if (left &amp;gt;= right) return; int i = left, j = right, base = nums[left]; while (i &amp;lt; j) { while (i &amp;lt; j &amp;amp;&amp;amp; nums[j] &amp;gt;= base) --j; //找一个比base小的 while (i &amp;lt; j &amp;amp;&amp;amp; nums[i] &amp;lt;= base) &#43;&#43;i; //找一个比base大的 if (i &amp;lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); quick_sort_sigle_thread(nums, left, i - 1); quick_sort_sigle_thread(nums, i &#43; 1, right); } void quick_sort_multi_thread(int* nums, int left, int right) { if (left &amp;gt;= right) return; int i = left, j = right, base = nums[left]; while (i &amp;lt; j) { while (i &amp;lt; j &amp;amp;&amp;amp; nums[j] &amp;gt;= base) --j; //找一个比base小的 while (i &amp;lt; j &amp;amp;&amp;amp; nums[i] &amp;lt;= base) &#43;&#43;i; //找一个比base大的 if (i &amp;lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); thread threads[2]; if (right - left &amp;lt;= 100000) { //小于10w用递归 threads[0] = thread(quick_sort_sigle_thread, nums, left, i - 1); threads[1] = thread(quick_sort_sigle_thread, nums, i &#43; 1, right); } else { //大于10w继续用多线程分割 threads[0] = thread(quick_sort_multi_thread, nums, left, i - 1); threads[1] = thread(quick_sort_multi_thread, nums, i &#43; 1, right); } for (int i = 0; i &amp;lt; 2; &#43;&#43; i) threads[i].">
+<meta name="twitter:title" content="C++多线程实现快速排序算法">
+<meta name="twitter:description" content="一个实现C++快排的算法 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 #include &lt;iostream&gt; #include &lt;thread&gt; #include &lt;ctime&gt; using namespace std; #define N 10000000 void rand_nums(int* nums, int n) { srand((unsigned int)time(NULL)); for (int i = 0; i &lt; n; ++i) { nums[i] = rand() % N; } } void quick_sort_sigle_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); quick_sort_sigle_thread(nums, left, i - 1); quick_sort_sigle_thread(nums, i + 1, right); } void quick_sort_multi_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); thread threads[2]; if (right - left &lt;= 100000) { //小于10w用递归 threads[0] = thread(quick_sort_sigle_thread, nums, left, i - 1); threads[1] = thread(quick_sort_sigle_thread, nums, i + 1, right); } else { //大于10w继续用多线程分割 threads[0] = thread(quick_sort_multi_thread, nums, left, i - 1); threads[1] = thread(quick_sort_multi_thread, nums, i + 1, right); } for (int i = 0; i &lt; 2; ++ i) threads[i].join(); } void print_nums(int* nums, int end, int start = 0) { for (int i = start; i &lt; start + end; ++i) { cout &lt;&lt; nums[i] &lt;&lt; &#39; &#39;; } cout &lt;&lt; endl; } int main() { int *nums = new int[N]; rand_nums(nums, N); // print_nums(nums, N); cout &lt;&lt; &#34;数组大小：&#34; &lt;&lt; N &lt;&lt; endl; int start_time, end_time; start_time = clock(); quick_sort_sigle_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;单线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); rand_nums(nums, N); start_time = clock(); quick_sort_multi_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;多线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); delete[] nums; return 0; } ">
     </head>
     <body class="
     article-page
@@ -55,8 +56,8 @@
                     
                     
                         
-                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
                 </a>
@@ -71,13 +72,14 @@
             <h1 class="site-name"><a href="/">Charent的博客</a></h1>
             <h2 class="site-description">不积硅步，无以至千里</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/charent'
                         target="_blank"
                         title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,7 +98,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -117,7 +118,6 @@
         </li>
         
         
-
         <li >
             <a href='/archives/' >
                 
@@ -138,7 +138,6 @@
         </li>
         
         
-
         <li >
             <a href='/search/' >
                 
@@ -158,7 +157,6 @@
         </li>
         
         
-
         <li >
             <a href='/%E5%85%B3%E4%BA%8E/' >
                 
@@ -177,10 +175,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -191,19 +190,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://charent.github.io/" selected>中文</option>
-                        
-                            <option value="https://charent.github.io/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -211,7 +211,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -219,13 +219,17 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -253,6 +257,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -275,16 +282,17 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h1 id="一个实现c快排的算法">一个实现C++快排的算法</h1>
-<p><img src="/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1.png"
+    <h1 id="一个实现c快排的算法">一个实现C++快排的算法
+</h1><p><img src="/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1.png"
 	width="170"
 	height="66"
-	srcset="/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1_hud0630e01350383e78ce5fd3a764a49eb_4113_480x0_resize_box_3.png 480w, /p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1_hud0630e01350383e78ce5fd3a764a49eb_4113_1024x0_resize_box_3.png 1024w"
+	srcset="/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1_hu_6361896a59d1ed7.png 480w, /p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1_hu_a46a163ded889b45.png 1024w"
 	loading="lazy"
 	
 		alt="speed"
@@ -528,26 +536,29 @@
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
     window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
             delimiters: [
                 { left: "$$", right: "$$", display: true },
                 { left: "$", right: "$", display: false },
                 { left: "\\(", right: "\\)", display: false },
                 { left: "\\[", right: "\\]", display: true }
-            ]
+            ],
+            ignoredClasses: ["gist"]
         });})
 </script>
+
     
 </article>
 
@@ -555,9 +566,9 @@
 
     
 
-<aside class="related-contents--wrapper">
+<aside class="related-content--wrapper">
     <h2 class="section-title">相关文章</h2>
-    <div class="related-contents">
+    <div class="related-content">
         <div class="flex article-list--tile">
             
                 
@@ -571,6 +582,7 @@
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -583,6 +595,7 @@
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -595,6 +608,7 @@
         </div>
     </a>
 </article>
+
             
         </div>
     </div>
@@ -611,12 +625,12 @@
         
             2018 - 
         
-        2024 Charent的博客
+        2025 Charent的博客
     </section>
     
     <section class="powerby">
-         <br />
-        
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 
@@ -693,21 +707,19 @@
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
-    
-
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');

@@ -12,8 +12,8 @@
         <pubDate>Tue, 09 Jan 2024 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E6%8E%A8%E5%AF%BC/</guid>
-        <description>&lt;h1 id=&#34;反向传播推导&#34;&gt;反向传播推导&lt;/h1&gt;
-&lt;p&gt;深度学习神经网络的前向传播大家都很清楚，对我来说，反向传播一直都是一知半解。今天重新复习一下。&lt;/p&gt;
+        <description>&lt;h1 id=&#34;反向传播推导&#34;&gt;反向传播推导
+&lt;/h1&gt;&lt;p&gt;深度学习神经网络的前向传播大家都很清楚，对我来说，反向传播一直都是一知半解。今天重新复习一下。&lt;/p&gt;
 &lt;p&gt;我们以&lt;code&gt;sigmoid&lt;/code&gt;函数作为一个计算图节点为例（加法乘法太简单了）。首先，&lt;code&gt;sigmoid函数&lt;/code&gt;的定义如下：
 $$
 y = \frac{1}{1 + e^{-x}}

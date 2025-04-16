@@ -1,29 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='批量归一化（Batch Normalization） 训练深度神经网络可能非常耗时。但是可以通过消除梯度来显着地减少训练时间，这种情况发生在网络由于梯度（特别是在较早的层中的梯度）接近零值而停止更新。
-在CNN中，BN应作用在非线性映射前。在神经网络训练时遇到收敛速度很慢，或梯度爆炸等无法训练的状况时可以尝试BN来解决。另外，在一般使用情况下也可以加入BN来加快训练速度，提高模型精度
-批量标准化（Batch Normalization）也许是对付梯度消失和爆炸问题的最有力工具。 批量标准化的工作方式如下：对于给定层中的每个单元，首先计算z分数，然后在两个受过训练的变量γ和β应用线性转换。 批量标准化通常在非线性激活函数之前完成，但在激活函数之后应用批量标准也可能是有利的。 σ激活函数和tanh激活函数存在梯度饱和的区域，其原因是激活函数的输入值过大或者过小，其得到的激活函数的梯度值会非常接近于0，使得网络的收敛速度减慢。传统的方法是使用不存在梯度饱和区域的激活函数，例如ReLU等。BN也可以缓解梯度饱和的问题，它的策略是在调用激活函数之前将Wx&#43;b的值归一化到梯度值比较大的区域。BN应在激活函数之前使用。
-σ激活函数和tanh激活函数： 在反向传播过程中，梯度倾向于在较低层里变得更小，从而减缓权重更新并因此减少训练次数。 批量标准化有助于消除所谓的梯度消失问题。
-在批量归一化的论文中 https://arxiv.org/abs/1502.03167v3，作者是娘BN放在非线性激活层的前面。目前在实践上，倾向于把BN放在ReLU后面。也有评测表明BN放ReLU后面效果更好。&amp;hellip;（-）&amp;hellip;玄学'><title>Batch Normalization：批量归一化</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="批量归一化（Batch Normalization） 训练深度神经网络可能非常耗时。但是可以通过消除梯度来显着地减少训练时间，这种情况发生在网络由于梯度（特别是在较早的层中的梯度）接近零值而停止更新。\n在CNN中，BN应作用在非线性映射前。在神经网络训练时遇到收敛速度很慢，或梯度爆炸等无法训练的状况时可以尝试BN来解决。另外，在一般使用情况下也可以加入BN来加快训练速度，提高模型精度\n批量标准化（Batch Normalization）也许是对付梯度消失和爆炸问题的最有力工具。 批量标准化的工作方式如下：对于给定层中的每个单元，首先计算z分数，然后在两个受过训练的变量γ和β应用线性转换。 批量标准化通常在非线性激活函数之前完成，但在激活函数之后应用批量标准也可能是有利的。 σ激活函数和tanh激活函数存在梯度饱和的区域，其原因是激活函数的输入值过大或者过小，其得到的激活函数的梯度值会非常接近于0，使得网络的收敛速度减慢。传统的方法是使用不存在梯度饱和区域的激活函数，例如ReLU等。BN也可以缓解梯度饱和的问题，它的策略是在调用激活函数之前将Wx+b的值归一化到梯度值比较大的区域。BN应在激活函数之前使用。\nσ激活函数和tanh激活函数： 在反向传播过程中，梯度倾向于在较低层里变得更小，从而减缓权重更新并因此减少训练次数。 批量标准化有助于消除所谓的梯度消失问题。\n在批量归一化的论文中 https://arxiv.org/abs/1502.03167v3，作者是娘BN放在非线性激活层的前面。目前在实践上，倾向于把BN放在ReLU后面。也有评测表明BN放ReLU后面效果更好。&hellip;（-）&hellip;玄学\n">
+<title>Batch Normalization：批量归一化</title>
 
 <link rel='canonical' href='https://charent.github.io/p/batch-normalization%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96/'>
 
-<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='Batch Normalization：批量归一化'>
-<meta property='og:description' content='批量归一化（Batch Normalization） 训练深度神经网络可能非常耗时。但是可以通过消除梯度来显着地减少训练时间，这种情况发生在网络由于梯度（特别是在较早的层中的梯度）接近零值而停止更新。
-在CNN中，BN应作用在非线性映射前。在神经网络训练时遇到收敛速度很慢，或梯度爆炸等无法训练的状况时可以尝试BN来解决。另外，在一般使用情况下也可以加入BN来加快训练速度，提高模型精度
-批量标准化（Batch Normalization）也许是对付梯度消失和爆炸问题的最有力工具。 批量标准化的工作方式如下：对于给定层中的每个单元，首先计算z分数，然后在两个受过训练的变量γ和β应用线性转换。 批量标准化通常在非线性激活函数之前完成，但在激活函数之后应用批量标准也可能是有利的。 σ激活函数和tanh激活函数存在梯度饱和的区域，其原因是激活函数的输入值过大或者过小，其得到的激活函数的梯度值会非常接近于0，使得网络的收敛速度减慢。传统的方法是使用不存在梯度饱和区域的激活函数，例如ReLU等。BN也可以缓解梯度饱和的问题，它的策略是在调用激活函数之前将Wx&#43;b的值归一化到梯度值比较大的区域。BN应在激活函数之前使用。
-σ激活函数和tanh激活函数： 在反向传播过程中，梯度倾向于在较低层里变得更小，从而减缓权重更新并因此减少训练次数。 批量标准化有助于消除所谓的梯度消失问题。
-在批量归一化的论文中 https://arxiv.org/abs/1502.03167v3，作者是娘BN放在非线性激活层的前面。目前在实践上，倾向于把BN放在ReLU后面。也有评测表明BN放ReLU后面效果更好。&amp;hellip;（-）&amp;hellip;玄学'>
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="Batch Normalization：批量归一化">
+<meta property='og:description' content="批量归一化（Batch Normalization） 训练深度神经网络可能非常耗时。但是可以通过消除梯度来显着地减少训练时间，这种情况发生在网络由于梯度（特别是在较早的层中的梯度）接近零值而停止更新。\n在CNN中，BN应作用在非线性映射前。在神经网络训练时遇到收敛速度很慢，或梯度爆炸等无法训练的状况时可以尝试BN来解决。另外，在一般使用情况下也可以加入BN来加快训练速度，提高模型精度\n批量标准化（Batch Normalization）也许是对付梯度消失和爆炸问题的最有力工具。 批量标准化的工作方式如下：对于给定层中的每个单元，首先计算z分数，然后在两个受过训练的变量γ和β应用线性转换。 批量标准化通常在非线性激活函数之前完成，但在激活函数之后应用批量标准也可能是有利的。 σ激活函数和tanh激活函数存在梯度饱和的区域，其原因是激活函数的输入值过大或者过小，其得到的激活函数的梯度值会非常接近于0，使得网络的收敛速度减慢。传统的方法是使用不存在梯度饱和区域的激活函数，例如ReLU等。BN也可以缓解梯度饱和的问题，它的策略是在调用激活函数之前将Wx+b的值归一化到梯度值比较大的区域。BN应在激活函数之前使用。\nσ激活函数和tanh激活函数： 在反向传播过程中，梯度倾向于在较低层里变得更小，从而减缓权重更新并因此减少训练次数。 批量标准化有助于消除所谓的梯度消失问题。\n在批量归一化的论文中 https://arxiv.org/abs/1502.03167v3，作者是娘BN放在非线性激活层的前面。目前在实践上，倾向于把BN放在ReLU后面。也有评测表明BN放ReLU后面效果更好。&hellip;（-）&hellip;玄学\n">
 <meta property='og:url' content='https://charent.github.io/p/batch-normalization%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96/'>
 <meta property='og:site_name' content='Charent的博客'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2019-12-04T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2019-12-04T00:00:00&#43;00:00'/>
 <meta name="twitter:title" content="Batch Normalization：批量归一化">
-<meta name="twitter:description" content="批量归一化（Batch Normalization） 训练深度神经网络可能非常耗时。但是可以通过消除梯度来显着地减少训练时间，这种情况发生在网络由于梯度（特别是在较早的层中的梯度）接近零值而停止更新。
-在CNN中，BN应作用在非线性映射前。在神经网络训练时遇到收敛速度很慢，或梯度爆炸等无法训练的状况时可以尝试BN来解决。另外，在一般使用情况下也可以加入BN来加快训练速度，提高模型精度
-批量标准化（Batch Normalization）也许是对付梯度消失和爆炸问题的最有力工具。 批量标准化的工作方式如下：对于给定层中的每个单元，首先计算z分数，然后在两个受过训练的变量γ和β应用线性转换。 批量标准化通常在非线性激活函数之前完成，但在激活函数之后应用批量标准也可能是有利的。 σ激活函数和tanh激活函数存在梯度饱和的区域，其原因是激活函数的输入值过大或者过小，其得到的激活函数的梯度值会非常接近于0，使得网络的收敛速度减慢。传统的方法是使用不存在梯度饱和区域的激活函数，例如ReLU等。BN也可以缓解梯度饱和的问题，它的策略是在调用激活函数之前将Wx&#43;b的值归一化到梯度值比较大的区域。BN应在激活函数之前使用。
-σ激活函数和tanh激活函数： 在反向传播过程中，梯度倾向于在较低层里变得更小，从而减缓权重更新并因此减少训练次数。 批量标准化有助于消除所谓的梯度消失问题。
-在批量归一化的论文中 https://arxiv.org/abs/1502.03167v3，作者是娘BN放在非线性激活层的前面。目前在实践上，倾向于把BN放在ReLU后面。也有评测表明BN放ReLU后面效果更好。&amp;hellip;（-）&amp;hellip;玄学">
+<meta name="twitter:description" content="批量归一化（Batch Normalization） 训练深度神经网络可能非常耗时。但是可以通过消除梯度来显着地减少训练时间，这种情况发生在网络由于梯度（特别是在较早的层中的梯度）接近零值而停止更新。\n在CNN中，BN应作用在非线性映射前。在神经网络训练时遇到收敛速度很慢，或梯度爆炸等无法训练的状况时可以尝试BN来解决。另外，在一般使用情况下也可以加入BN来加快训练速度，提高模型精度\n批量标准化（Batch Normalization）也许是对付梯度消失和爆炸问题的最有力工具。 批量标准化的工作方式如下：对于给定层中的每个单元，首先计算z分数，然后在两个受过训练的变量γ和β应用线性转换。 批量标准化通常在非线性激活函数之前完成，但在激活函数之后应用批量标准也可能是有利的。 σ激活函数和tanh激活函数存在梯度饱和的区域，其原因是激活函数的输入值过大或者过小，其得到的激活函数的梯度值会非常接近于0，使得网络的收敛速度减慢。传统的方法是使用不存在梯度饱和区域的激活函数，例如ReLU等。BN也可以缓解梯度饱和的问题，它的策略是在调用激活函数之前将Wx+b的值归一化到梯度值比较大的区域。BN应在激活函数之前使用。\nσ激活函数和tanh激活函数： 在反向传播过程中，梯度倾向于在较低层里变得更小，从而减缓权重更新并因此减少训练次数。 批量标准化有助于消除所谓的梯度消失问题。\n在批量归一化的论文中 https://arxiv.org/abs/1502.03167v3，作者是娘BN放在非线性激活层的前面。目前在实践上，倾向于把BN放在ReLU后面。也有评测表明BN放ReLU后面效果更好。&hellip;（-）&hellip;玄学\n">
     </head>
     <body class="
     article-page
@@ -67,8 +56,8 @@
                     
                     
                         
-                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
                 </a>
@@ -83,13 +72,14 @@
             <h1 class="site-name"><a href="/">Charent的博客</a></h1>
             <h2 class="site-description">不积硅步，无以至千里</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/charent'
                         target="_blank"
                         title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -108,7 +98,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -129,7 +118,6 @@
         </li>
         
         
-
         <li >
             <a href='/archives/' >
                 
@@ -150,7 +138,6 @@
         </li>
         
         
-
         <li >
             <a href='/search/' >
                 
@@ -170,7 +157,6 @@
         </li>
         
         
-
         <li >
             <a href='/%E5%85%B3%E4%BA%8E/' >
                 
@@ -189,10 +175,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -203,19 +190,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://charent.github.io/" selected>中文</option>
-                        
-                            <option value="https://charent.github.io/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -223,7 +211,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -231,13 +219,17 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -261,6 +253,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -283,19 +278,20 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h1 id="批量归一化batch-normalization">批量归一化（Batch Normalization）</h1>
-<p>训练深度神经网络可能非常耗时。但是可以通过消除梯度来显着地减少训练时间，这种情况发生在网络由于梯度（特别是在较早的层中的梯度）接近零值而停止更新。</p>
+    <h1 id="批量归一化batch-normalization">批量归一化（Batch Normalization）
+</h1><p>训练深度神经网络可能非常耗时。但是可以通过消除梯度来显着地减少训练时间，这种情况发生在网络由于梯度（特别是在较早的层中的梯度）接近零值而停止更新。</p>
 <p>在CNN中，BN应作用在非线性映射前。在神经网络训练时遇到收敛速度很慢，或梯度爆炸等无法训练的状况时可以尝试BN来解决。另外，在一般使用情况下也可以加入BN来加快训练速度，提高模型精度</p>
 <p>批量标准化（Batch Normalization）也许是对付梯度消失和爆炸问题的最有力工具。 批量标准化的工作方式如下：对于给定层中的每个单元，首先计算z分数，然后在两个受过训练的变量γ和β应用线性转换。 批量标准化通常在非线性激活函数之前完成，但在激活函数之后应用批量标准也可能是有利的。
 <img src="/p/batch-normalization%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96/1.png"
 	width="760"
 	height="618"
-	srcset="/p/batch-normalization%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96/1_huae3a65e8a8074a32bf9b5e3cd0575646_120836_480x0_resize_box_3.png 480w, /p/batch-normalization%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96/1_huae3a65e8a8074a32bf9b5e3cd0575646_120836_1024x0_resize_box_3.png 1024w"
+	srcset="/p/batch-normalization%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96/1_hu_aa2cfebb832457f9.png 480w, /p/batch-normalization%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96/1_hu_1828b0804e00ed6e.png 1024w"
 	loading="lazy"
 	
 		alt="bn"
@@ -344,26 +340,29 @@
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
     window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
             delimiters: [
                 { left: "$$", right: "$$", display: true },
                 { left: "$", right: "$", display: false },
                 { left: "\\(", right: "\\)", display: false },
                 { left: "\\[", right: "\\]", display: true }
-            ]
+            ],
+            ignoredClasses: ["gist"]
         });})
 </script>
+
     
 </article>
 
@@ -371,10 +370,34 @@
 
     
 
-<aside class="related-contents--wrapper">
+<aside class="related-content--wrapper">
     <h2 class="section-title">相关文章</h2>
-    <div class="related-contents">
+    <div class="related-content">
         <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/%E5%B0%96%E5%88%BA/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/%E5%B0%96%E5%88%BA/1.a38dbbd21257b1eb1f42c15fb529f890_hu_47109822d3710042.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 大模型微调出现loss尖峰/尖刺"
+                        
+                        data-hash="md5-o4270hJXsesfQsFftSn4kA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">大模型微调出现loss尖峰/尖刺</h2>
+        </div>
+    </a>
+</article>
+
             
                 
 <article class="">
@@ -387,6 +410,7 @@
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -399,6 +423,7 @@
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -411,6 +436,7 @@
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -423,18 +449,7 @@
         </div>
     </a>
 </article>
-            
-                
-<article class="">
-    <a href="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/">
-        
-        
 
-        <div class="article-details">
-            <h2 class="article-title">孪生网络实现多分类（Siamese Network）</h2>
-        </div>
-    </a>
-</article>
             
         </div>
     </div>
@@ -451,12 +466,12 @@
         
             2018 - 
         
-        2024 Charent的博客
+        2025 Charent的博客
     </section>
     
     <section class="powerby">
-         <br />
-        
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 
@@ -533,21 +548,19 @@
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
-    
-
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');

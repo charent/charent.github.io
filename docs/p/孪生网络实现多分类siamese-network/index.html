@@ -1,35 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='孪生网络之小样本学习： DL标准分类方法：输入x通过多层神经网络后，输出x属于某一类（或多个类）的概率。 小样本分类方法：每个类只需要为数不多的训练样本，要求要识别的样本与训练样本相似，如人脸识别。 孪生网络 孪生网络和学习输入的特征进行分类的网络不同，孪生网络在两个输入中进行区分，即是学习两个输入的相似度。
-孪生网络由两个完全相同的神经网络组成，每个都采用两个输入图像中的一个。然后将两个网络的最后一层馈送到对比损失函数，用来计算两个图像之间的相似度。它具有两个姐妹网络，它们是具有完全相同权重的相同神经网络。图像对中的每个图像将被馈送到这些网络中的一个。使用对比损失函数优化网络（我们将获得确切的函数）
-损失函数： 使用和普通神经网络所不同的损失函数：对比损失函数（Contrastive Loss Function） 孪生架构的目的不是对输入特征进行分类，而是区分它们。因此，分类损失函数（如交叉熵）不是最合适的选择。相反，这种架构更适合使用对比函数。一般而言，这个函数只是评估网络区分一对给定的图像的效果如何。 $$ L = \frac{1} {2N} \sum_{i=1}^{n} yd^2 &#43; (1-y)max(margin-d, 0)^2 $$
-其中$d=||an−bn||_2$，代表两个样本特征的欧氏距离，y为两个样本是否匹配的标签，y=1代表两个样本相似或者匹配，y=0则代表不匹配，margin为设定的阈值。 欧氏距离d： $$ d=\sqrt{(G_w(x_1) - G_w(x_2))^2} $$ 其中$G_w$是其中一个姐妹网络的输出。$X1$和$X2$是输入数据对。 说明： Y值为1或0。如果模型预测输入是相似的，那么Y的值为0，否则Y为1。 max（）是表示0和m-Dw之间较大值的函数。 m是大于0的边际价值（margin value）。有一个边际价值表示超出该边际价值的不同对不会造成损失。这是有道理的，因为你只希望基于实际不相似对来优化网络，但网络认为是相当相似的。
-处理多分类、少样本的问题： 训练数据要保证基本正、负样本比例接近1:1 数据集划分：训练集，测试集，支持集（Support Set），其中支持集包含所有类的样本
-训练： x1、x2可以是正样本、负样本
-样本x1通过网络得到输出y1 样本x2通过网络得到输出y2 使用y1、y2计算对比损失 反向传播计算梯度 使用优化器更新权重 训练集中，x1、x2和标签y的对应关系 x1和x2的关系 y x1、x2属于同一类 0 x1、x2属于不同类 1 测试： 给定测试样本 x ，从支持集中依次取出每个类 x_i（ i=1,2,3,&amp;hellip;.n ），x 和所有 x_i 依次通过孪生网络，若 x_j 和 x 的相似度最高，则认为 x 属于第 j 类（即 x_j 所属的类）'><title>孪生网络实现多分类（Siamese Network）</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="孪生网络之小样本学习： DL标准分类方法：输入x通过多层神经网络后，输出x属于某一类（或多个类）的概率。 小样本分类方法：每个类只需要为数不多的训练样本，要求要识别的样本与训练样本相似，如人脸识别。 孪生网络 孪生网络和学习输入的特征进行分类的网络不同，孪生网络在两个输入中进行区分，即是学习两个输入的相似度。\n孪生网络由两个完全相同的神经网络组成，每个都采用两个输入图像中的一个。然后将两个网络的最后一层馈送到对比损失函数，用来计算两个图像之间的相似度。它具有两个姐妹网络，它们是具有完全相同权重的相同神经网络。图像对中的每个图像将被馈送到这些网络中的一个。使用对比损失函数优化网络（我们将获得确切的函数）\n损失函数： 使用和普通神经网络所不同的损失函数：对比损失函数（Contrastive Loss Function） 孪生架构的目的不是对输入特征进行分类，而是区分它们。因此，分类损失函数（如交叉熵）不是最合适的选择。相反，这种架构更适合使用对比函数。一般而言，这个函数只是评估网络区分一对给定的图像的效果如何。 $$ L = \\frac{1} {2N} \\sum_{i=1}^{n} yd^2 + (1-y)max(margin-d, 0)^2 $$\n其中$d=||an−bn||_2$，代表两个样本特征的欧氏距离，y为两个样本是否匹配的标签，y=1代表两个样本相似或者匹配，y=0则代表不匹配，margin为设定的阈值。 欧氏距离d： $$ d=\\sqrt{(G_w(x_1) - G_w(x_2))^2} $$ 其中$G_w$是其中一个姐妹网络的输出。$X1$和$X2$是输入数据对。 说明： Y值为1或0。如果模型预测输入是相似的，那么Y的值为0，否则Y为1。 max（）是表示0和m-Dw之间较大值的函数。 m是大于0的边际价值（margin value）。有一个边际价值表示超出该边际价值的不同对不会造成损失。这是有道理的，因为你只希望基于实际不相似对来优化网络，但网络认为是相当相似的。\n处理多分类、少样本的问题： 训练数据要保证基本正、负样本比例接近1:1 数据集划分：训练集，测试集，支持集（Support Set），其中支持集包含所有类的样本\n训练： x1、x2可以是正样本、负样本\n样本x1通过网络得到输出y1 样本x2通过网络得到输出y2 使用y1、y2计算对比损失 反向传播计算梯度 使用优化器更新权重 训练集中，x1、x2和标签y的对应关系 x1和x2的关系 y x1、x2属于同一类 0 x1、x2属于不同类 1 测试： 给定测试样本 x ，从支持集中依次取出每个类 x_i（ i=1,2,3,&hellip;.n ），x 和所有 x_i 依次通过孪生网络，若 x_j 和 x 的相似度最高，则认为 x 属于第 j 类（即 x_j 所属的类）\n">
+<title>孪生网络实现多分类（Siamese Network）</title>
 
 <link rel='canonical' href='https://charent.github.io/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/'>
 
-<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='孪生网络实现多分类（Siamese Network）'>
-<meta property='og:description' content='孪生网络之小样本学习： DL标准分类方法：输入x通过多层神经网络后，输出x属于某一类（或多个类）的概率。 小样本分类方法：每个类只需要为数不多的训练样本，要求要识别的样本与训练样本相似，如人脸识别。 孪生网络 孪生网络和学习输入的特征进行分类的网络不同，孪生网络在两个输入中进行区分，即是学习两个输入的相似度。
-孪生网络由两个完全相同的神经网络组成，每个都采用两个输入图像中的一个。然后将两个网络的最后一层馈送到对比损失函数，用来计算两个图像之间的相似度。它具有两个姐妹网络，它们是具有完全相同权重的相同神经网络。图像对中的每个图像将被馈送到这些网络中的一个。使用对比损失函数优化网络（我们将获得确切的函数）
-损失函数： 使用和普通神经网络所不同的损失函数：对比损失函数（Contrastive Loss Function） 孪生架构的目的不是对输入特征进行分类，而是区分它们。因此，分类损失函数（如交叉熵）不是最合适的选择。相反，这种架构更适合使用对比函数。一般而言，这个函数只是评估网络区分一对给定的图像的效果如何。 $$ L = \frac{1} {2N} \sum_{i=1}^{n} yd^2 &#43; (1-y)max(margin-d, 0)^2 $$
-其中$d=||an−bn||_2$，代表两个样本特征的欧氏距离，y为两个样本是否匹配的标签，y=1代表两个样本相似或者匹配，y=0则代表不匹配，margin为设定的阈值。 欧氏距离d： $$ d=\sqrt{(G_w(x_1) - G_w(x_2))^2} $$ 其中$G_w$是其中一个姐妹网络的输出。$X1$和$X2$是输入数据对。 说明： Y值为1或0。如果模型预测输入是相似的，那么Y的值为0，否则Y为1。 max（）是表示0和m-Dw之间较大值的函数。 m是大于0的边际价值（margin value）。有一个边际价值表示超出该边际价值的不同对不会造成损失。这是有道理的，因为你只希望基于实际不相似对来优化网络，但网络认为是相当相似的。
-处理多分类、少样本的问题： 训练数据要保证基本正、负样本比例接近1:1 数据集划分：训练集，测试集，支持集（Support Set），其中支持集包含所有类的样本
-训练： x1、x2可以是正样本、负样本
-样本x1通过网络得到输出y1 样本x2通过网络得到输出y2 使用y1、y2计算对比损失 反向传播计算梯度 使用优化器更新权重 训练集中，x1、x2和标签y的对应关系 x1和x2的关系 y x1、x2属于同一类 0 x1、x2属于不同类 1 测试： 给定测试样本 x ，从支持集中依次取出每个类 x_i（ i=1,2,3,&amp;hellip;.n ），x 和所有 x_i 依次通过孪生网络，若 x_j 和 x 的相似度最高，则认为 x 属于第 j 类（即 x_j 所属的类）'>
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="孪生网络实现多分类（Siamese Network）">
+<meta property='og:description' content="孪生网络之小样本学习： DL标准分类方法：输入x通过多层神经网络后，输出x属于某一类（或多个类）的概率。 小样本分类方法：每个类只需要为数不多的训练样本，要求要识别的样本与训练样本相似，如人脸识别。 孪生网络 孪生网络和学习输入的特征进行分类的网络不同，孪生网络在两个输入中进行区分，即是学习两个输入的相似度。\n孪生网络由两个完全相同的神经网络组成，每个都采用两个输入图像中的一个。然后将两个网络的最后一层馈送到对比损失函数，用来计算两个图像之间的相似度。它具有两个姐妹网络，它们是具有完全相同权重的相同神经网络。图像对中的每个图像将被馈送到这些网络中的一个。使用对比损失函数优化网络（我们将获得确切的函数）\n损失函数： 使用和普通神经网络所不同的损失函数：对比损失函数（Contrastive Loss Function） 孪生架构的目的不是对输入特征进行分类，而是区分它们。因此，分类损失函数（如交叉熵）不是最合适的选择。相反，这种架构更适合使用对比函数。一般而言，这个函数只是评估网络区分一对给定的图像的效果如何。 $$ L = \\frac{1} {2N} \\sum_{i=1}^{n} yd^2 + (1-y)max(margin-d, 0)^2 $$\n其中$d=||an−bn||_2$，代表两个样本特征的欧氏距离，y为两个样本是否匹配的标签，y=1代表两个样本相似或者匹配，y=0则代表不匹配，margin为设定的阈值。 欧氏距离d： $$ d=\\sqrt{(G_w(x_1) - G_w(x_2))^2} $$ 其中$G_w$是其中一个姐妹网络的输出。$X1$和$X2$是输入数据对。 说明： Y值为1或0。如果模型预测输入是相似的，那么Y的值为0，否则Y为1。 max（）是表示0和m-Dw之间较大值的函数。 m是大于0的边际价值（margin value）。有一个边际价值表示超出该边际价值的不同对不会造成损失。这是有道理的，因为你只希望基于实际不相似对来优化网络，但网络认为是相当相似的。\n处理多分类、少样本的问题： 训练数据要保证基本正、负样本比例接近1:1 数据集划分：训练集，测试集，支持集（Support Set），其中支持集包含所有类的样本\n训练： x1、x2可以是正样本、负样本\n样本x1通过网络得到输出y1 样本x2通过网络得到输出y2 使用y1、y2计算对比损失 反向传播计算梯度 使用优化器更新权重 训练集中，x1、x2和标签y的对应关系 x1和x2的关系 y x1、x2属于同一类 0 x1、x2属于不同类 1 测试： 给定测试样本 x ，从支持集中依次取出每个类 x_i（ i=1,2,3,&hellip;.n ），x 和所有 x_i 依次通过孪生网络，若 x_j 和 x 的相似度最高，则认为 x 属于第 j 类（即 x_j 所属的类）\n">
 <meta property='og:url' content='https://charent.github.io/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/'>
 <meta property='og:site_name' content='Charent的博客'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2020-03-05T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2020-03-05T00:00:00&#43;00:00'/>
 <meta name="twitter:title" content="孪生网络实现多分类（Siamese Network）">
-<meta name="twitter:description" content="孪生网络之小样本学习： DL标准分类方法：输入x通过多层神经网络后，输出x属于某一类（或多个类）的概率。 小样本分类方法：每个类只需要为数不多的训练样本，要求要识别的样本与训练样本相似，如人脸识别。 孪生网络 孪生网络和学习输入的特征进行分类的网络不同，孪生网络在两个输入中进行区分，即是学习两个输入的相似度。
-孪生网络由两个完全相同的神经网络组成，每个都采用两个输入图像中的一个。然后将两个网络的最后一层馈送到对比损失函数，用来计算两个图像之间的相似度。它具有两个姐妹网络，它们是具有完全相同权重的相同神经网络。图像对中的每个图像将被馈送到这些网络中的一个。使用对比损失函数优化网络（我们将获得确切的函数）
-损失函数： 使用和普通神经网络所不同的损失函数：对比损失函数（Contrastive Loss Function） 孪生架构的目的不是对输入特征进行分类，而是区分它们。因此，分类损失函数（如交叉熵）不是最合适的选择。相反，这种架构更适合使用对比函数。一般而言，这个函数只是评估网络区分一对给定的图像的效果如何。 $$ L = \frac{1} {2N} \sum_{i=1}^{n} yd^2 &#43; (1-y)max(margin-d, 0)^2 $$
-其中$d=||an−bn||_2$，代表两个样本特征的欧氏距离，y为两个样本是否匹配的标签，y=1代表两个样本相似或者匹配，y=0则代表不匹配，margin为设定的阈值。 欧氏距离d： $$ d=\sqrt{(G_w(x_1) - G_w(x_2))^2} $$ 其中$G_w$是其中一个姐妹网络的输出。$X1$和$X2$是输入数据对。 说明： Y值为1或0。如果模型预测输入是相似的，那么Y的值为0，否则Y为1。 max（）是表示0和m-Dw之间较大值的函数。 m是大于0的边际价值（margin value）。有一个边际价值表示超出该边际价值的不同对不会造成损失。这是有道理的，因为你只希望基于实际不相似对来优化网络，但网络认为是相当相似的。
-处理多分类、少样本的问题： 训练数据要保证基本正、负样本比例接近1:1 数据集划分：训练集，测试集，支持集（Support Set），其中支持集包含所有类的样本
-训练： x1、x2可以是正样本、负样本
-样本x1通过网络得到输出y1 样本x2通过网络得到输出y2 使用y1、y2计算对比损失 反向传播计算梯度 使用优化器更新权重 训练集中，x1、x2和标签y的对应关系 x1和x2的关系 y x1、x2属于同一类 0 x1、x2属于不同类 1 测试： 给定测试样本 x ，从支持集中依次取出每个类 x_i（ i=1,2,3,&amp;hellip;.n ），x 和所有 x_i 依次通过孪生网络，若 x_j 和 x 的相似度最高，则认为 x 属于第 j 类（即 x_j 所属的类）">
+<meta name="twitter:description" content="孪生网络之小样本学习： DL标准分类方法：输入x通过多层神经网络后，输出x属于某一类（或多个类）的概率。 小样本分类方法：每个类只需要为数不多的训练样本，要求要识别的样本与训练样本相似，如人脸识别。 孪生网络 孪生网络和学习输入的特征进行分类的网络不同，孪生网络在两个输入中进行区分，即是学习两个输入的相似度。\n孪生网络由两个完全相同的神经网络组成，每个都采用两个输入图像中的一个。然后将两个网络的最后一层馈送到对比损失函数，用来计算两个图像之间的相似度。它具有两个姐妹网络，它们是具有完全相同权重的相同神经网络。图像对中的每个图像将被馈送到这些网络中的一个。使用对比损失函数优化网络（我们将获得确切的函数）\n损失函数： 使用和普通神经网络所不同的损失函数：对比损失函数（Contrastive Loss Function） 孪生架构的目的不是对输入特征进行分类，而是区分它们。因此，分类损失函数（如交叉熵）不是最合适的选择。相反，这种架构更适合使用对比函数。一般而言，这个函数只是评估网络区分一对给定的图像的效果如何。 $$ L = \\frac{1} {2N} \\sum_{i=1}^{n} yd^2 + (1-y)max(margin-d, 0)^2 $$\n其中$d=||an−bn||_2$，代表两个样本特征的欧氏距离，y为两个样本是否匹配的标签，y=1代表两个样本相似或者匹配，y=0则代表不匹配，margin为设定的阈值。 欧氏距离d： $$ d=\\sqrt{(G_w(x_1) - G_w(x_2))^2} $$ 其中$G_w$是其中一个姐妹网络的输出。$X1$和$X2$是输入数据对。 说明： Y值为1或0。如果模型预测输入是相似的，那么Y的值为0，否则Y为1。 max（）是表示0和m-Dw之间较大值的函数。 m是大于0的边际价值（margin value）。有一个边际价值表示超出该边际价值的不同对不会造成损失。这是有道理的，因为你只希望基于实际不相似对来优化网络，但网络认为是相当相似的。\n处理多分类、少样本的问题： 训练数据要保证基本正、负样本比例接近1:1 数据集划分：训练集，测试集，支持集（Support Set），其中支持集包含所有类的样本\n训练： x1、x2可以是正样本、负样本\n样本x1通过网络得到输出y1 样本x2通过网络得到输出y2 使用y1、y2计算对比损失 反向传播计算梯度 使用优化器更新权重 训练集中，x1、x2和标签y的对应关系 x1和x2的关系 y x1、x2属于同一类 0 x1、x2属于不同类 1 测试： 给定测试样本 x ，从支持集中依次取出每个类 x_i（ i=1,2,3,&hellip;.n ），x 和所有 x_i 依次通过孪生网络，若 x_j 和 x 的相似度最高，则认为 x 属于第 j 类（即 x_j 所属的类）\n">
     </head>
     <body class="
     article-page
@@ -73,8 +56,8 @@
                     
                     
                         
-                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
                 </a>
@@ -89,13 +72,14 @@
             <h1 class="site-name"><a href="/">Charent的博客</a></h1>
             <h2 class="site-description">不积硅步，无以至千里</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/charent'
                         target="_blank"
                         title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -114,7 +98,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -135,7 +118,6 @@
         </li>
         
         
-
         <li >
             <a href='/archives/' >
                 
@@ -156,7 +138,6 @@
         </li>
         
         
-
         <li >
             <a href='/search/' >
                 
@@ -176,7 +157,6 @@
         </li>
         
         
-
         <li >
             <a href='/%E5%85%B3%E4%BA%8E/' >
                 
@@ -195,10 +175,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -209,19 +190,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://charent.github.io/" selected>中文</option>
-                        
-                            <option value="https://charent.github.io/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -229,7 +211,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -237,13 +219,69 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#孪生网络之小样本学习">孪生网络之小样本学习：</a></li>
+            <li><a href="#孪生网络">孪生网络</a></li>
+            <li><a href="#损失函数">损失函数：</a></li>
+            <li><a href="#处理多分类少样本的问题">处理多分类、少样本的问题：</a></li>
+            <li><a href="#训练">训练：</a></li>
+            <li><a href="#测试">测试：</a></li>
+            <li><a href="#实验">实验：</a></li>
+            <li><a href="#字向量">字向量：</a></li>
+            <li><a href="#模型">模型：</a></li>
+            <li><a href="#损失函数-1">损失函数：</a></li>
+            <li><a href="#正确率的计算">正确率的计算：</a></li>
+            <li><a href="#训练-1">训练：</a></li>
+            <li><a href="#测试-1">测试：</a></li>
+          </ol>
+        </li>
+        <li><a href="#原因分析">原因分析：</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -275,6 +313,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -297,23 +338,24 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h4 id="孪生网络之小样本学习">孪生网络之小样本学习：</h4>
-<ol>
+    <h4 id="孪生网络之小样本学习">孪生网络之小样本学习：
+</h4><ol>
 <li>DL标准分类方法：输入x通过多层神经网络后，输出x属于某一类（或多个类）的概率。</li>
 <li>小样本分类方法：每个类只需要为数不多的训练样本，要求要识别的样本与训练样本相似，如人脸识别。</li>
 </ol>
-<h4 id="孪生网络">孪生网络</h4>
-<p>孪生网络和学习输入的特征进行分类的网络不同，孪生网络在两个输入中进行区分，即是学习两个输入的相似度。</p>
+<h4 id="孪生网络">孪生网络
+</h4><p>孪生网络和学习输入的特征进行分类的网络不同，孪生网络在两个输入中进行区分，即是学习两个输入的相似度。</p>
 <p>孪生网络由两个完全相同的神经网络组成，每个都采用两个输入图像中的一个。然后将两个网络的最后一层馈送到对比损失函数，用来计算两个图像之间的相似度。它具有两个姐妹网络，它们是具有完全相同权重的相同神经网络。图像对中的每个图像将被馈送到这些网络中的一个。使用对比损失函数优化网络（我们将获得确切的函数）</p>
 <p><img src="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/1.png"
 	width="514"
 	height="660"
-	srcset="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/1_hu08795b9674ed7ebcd18faa6b8eccb258_71605_480x0_resize_box_3.png 480w, /p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/1_hu08795b9674ed7ebcd18faa6b8eccb258_71605_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/1_hu_f300cba5195a3fd8.png 480w, /p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/1_hu_4822138f2c00eaa5.png 1024w"
 	loading="lazy"
 	
 		alt="孪生网络"
@@ -324,8 +366,8 @@
 		data-flex-basis="186px"
 	
 ></p>
-<h4 id="损失函数">损失函数：</h4>
-<p>使用和普通神经网络所不同的损失函数：对比损失函数（Contrastive Loss Function）
+<h4 id="损失函数">损失函数：
+</h4><p>使用和普通神经网络所不同的损失函数：对比损失函数（Contrastive Loss Function）
 孪生架构的目的不是对输入特征进行分类，而是区分它们。因此，分类损失函数（如交叉熵）不是最合适的选择。相反，这种架构更适合使用对比函数。一般而言，这个函数只是评估网络区分一对给定的图像的效果如何。
 $$
 L = \frac{1} {2N} \sum_{i=1}^{n} yd^2 + (1-y)max(margin-d, 0)^2
@@ -340,11 +382,11 @@ $$
 Y值为1或0。如果模型预测输入是相似的，那么Y的值为0，否则Y为1。
 max（）是表示0和m-Dw之间较大值的函数。
 m是大于0的边际价值（margin value）。有一个边际价值表示超出该边际价值的不同对不会造成损失。这是有道理的，因为你只希望基于实际不相似对来优化网络，但网络认为是相当相似的。</p>
-<h4 id="处理多分类少样本的问题">处理多分类、少样本的问题：</h4>
-<p>训练数据要保证基本正、负样本比例接近1:1
+<h4 id="处理多分类少样本的问题">处理多分类、少样本的问题：
+</h4><p>训练数据要保证基本正、负样本比例接近1:1
 数据集划分：训练集，测试集，支持集（Support Set），其中支持集包含所有类的样本</p>
-<h4 id="训练">训练：</h4>
-<p>x1、x2可以是正样本、负样本</p>
+<h4 id="训练">训练：
+</h4><p>x1、x2可以是正样本、负样本</p>
 <ol>
 <li>样本x1通过网络得到输出y1</li>
 <li>样本x2通过网络得到输出y2</li>
@@ -354,35 +396,35 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
 <li>训练集中，x1、x2和标签y的对应关系</li>
 </ol>
 <div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>x1和x2的关系</th>
-<th style="text-align:center">y</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>x1、x2属于同一类</td>
-<td style="text-align:center">0</td>
-</tr>
-<tr>
-<td>x1、x2属于不同类</td>
-<td style="text-align:center">1</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th>x1和x2的关系</th>
+          <th style="text-align: center">y</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>x1、x2属于同一类</td>
+          <td style="text-align: center">0</td>
+      </tr>
+      <tr>
+          <td>x1、x2属于不同类</td>
+          <td style="text-align: center">1</td>
+      </tr>
+  </tbody>
 </table></div>
-<h4 id="测试">测试：</h4>
-<p>给定测试样本 x ，从支持集中依次取出每个类 x_i（ i=1,2,3,&hellip;.n ），x 和所有 x_i 依次通过孪生网络，若 x_j 和 x 的相似度最高，则认为 x 属于第 j 类（即 x_j 所属的类）</p>
-<h4 id="实验">实验：</h4>
-<h5 id="数据">数据：</h5>
-<p>新闻标题数据集，14个类。小样本：每个类中随机抽取50条数据做为训练数据。</p>
+<h4 id="测试">测试：
+</h4><p>给定测试样本 x ，从支持集中依次取出每个类 x_i（ i=1,2,3,&hellip;.n ），x 和所有 x_i 依次通过孪生网络，若 x_j 和 x 的相似度最高，则认为 x 属于第 j 类（即 x_j 所属的类）</p>
+<h4 id="实验">实验：
+</h4><h5 id="数据">数据：
+</h5><p>新闻标题数据集，14个类。小样本：每个类中随机抽取50条数据做为训练数据。</p>
 <p>训练集：每个类的50条样本和自身做笛卡尔乘积，得到 50 x 50 = 2500 条正样本，即这2500条样本（x1,x2）对应的y=1；负样本：对每一类，从其余类的各50个样本中，每个类随机抽取 50 / 14 = 4个样本，共56个样本，和该类的50个样本做笛卡尔积组成 50 x 56 = 2800个负样本，即是(x1, x2)对应的 y=0，x1为该类样本，x2为其他类样本。共71400条训练数据
 测试集：每个类随机选取3000条，共42000条数据。</p>
 <p>支持集：支持集的选定较为困难。孪生网络在人脸识别中取得的效果非常好，网络训练好之后，直接拿一张人脸照片就可以作为支持集，支持集的样本和测试集的样本输入孪生网络后，网络会输出这两个样本的相似度，再根据相似度判断测试样本和支持样本是否属于同一个类。具体支持集的选取会在实验部分讨论。</p>
-<h4 id="字向量">字向量：</h4>
-<p>使用开源的基于人民日报语料、Word + Ngram训练的预训练词向量，包含1664K的字、词。每个字、词的维度是300。向量矩阵大小：972M</p>
-<h4 id="模型">模型：</h4>
-<div class="highlight"><div class="chroma">
+<h4 id="字向量">字向量：
+</h4><p>使用开源的基于人民日报语料、Word + Ngram训练的预训练词向量，包含1664K的字、词。每个字、词的维度是300。向量矩阵大小：972M</p>
+<h4 id="模型">模型：
+</h4><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
@@ -403,8 +445,8 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>模型最后输出一个长度为16的一维数组，用于计算相似度。</p>
-<h4 id="损失函数-1">损失函数：</h4>
-<p>使用对比损失函数，描述两个输出向量之间的欧氏距离的损失。</p>
+<h4 id="损失函数-1">损失函数：
+</h4><p>使用对比损失函数，描述两个输出向量之间的欧氏距离的损失。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -469,8 +511,8 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">loss</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="正确率的计算">正确率的计算：</h4>
-<p>损失函数中使用欧氏距离来刻画两个向量之间的相似程度，欧氏距离的值域范围是[0,+∞]，并不适合设置一个阀值来衡量相似或者不相似。解决方法是将欧氏距离映射到[0, 1]的区间（归一化），和余弦相似度的值域一样，接近1就越相似，接近0就越不相似。</p>
+</div><h4 id="正确率的计算">正确率的计算：
+</h4><p>损失函数中使用欧氏距离来刻画两个向量之间的相似程度，欧氏距离的值域范围是[0,+∞]，并不适合设置一个阀值来衡量相似或者不相似。解决方法是将欧氏距离映射到[0, 1]的区间（归一化），和余弦相似度的值域一样，接近1就越相似，接近0就越不相似。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -562,8 +604,8 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
 </span></span><span class="line"><span class="cl">            <span class="n">test_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h4 id="训练-1">训练：</h4>
-<p>机器配置：CPU：i5-8300H；显卡：1050TI；内存：16G；显存：4G</p>
+</div><h4 id="训练-1">训练：
+</h4><p>机器配置：CPU：i5-8300H；显卡：1050TI；内存：16G；显存：4G</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -583,7 +625,7 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
 <img src="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/2.png"
 	width="442"
 	height="278"
-	srcset="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/2_huf92c6438d52cf46256b6f5d441c5b0e5_8667_480x0_resize_box_3.png 480w, /p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/2_huf92c6438d52cf46256b6f5d441c5b0e5_8667_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/2_hu_a115931c4c4025cd.png 480w, /p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/2_hu_88ac9b8be9ded354.png 1024w"
 	loading="lazy"
 	
 		alt="loss"
@@ -598,7 +640,7 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
 <img src="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/3.png"
 	width="413"
 	height="260"
-	srcset="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/3_hu10b65b6fb176294d368b185a4436db70_7815_480x0_resize_box_3.png 480w, /p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/3_hu10b65b6fb176294d368b185a4436db70_7815_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/3_hu_1dc0e81a01fe33d3.png 480w, /p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/3_hu_911e8f3a0ae916bf.png 1024w"
 	loading="lazy"
 	
 		alt="acc"
@@ -610,15 +652,15 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
 	
 ></li>
 </ol>
-<h4 id="测试-1">测试：</h4>
-<p>每个类的训练样本只有50个，训练时候正确率已经接近100%（过拟合问题后面讨论）。但是测试集的正确率训练的过程中的正确率相差甚远。
+<h4 id="测试-1">测试：
+</h4><p>每个类的训练样本只有50个，训练时候正确率已经接近100%（过拟合问题后面讨论）。但是测试集的正确率训练的过程中的正确率相差甚远。
 （支持集的作用是当一个类示例，看测试样本和示例样本是否相似）
 将训练数据（14个类 x 每个类50条样本）求和作为支持集：
 平均正确率只有7%，出现了某一批次的测试数据正确率达100%，其余测试数据正确率为0，原因未知。
 <img src="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/4.png"
 	width="605"
 	height="343"
-	srcset="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/4_hu02f7e38ad13a14933311fcf812b450c5_13449_480x0_resize_box_3.png 480w, /p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/4_hu02f7e38ad13a14933311fcf812b450c5_13449_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/4_hu_ba1d6fa6749b3336.png 480w, /p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/4_hu_6ef5517058de89c4.png 1024w"
 	loading="lazy"
 	
 		alt="acc"
@@ -629,8 +671,8 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
 		data-flex-basis="423px"
 	
 ></p>
-<h3 id="原因分析">原因分析：</h3>
-<p>本实验每个类别使用50个样本，满足小样本的特性，但是模型训练完成之后，用测试集测试模型，正确率不到40%。孪生网络应用在人脸识别模型较多（即是输入两张人脸，看这两张人脸是不是属于同一个人），训练一个模型只需要少量样本。人脸图像的特征较为明显（有鼻子、有眼睛等），图像特征也相对容易捕捉。但是当将孪生网络用于少样本的文本分类任务后，一个类别的文本表述方式千变万化，很难通过少量样本找到该类文本的明显特征。
+<h3 id="原因分析">原因分析：
+</h3><p>本实验每个类别使用50个样本，满足小样本的特性，但是模型训练完成之后，用测试集测试模型，正确率不到40%。孪生网络应用在人脸识别模型较多（即是输入两张人脸，看这两张人脸是不是属于同一个人），训练一个模型只需要少量样本。人脸图像的特征较为明显（有鼻子、有眼睛等），图像特征也相对容易捕捉。但是当将孪生网络用于少样本的文本分类任务后，一个类别的文本表述方式千变万化，很难通过少量样本找到该类文本的明显特征。
 比如，对于财经类的文本：“铜价上涨趋势不变 短期震荡后进一步上扬”出现在了训练集当中，假设这个样本也是财经类的支持集样本，当测试集遇到“午评：期市全线反弹 有色金属郑糖领涨”，出现了“铜”、“有色金属”的特征，则孪生网络可以认为属于同一个类别；但是当测试集样本“保命比业绩更重要 基金上演熊市年底冲刺”，当“基金”、“熊市”等特征没有出现在训练集时，孪生网络则不能正确地划分该类。</p>
 <p>综上所述，孪生网络用于多类别文本分类不可行。</p>
 
@@ -646,26 +688,29 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
     window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
             delimiters: [
                 { left: "$$", right: "$$", display: true },
                 { left: "$", right: "$", display: false },
                 { left: "\\(", right: "\\)", display: false },
                 { left: "\\[", right: "\\]", display: true }
-            ]
+            ],
+            ignoredClasses: ["gist"]
         });})
 </script>
+
     
 </article>
 
@@ -673,9 +718,9 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
 
     
 
-<aside class="related-contents--wrapper">
+<aside class="related-content--wrapper">
     <h2 class="section-title">相关文章</h2>
-    <div class="related-contents">
+    <div class="related-content">
         <div class="flex article-list--tile">
             
                 
@@ -689,6 +734,31 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
         </div>
     </a>
 </article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/%E5%B0%96%E5%88%BA/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/%E5%B0%96%E5%88%BA/1.a38dbbd21257b1eb1f42c15fb529f890_hu_47109822d3710042.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 大模型微调出现loss尖峰/尖刺"
+                        
+                        data-hash="md5-o4270hJXsesfQsFftSn4kA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">大模型微调出现loss尖峰/尖刺</h2>
+        </div>
+    </a>
+</article>
+
             
                 
 <article class="">
@@ -701,6 +771,7 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -713,6 +784,7 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -725,18 +797,7 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
         </div>
     </a>
 </article>
-            
-                
-<article class="">
-    <a href="/p/%E5%B0%8F%E6%A0%B7%E6%9C%AC%E5%AD%A6%E4%B9%A0/">
-        
-        
 
-        <div class="article-details">
-            <h2 class="article-title">小样本学习</h2>
-        </div>
-    </a>
-</article>
             
         </div>
     </div>
@@ -753,12 +814,12 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
         
             2018 - 
         
-        2024 Charent的博客
+        2025 Charent的博客
     </section>
     
     <section class="powerby">
-         <br />
-        
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 
@@ -835,73 +896,19 @@ m是大于0的边际价值（margin value）。有一个边际价值表示超出
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li>
-      <ol>
-        <li>
-          <ol>
-            <li><a href="#孪生网络之小样本学习">孪生网络之小样本学习：</a></li>
-            <li><a href="#孪生网络">孪生网络</a></li>
-            <li><a href="#损失函数">损失函数：</a></li>
-            <li><a href="#处理多分类少样本的问题">处理多分类、少样本的问题：</a></li>
-            <li><a href="#训练">训练：</a></li>
-            <li><a href="#测试">测试：</a></li>
-            <li><a href="#实验">实验：</a></li>
-            <li><a href="#字向量">字向量：</a></li>
-            <li><a href="#模型">模型：</a></li>
-            <li><a href="#损失函数-1">损失函数：</a></li>
-            <li><a href="#正确率的计算">正确率的计算：</a></li>
-            <li><a href="#训练-1">训练：</a></li>
-            <li><a href="#测试-1">测试：</a></li>
-          </ol>
-        </li>
-        <li><a href="#原因分析">原因分析：</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');

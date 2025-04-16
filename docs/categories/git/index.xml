@@ -12,8 +12,8 @@
         <pubDate>Sun, 03 Jan 2021 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/%E9%85%8D%E7%BD%AE%E9%A1%B9%E7%9B%AE%E5%8F%AF%E6%8E%A8%E9%80%81%E5%88%B0github%E5%92%8Cgitee/</guid>
-        <description>&lt;h1 id=&#34;创建两个密钥&#34;&gt;创建两个密钥&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+        <description>&lt;h1 id=&#34;创建两个密钥&#34;&gt;创建两个密钥
+&lt;/h1&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
@@ -54,10 +54,10 @@
 &lt;li&gt;id_rsa.github&lt;/li&gt;
 &lt;li&gt;id_rsa.github.pub&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h1 id=&#34;把公钥id_rsapub复制到giteegithub&#34;&gt;把公钥（id_rsa.*.pub）复制到Gitee、Github&lt;/h1&gt;
-&lt;p&gt;这一步比较简单，去自己的git页面的设置找就可以了&lt;/p&gt;
-&lt;h1 id=&#34;配置密钥使用config&#34;&gt;配置密钥使用config&lt;/h1&gt;
-&lt;p&gt;在·目录下创建config文件，添加以下内容到文件中&lt;/p&gt;
+&lt;h1 id=&#34;把公钥id_rsapub复制到giteegithub&#34;&gt;把公钥（id_rsa.*.pub）复制到Gitee、Github
+&lt;/h1&gt;&lt;p&gt;这一步比较简单，去自己的git页面的设置找就可以了&lt;/p&gt;
+&lt;h1 id=&#34;配置密钥使用config&#34;&gt;配置密钥使用config
+&lt;/h1&gt;&lt;p&gt;在·目录下创建config文件，添加以下内容到文件中&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
@@ -98,8 +98,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;IdentityFile C:\Users\XXX\.ssh\id_rsa.github
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h1 id=&#34;测试密钥是否配置成功&#34;&gt;测试密钥是否配置成功&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;/div&gt;&lt;h1 id=&#34;测试密钥是否配置成功&#34;&gt;测试密钥是否配置成功
+&lt;/h1&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
@@ -129,8 +129,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;but GitHub does not provide shell access.
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h1 id=&#34;配置一个项目可以推送两个仓库&#34;&gt;配置一个项目可以推送两个仓库&lt;/h1&gt;
-&lt;p&gt;在项目的&lt;code&gt;.git/config&lt;/code&gt;文件修改&lt;code&gt;url = git@github.com:你的用户名/你的项目仓库.git&lt;/code&gt;，如果你要推送到多个git仓库，比如要推送到&lt;code&gt;gitee&lt;/code&gt;和&lt;code&gt;gitub&lt;/code&gt;，则配置&lt;code&gt;[remote &amp;quot;github&amp;quot;]&lt;/code&gt;和&lt;code&gt;[remote &amp;quot;gitee&amp;quot;]&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;&lt;h1 id=&#34;配置一个项目可以推送两个仓库&#34;&gt;配置一个项目可以推送两个仓库
+&lt;/h1&gt;&lt;p&gt;在项目的&lt;code&gt;.git/config&lt;/code&gt;文件修改&lt;code&gt;url = git@github.com:你的用户名/你的项目仓库.git&lt;/code&gt;，如果你要推送到多个git仓库，比如要推送到&lt;code&gt;gitee&lt;/code&gt;和&lt;code&gt;gitub&lt;/code&gt;，则配置&lt;code&gt;[remote &amp;quot;github&amp;quot;]&lt;/code&gt;和&lt;code&gt;[remote &amp;quot;gitee&amp;quot;]&lt;/code&gt;&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1

@@ -1,29 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='什么是TF-IDF？ TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点
-在文本挖掘的预处理中，向量化之后一般都伴随着TF-IDF的处理，那么什么是TF-IDF，为什么一般我们要加这一步预处理呢？这里就对TF-IDF的原理做一个总结。
-文本向量化特征的不足 在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：
-1 2 3 4 corpus=[&amp;#34;I come to China to travel&amp;#34;, &amp;#34;This is a car polupar in China&amp;#34;, &amp;#34;I love tea and Apple &amp;#34;, &amp;#34;The work is to write some papers in science&amp;#34;] 不考虑停用词，处理后得到的词向量如下：
-1 2 3 4 [[0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 2 1 0 0] [0 0 1 1 0 1 1 0 0 1 0 0 0 0 1 0 0 0 0] [1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0] [0 0 0 0 0 1 1 0 1 0 1 1 0 1 0 1 0 1 1]] 如果我们直接将统计词频后的19维特征做为文本分类的输入，会发现有一些问题。比如第一个文本，我们发现&amp;quot;come&amp;quot;,&amp;ldquo;China&amp;quot;和“Travel”各出现1次，而“to“出现了两次。似乎看起来这个文本与”to“这个特征更关系紧密。但是实际上”to“是一个非常普遍的词，几乎所有的文本都会用到，因此虽然它的词频为2，但是重要性却比词频为1的&amp;quot;China&amp;quot;和“Travel”要低的多。如果我们的向量化特征仅仅用词频表示就无法反应这一点。因此我们需要进一步的预处理来反应文本的这个特征，而这个预处理就是TF-IDF。'><title>文本预处理之TFIDF</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="什么是TF-IDF？ TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点\n在文本挖掘的预处理中，向量化之后一般都伴随着TF-IDF的处理，那么什么是TF-IDF，为什么一般我们要加这一步预处理呢？这里就对TF-IDF的原理做一个总结。\n文本向量化特征的不足 在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：\n1 2 3 4 corpus=[&#34;I come to China to travel&#34;, &#34;This is a car polupar in China&#34;, &#34;I love tea and Apple &#34;, &#34;The work is to write some papers in science&#34;] 不考虑停用词，处理后得到的词向量如下：\n1 2 3 4 [[0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 2 1 0 0] [0 0 1 1 0 1 1 0 0 1 0 0 0 0 1 0 0 0 0] [1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0] [0 0 0 0 0 1 1 0 1 0 1 1 0 1 0 1 0 1 1]] 如果我们直接将统计词频后的19维特征做为文本分类的输入，会发现有一些问题。比如第一个文本，我们发现&quot;come&quot;,&ldquo;China&quot;和“Travel”各出现1次，而“to“出现了两次。似乎看起来这个文本与”to“这个特征更关系紧密。但是实际上”to“是一个非常普遍的词，几乎所有的文本都会用到，因此虽然它的词频为2，但是重要性却比词频为1的&quot;China&quot;和“Travel”要低的多。如果我们的向量化特征仅仅用词频表示就无法反应这一点。因此我们需要进一步的预处理来反应文本的这个特征，而这个预处理就是TF-IDF。\n前面的TF也就是我们前面说到的词频，我们之前做的向量化也就是做了文本中各个词的出现频率统计，并作为文本特征，这个很好理解。关键是后面的这个IDF，即“逆文本频率”如何理解。我们的IDF就是来帮助我们来反应这个词的重要性的，进而修正仅仅用词频表示的词特征值。\n概括来讲， IDF反应了一个词在所有文本中出现的频率，如果一个词在很多的文本中出现，那么它的IDF值应该低，比如上文中的“to”。而反过来如果一个词在比较少的文本中出现，那么它的IDF值应该高。比如一些专业的名词如“Machine Learning”。这样的词IDF值应该高。一个极端的情况，如果一个词在所有的文本中都出现，那么它的IDF值应该为0。 上面是从定性上说明的IDF的作用，那么如何对一个词的IDF进行定量分析呢？这里直接给出一个词x的IDF的基本公式如下： $$ IDF(x)=log(\\frac{N+1}{N(x)+1}) +1 $$ 其中，N代表语料库中文本的总数，而N(x)代表语料库中包含词x的文本总数。为什么IDF的基本公式应该是是上面这样的而不是像N/N(x)这样的形式呢？这就涉及到信息论相关的一些知识了。 上面的IDF公式已经可以使用了，但是在一些特殊的情况会有一些小问题，比如某一个生僻词在语料库中没有，这样我们的分母为0， IDF没有意义了。所以常用的IDF我们需要做一些平滑，使语料库中没有出现的词也可以得到一个合适的IDF值。平滑的方法有很多种，最常见的IDF平滑后的公式之一为\n有了IDF的定义，我们就可以计算某一个词的TF-IDF值了： $$ TFIDF(x)=TF(x)∗IDF(x) $$ 其中TF(x)指词x在当前文本中的词频。\nTF-IDF是非常常用的文本挖掘预处理基本步骤，但是如果预处理中使用了Hash Trick，则一般就无法使用TF-IDF了，因为Hash Trick后我们已经无法得到哈希后的各特征的IDF的值。使用了IF-IDF并标准化以后，我们就可以使用各个文本的词特征向量作为文本的特征，进行分类或者聚类分析。 当然TF-IDF不光可以用于文本挖掘，在信息检索等很多领域都有使用。\n">
+<title>文本预处理之TFIDF</title>
 
 <link rel='canonical' href='https://charent.github.io/p/%E6%96%87%E6%9C%AC%E9%A2%84%E5%A4%84%E7%90%86%E4%B9%8Btfidf/'>
 
-<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='文本预处理之TFIDF'>
-<meta property='og:description' content='什么是TF-IDF？ TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点
-在文本挖掘的预处理中，向量化之后一般都伴随着TF-IDF的处理，那么什么是TF-IDF，为什么一般我们要加这一步预处理呢？这里就对TF-IDF的原理做一个总结。
-文本向量化特征的不足 在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：
-1 2 3 4 corpus=[&amp;#34;I come to China to travel&amp;#34;, &amp;#34;This is a car polupar in China&amp;#34;, &amp;#34;I love tea and Apple &amp;#34;, &amp;#34;The work is to write some papers in science&amp;#34;] 不考虑停用词，处理后得到的词向量如下：
-1 2 3 4 [[0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 2 1 0 0] [0 0 1 1 0 1 1 0 0 1 0 0 0 0 1 0 0 0 0] [1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0] [0 0 0 0 0 1 1 0 1 0 1 1 0 1 0 1 0 1 1]] 如果我们直接将统计词频后的19维特征做为文本分类的输入，会发现有一些问题。比如第一个文本，我们发现&amp;quot;come&amp;quot;,&amp;ldquo;China&amp;quot;和“Travel”各出现1次，而“to“出现了两次。似乎看起来这个文本与”to“这个特征更关系紧密。但是实际上”to“是一个非常普遍的词，几乎所有的文本都会用到，因此虽然它的词频为2，但是重要性却比词频为1的&amp;quot;China&amp;quot;和“Travel”要低的多。如果我们的向量化特征仅仅用词频表示就无法反应这一点。因此我们需要进一步的预处理来反应文本的这个特征，而这个预处理就是TF-IDF。'>
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="文本预处理之TFIDF">
+<meta property='og:description' content="什么是TF-IDF？ TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点\n在文本挖掘的预处理中，向量化之后一般都伴随着TF-IDF的处理，那么什么是TF-IDF，为什么一般我们要加这一步预处理呢？这里就对TF-IDF的原理做一个总结。\n文本向量化特征的不足 在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：\n1 2 3 4 corpus=[&#34;I come to China to travel&#34;, &#34;This is a car polupar in China&#34;, &#34;I love tea and Apple &#34;, &#34;The work is to write some papers in science&#34;] 不考虑停用词，处理后得到的词向量如下：\n1 2 3 4 [[0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 2 1 0 0] [0 0 1 1 0 1 1 0 0 1 0 0 0 0 1 0 0 0 0] [1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0] [0 0 0 0 0 1 1 0 1 0 1 1 0 1 0 1 0 1 1]] 如果我们直接将统计词频后的19维特征做为文本分类的输入，会发现有一些问题。比如第一个文本，我们发现&quot;come&quot;,&ldquo;China&quot;和“Travel”各出现1次，而“to“出现了两次。似乎看起来这个文本与”to“这个特征更关系紧密。但是实际上”to“是一个非常普遍的词，几乎所有的文本都会用到，因此虽然它的词频为2，但是重要性却比词频为1的&quot;China&quot;和“Travel”要低的多。如果我们的向量化特征仅仅用词频表示就无法反应这一点。因此我们需要进一步的预处理来反应文本的这个特征，而这个预处理就是TF-IDF。\n前面的TF也就是我们前面说到的词频，我们之前做的向量化也就是做了文本中各个词的出现频率统计，并作为文本特征，这个很好理解。关键是后面的这个IDF，即“逆文本频率”如何理解。我们的IDF就是来帮助我们来反应这个词的重要性的，进而修正仅仅用词频表示的词特征值。\n概括来讲， IDF反应了一个词在所有文本中出现的频率，如果一个词在很多的文本中出现，那么它的IDF值应该低，比如上文中的“to”。而反过来如果一个词在比较少的文本中出现，那么它的IDF值应该高。比如一些专业的名词如“Machine Learning”。这样的词IDF值应该高。一个极端的情况，如果一个词在所有的文本中都出现，那么它的IDF值应该为0。 上面是从定性上说明的IDF的作用，那么如何对一个词的IDF进行定量分析呢？这里直接给出一个词x的IDF的基本公式如下： $$ IDF(x)=log(\\frac{N+1}{N(x)+1}) +1 $$ 其中，N代表语料库中文本的总数，而N(x)代表语料库中包含词x的文本总数。为什么IDF的基本公式应该是是上面这样的而不是像N/N(x)这样的形式呢？这就涉及到信息论相关的一些知识了。 上面的IDF公式已经可以使用了，但是在一些特殊的情况会有一些小问题，比如某一个生僻词在语料库中没有，这样我们的分母为0， IDF没有意义了。所以常用的IDF我们需要做一些平滑，使语料库中没有出现的词也可以得到一个合适的IDF值。平滑的方法有很多种，最常见的IDF平滑后的公式之一为\n有了IDF的定义，我们就可以计算某一个词的TF-IDF值了： $$ TFIDF(x)=TF(x)∗IDF(x) $$ 其中TF(x)指词x在当前文本中的词频。\nTF-IDF是非常常用的文本挖掘预处理基本步骤，但是如果预处理中使用了Hash Trick，则一般就无法使用TF-IDF了，因为Hash Trick后我们已经无法得到哈希后的各特征的IDF的值。使用了IF-IDF并标准化以后，我们就可以使用各个文本的词特征向量作为文本的特征，进行分类或者聚类分析。 当然TF-IDF不光可以用于文本挖掘，在信息检索等很多领域都有使用。\n">
 <meta property='og:url' content='https://charent.github.io/p/%E6%96%87%E6%9C%AC%E9%A2%84%E5%A4%84%E7%90%86%E4%B9%8Btfidf/'>
 <meta property='og:site_name' content='Charent的博客'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2019-12-17T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2019-12-17T00:00:00&#43;00:00'/>
 <meta name="twitter:title" content="文本预处理之TFIDF">
-<meta name="twitter:description" content="什么是TF-IDF？ TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点
-在文本挖掘的预处理中，向量化之后一般都伴随着TF-IDF的处理，那么什么是TF-IDF，为什么一般我们要加这一步预处理呢？这里就对TF-IDF的原理做一个总结。
-文本向量化特征的不足 在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：
-1 2 3 4 corpus=[&amp;#34;I come to China to travel&amp;#34;, &amp;#34;This is a car polupar in China&amp;#34;, &amp;#34;I love tea and Apple &amp;#34;, &amp;#34;The work is to write some papers in science&amp;#34;] 不考虑停用词，处理后得到的词向量如下：
-1 2 3 4 [[0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 2 1 0 0] [0 0 1 1 0 1 1 0 0 1 0 0 0 0 1 0 0 0 0] [1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0] [0 0 0 0 0 1 1 0 1 0 1 1 0 1 0 1 0 1 1]] 如果我们直接将统计词频后的19维特征做为文本分类的输入，会发现有一些问题。比如第一个文本，我们发现&amp;quot;come&amp;quot;,&amp;ldquo;China&amp;quot;和“Travel”各出现1次，而“to“出现了两次。似乎看起来这个文本与”to“这个特征更关系紧密。但是实际上”to“是一个非常普遍的词，几乎所有的文本都会用到，因此虽然它的词频为2，但是重要性却比词频为1的&amp;quot;China&amp;quot;和“Travel”要低的多。如果我们的向量化特征仅仅用词频表示就无法反应这一点。因此我们需要进一步的预处理来反应文本的这个特征，而这个预处理就是TF-IDF。">
+<meta name="twitter:description" content="什么是TF-IDF？ TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点\n在文本挖掘的预处理中，向量化之后一般都伴随着TF-IDF的处理，那么什么是TF-IDF，为什么一般我们要加这一步预处理呢？这里就对TF-IDF的原理做一个总结。\n文本向量化特征的不足 在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：\n1 2 3 4 corpus=[&#34;I come to China to travel&#34;, &#34;This is a car polupar in China&#34;, &#34;I love tea and Apple &#34;, &#34;The work is to write some papers in science&#34;] 不考虑停用词，处理后得到的词向量如下：\n1 2 3 4 [[0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 2 1 0 0] [0 0 1 1 0 1 1 0 0 1 0 0 0 0 1 0 0 0 0] [1 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0] [0 0 0 0 0 1 1 0 1 0 1 1 0 1 0 1 0 1 1]] 如果我们直接将统计词频后的19维特征做为文本分类的输入，会发现有一些问题。比如第一个文本，我们发现&quot;come&quot;,&ldquo;China&quot;和“Travel”各出现1次，而“to“出现了两次。似乎看起来这个文本与”to“这个特征更关系紧密。但是实际上”to“是一个非常普遍的词，几乎所有的文本都会用到，因此虽然它的词频为2，但是重要性却比词频为1的&quot;China&quot;和“Travel”要低的多。如果我们的向量化特征仅仅用词频表示就无法反应这一点。因此我们需要进一步的预处理来反应文本的这个特征，而这个预处理就是TF-IDF。\n前面的TF也就是我们前面说到的词频，我们之前做的向量化也就是做了文本中各个词的出现频率统计，并作为文本特征，这个很好理解。关键是后面的这个IDF，即“逆文本频率”如何理解。我们的IDF就是来帮助我们来反应这个词的重要性的，进而修正仅仅用词频表示的词特征值。\n概括来讲， IDF反应了一个词在所有文本中出现的频率，如果一个词在很多的文本中出现，那么它的IDF值应该低，比如上文中的“to”。而反过来如果一个词在比较少的文本中出现，那么它的IDF值应该高。比如一些专业的名词如“Machine Learning”。这样的词IDF值应该高。一个极端的情况，如果一个词在所有的文本中都出现，那么它的IDF值应该为0。 上面是从定性上说明的IDF的作用，那么如何对一个词的IDF进行定量分析呢？这里直接给出一个词x的IDF的基本公式如下： $$ IDF(x)=log(\\frac{N+1}{N(x)+1}) +1 $$ 其中，N代表语料库中文本的总数，而N(x)代表语料库中包含词x的文本总数。为什么IDF的基本公式应该是是上面这样的而不是像N/N(x)这样的形式呢？这就涉及到信息论相关的一些知识了。 上面的IDF公式已经可以使用了，但是在一些特殊的情况会有一些小问题，比如某一个生僻词在语料库中没有，这样我们的分母为0， IDF没有意义了。所以常用的IDF我们需要做一些平滑，使语料库中没有出现的词也可以得到一个合适的IDF值。平滑的方法有很多种，最常见的IDF平滑后的公式之一为\n有了IDF的定义，我们就可以计算某一个词的TF-IDF值了： $$ TFIDF(x)=TF(x)∗IDF(x) $$ 其中TF(x)指词x在当前文本中的词频。\nTF-IDF是非常常用的文本挖掘预处理基本步骤，但是如果预处理中使用了Hash Trick，则一般就无法使用TF-IDF了，因为Hash Trick后我们已经无法得到哈希后的各特征的IDF的值。使用了IF-IDF并标准化以后，我们就可以使用各个文本的词特征向量作为文本的特征，进行分类或者聚类分析。 当然TF-IDF不光可以用于文本挖掘，在信息检索等很多领域都有使用。\n">
     </head>
     <body class="
     article-page
@@ -67,8 +56,8 @@
                     
                     
                         
-                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
                 </a>
@@ -83,13 +72,14 @@
             <h1 class="site-name"><a href="/">Charent的博客</a></h1>
             <h2 class="site-description">不积硅步，无以至千里</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/charent'
                         target="_blank"
                         title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -108,7 +98,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -129,7 +118,6 @@
         </li>
         
         
-
         <li >
             <a href='/archives/' >
                 
@@ -150,7 +138,6 @@
         </li>
         
         
-
         <li >
             <a href='/search/' >
                 
@@ -170,7 +157,6 @@
         </li>
         
         
-
         <li >
             <a href='/%E5%85%B3%E4%BA%8E/' >
                 
@@ -189,10 +175,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -203,19 +190,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://charent.github.io/" selected>中文</option>
-                        
-                            <option value="https://charent.github.io/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -223,7 +211,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -231,13 +219,17 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -265,6 +257,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -287,16 +282,17 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h1 id="什么是tf-idf">什么是TF-IDF？</h1>
-<p>TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点</p>
+    <h1 id="什么是tf-idf">什么是TF-IDF？
+</h1><p>TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点</p>
 <p>在文本挖掘的预处理中，向量化之后一般都伴随着TF-IDF的处理，那么什么是TF-IDF，为什么一般我们要加这一步预处理呢？这里就对TF-IDF的原理做一个总结。</p>
-<h1 id="文本向量化特征的不足">文本向量化特征的不足</h1>
-<p>在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：</p>
+<h1 id="文本向量化特征的不足">文本向量化特征的不足
+</h1><p>在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -355,26 +351,29 @@ $$
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
     window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
             delimiters: [
                 { left: "$$", right: "$$", display: true },
                 { left: "$", right: "$", display: false },
                 { left: "\\(", right: "\\)", display: false },
                 { left: "\\[", right: "\\]", display: true }
-            ]
+            ],
+            ignoredClasses: ["gist"]
         });})
 </script>
+
     
 </article>
 
@@ -382,10 +381,34 @@ $$
 
     
 
-<aside class="related-contents--wrapper">
+<aside class="related-content--wrapper">
     <h2 class="section-title">相关文章</h2>
-    <div class="related-contents">
+    <div class="related-content">
         <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/%E5%B0%96%E5%88%BA/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/%E5%B0%96%E5%88%BA/1.a38dbbd21257b1eb1f42c15fb529f890_hu_47109822d3710042.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 大模型微调出现loss尖峰/尖刺"
+                        
+                        data-hash="md5-o4270hJXsesfQsFftSn4kA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">大模型微调出现loss尖峰/尖刺</h2>
+        </div>
+    </a>
+</article>
+
             
                 
 <article class="">
@@ -398,6 +421,7 @@ $$
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -410,6 +434,7 @@ $$
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -422,6 +447,7 @@ $$
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -434,18 +460,7 @@ $$
         </div>
     </a>
 </article>
-            
-                
-<article class="">
-    <a href="/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/">
-        
-        
 
-        <div class="article-details">
-            <h2 class="article-title">孪生网络实现多分类（Siamese Network）</h2>
-        </div>
-    </a>
-</article>
             
         </div>
     </div>
@@ -462,12 +477,12 @@ $$
         
             2018 - 
         
-        2024 Charent的博客
+        2025 Charent的博客
     </section>
     
     <section class="powerby">
-         <br />
-        
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 
@@ -544,21 +559,19 @@ $$
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
-    
-
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');

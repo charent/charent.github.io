@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>llm大模型 on Charent的博客</title>
+        <title>Llm大模型 on Charent的博客</title>
         <link>https://charent.github.io/categories/llm%E5%A4%A7%E6%A8%A1%E5%9E%8B/</link>
-        <description>Recent content in llm大模型 on Charent的博客</description>
+        <description>Recent content in Llm大模型 on Charent的博客</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <lastBuildDate>Sun, 12 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://charent.github.io/categories/llm%E5%A4%A7%E6%A8%A1%E5%9E%8B/index.xml" rel="self" type="application/rss+xml" /><item>
@@ -12,11 +12,11 @@
         <pubDate>Sun, 12 Nov 2023 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/</guid>
-        <description>&lt;h1 id=&#34;llama系列模型&#34;&gt;LLama系列模型&lt;/h1&gt;
-&lt;p&gt;llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。&lt;/p&gt;
-&lt;h1 id=&#34;llama2模型结构的主要改进&#34;&gt;LLama2模型结构的主要改进&lt;/h1&gt;
-&lt;h2 id=&#34;1-将layer_norm更换为rms_norm&#34;&gt;1. 将Layer_norm更换为RMS_norm&lt;/h2&gt;
-&lt;p&gt;在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。&lt;/p&gt;
+        <description>&lt;h1 id=&#34;llama系列模型&#34;&gt;LLama系列模型
+&lt;/h1&gt;&lt;p&gt;llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。&lt;/p&gt;
+&lt;h1 id=&#34;llama2模型结构的主要改进&#34;&gt;LLama2模型结构的主要改进
+&lt;/h1&gt;&lt;h2 id=&#34;1-将layer_norm更换为rms_norm&#34;&gt;1. 将Layer_norm更换为RMS_norm
+&lt;/h2&gt;&lt;p&gt;在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;经典layer norm计算公式如下：
 $$
@@ -72,11 +72,11 @@ $γ$是可学习的参数&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;output&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt; &lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;gama&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;2-q在与k相乘之前先使用rope进行位置编码&#34;&gt;2. Q在与K相乘之前，先使用RoPE进行位置编码&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope.png&#34;
+&lt;/div&gt;&lt;h2 id=&#34;2-q在与k相乘之前先使用rope进行位置编码&#34;&gt;2. Q在与K相乘之前，先使用RoPE进行位置编码
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope.png&#34;
 	width=&#34;1072&#34;
 	height=&#34;556&#34;
-	srcset=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope_hua244ea9e08212bfb4ed03f83d4a6738d_87886_480x0_resize_box_3.png 480w, https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope_hua244ea9e08212bfb4ed03f83d4a6738d_87886_1024x0_resize_box_3.png 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope_hu_496e396dc1efae10.png 480w, https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope_hu_7038d0f40a96deef.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;rope&#34;
@@ -239,11 +239,11 @@ $γ$是可学习的参数&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;c1&#34;&gt;# ......&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;3-引入kv-cache并采用group-query-attention&#34;&gt;3. 引入KV Cache，并采用Group Query Attention&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache.jpg&#34;
+&lt;/div&gt;&lt;h2 id=&#34;3-引入kv-cache并采用group-query-attention&#34;&gt;3. 引入KV Cache，并采用Group Query Attention
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache.jpg&#34;
 	width=&#34;1566&#34;
 	height=&#34;1054&#34;
-	srcset=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache_hu506057db48b1cfc262d6b7344f6873c4_145994_480x0_resize_q75_box.jpg 480w, https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache_hu506057db48b1cfc262d6b7344f6873c4_145994_1024x0_resize_q75_box.jpg 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache_hu_3645b72d9bd34c7c.jpg 480w, https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache_hu_66f5fb393d2e44d0.jpg 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;kv-cache&#34;
@@ -295,11 +295,11 @@ $γ$是可学习的参数&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;qkv&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;new_q&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;k&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;v&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;4-用silu激活函数代替relugelu&#34;&gt;4. 用SiLU激活函数代替RELU/GELU&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun.png&#34;
+&lt;/div&gt;&lt;h2 id=&#34;4-用silu激活函数代替relugelu&#34;&gt;4. 用SiLU激活函数代替RELU/GELU
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun.png&#34;
 	width=&#34;720&#34;
 	height=&#34;561&#34;
-	srcset=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu1bf631b7966cd0dd3d56cd597aac1f28_72453_480x0_resize_box_3.png 480w, https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu1bf631b7966cd0dd3d56cd597aac1f28_72453_1024x0_resize_box_3.png 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu_a790dfa302c41e16.png 480w, https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu_2555c5097e34cad.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;act fun&#34;
@@ -318,11 +318,11 @@ $$&lt;/p&gt;
 \sigma (x) = \frac{1} {1 + e^{-x} }
 $$&lt;/p&gt;
 &lt;p&gt;其中，$σ$是&lt;code&gt;Sigmoid&lt;/code&gt;函数， $\beta$ 是一个参数，上图为$β=0.5$时的函数图像。当$β=1$时，Swish函数就是SiLU函数。&lt;/p&gt;
-&lt;h2 id=&#34;5-使用分组查询注意力-grouped-query-attention-gqa&#34;&gt;5. 使用分组查询注意力 (Grouped Query Attention, GQA)&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa.png&#34;
+&lt;h2 id=&#34;5-使用分组查询注意力-grouped-query-attention-gqa&#34;&gt;5. 使用分组查询注意力 (Grouped Query Attention, GQA)
+&lt;/h2&gt;&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa.png&#34;
 	width=&#34;1080&#34;
 	height=&#34;349&#34;
-	srcset=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu4b2c50f6cc9ed5691ca0aeb990bfde87_51507_480x0_resize_box_3.png 480w, https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu4b2c50f6cc9ed5691ca0aeb990bfde87_51507_1024x0_resize_box_3.png 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu_e6d76a16c47c4f53.png 480w, https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu_63d05b014e02fe0a.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;maq_gqa&#34;

@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='lock_guard&amp;lt;mutex&amp;gt; lock(my_mutex) 它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;
-unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级加强版，它具有 lock_guard 的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock
-条件变量（condition_variable）唤醒阻塞线程的方式： notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争
-示例1 1 2 3 4 5 6 7 8 9 10 //mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的 //condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计 //condition_variable一般和互斥量一起使用 mutex mtx; //手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁 mtx.lock(); //代码段 ...直接使用mutex的加锁功能，能实现简单的互斥， ...mtx被其他线程lock之后，当前线程会阻塞，直到其他线程unlock，所有的阻塞进程会竞争该锁 ... mtx.unlock() 示例2 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 #include &amp;lt;iostream&amp;gt; #include &amp;lt;thread&amp;gt; #include &amp;lt;mutex&amp;gt; #include &amp;lt;deque&amp;gt; #include &amp;lt;condition_variable&amp;gt; #include &amp;lt;atomic&amp;gt; using namespace std; //是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量 //volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据 //而不是从编译器优化后的寄存器中读取，防止出现不一致的情况 volatile atomic_bool loop(true); class MsgList { private: deque&amp;lt;int&amp;gt; msg_queue; mutex mtx; condition_variable cond_var; public: void notify_all() { cond_var.'><title>C&#43;&#43;多线程及同步</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content=" lock_guard&lt;mutex&gt; lock(my_mutex) 它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;\nunique_lock\u00a0&lt;mutex&gt; lock(my_mutex)，是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock\n条件变量（condition_variable）唤醒阻塞线程的方式： notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争\n示例1 1 2 3 4 5 6 7 8 9 10 //mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的 //condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计 //condition_variable一般和互斥量一起使用 mutex mtx; //手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁 mtx.lock(); //代码段 ...直接使用mutex的加锁功能，能实现简单的互斥， ...mtx被其他线程lock之后，当前线程会阻塞，直到其他线程unlock，所有的阻塞进程会竞争该锁 ... mtx.unlock() 示例2 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 #include\u00a0&lt;iostream&gt; #include\u00a0&lt;thread&gt; #include\u00a0&lt;mutex&gt; #include\u00a0&lt;deque&gt; #include\u00a0&lt;condition_variable&gt; #include\u00a0&lt;atomic&gt; using\u00a0namespace\u00a0std; //是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量 //volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据 //而不是从编译器优化后的寄存器中读取，防止出现不一致的情况 volatile\u00a0atomic_bool\u00a0loop(true);\u00a0class\u00a0MsgList { private: deque&lt;int&gt;\u00a0msg_queue; mutex\u00a0mtx; condition_variable\u00a0cond_var; public: void\u00a0notify_all() { cond_var.notify_all(); } void\u00a0write_msg() { unique_lock&lt;mutex&gt;\u00a0lock(mtx); //锁的作用域：整个函数，函数返回后自动释放 for\u00a0(size_t\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a05;\u00a0++i) { msg_queue.push_back(i); } //全部数据写入后，唤醒一个阻塞的线程 //notify_all()唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 //这里用notify_one()，唤醒的顺序是阻塞的顺序，先阻塞先唤醒，后阻塞后唤醒，没有竞争 cond_var.notify_one(); } /* lock_guard对象时，它将尝试获取提供给它的互斥锁的所有权。 当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量; unique_lock\u00a0是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能， 同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要; condition_variable\u00a0条件变量需要该类型的锁作为参数，必须使用unique_lock */ void\u00a0read_msg() { /* 在这个例子中，如果不用condition_variable，下面的代码是等价的： void\u00a0read_msg(){ while\u00a0(loop){\u00a0//死循环 unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//加锁 while\u00a0(!msg_queue.empty()){\u00a0//不为空 //do\u00a0something } } } 这种写法存在的问题是： 当写线程没有数据的写入的时候（队列始终为空），所有的读线程会一直循环加锁、检测队列是否为空，造成CPU资源浪费 所以就有了下面的条件变量 */ while\u00a0(loop) { unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//实现对{}内的代码段实现能自动上锁和自动解锁，look是自定义的变量名称，在离开作用域时会析构（既是解锁） cond_var.wait(lock,\u00a0[this]()\u00a0-&gt;\u00a0bool\u00a0{\u00a0return\u00a0!msg_queue.empty()\u00a0||\u00a0!loop;\u00a0}\u00a0); //调用wait函数： //1.如果只有第一个参数，先解锁lock，然后将当前线程添加到当前condition_variable对象的等待线程列表中 //当前线程将继续阻塞，直到另外某个线程调用\u00a0notify_*\u00a0唤醒了当前线程，wait函数自动重新上锁并返回，继续执行下面的代码 //2.如果有第二个参数（是一个返回值为bool的可调用对象，这里用匿名函数） //先解锁、阻塞和1是一样的，当前线程被其他线程唤醒后，再判可调用对象的返回值(bool),如果为fals, //如果返回true（这里是队列不为空返回true），wait函数自动重新上锁并返回，继续执行下面的代码 //这里的!loop是判断是否要退出循环的，loop为false，\u00a0!lopp为true，则会执行下面的break代码，退出死循环，结束线程 //在第二个参数中，还可以判断读线程的个数，既是允许最大的读线程个数（限制资源的用户量） //wait函数总结就是，先解锁和阻塞，等唤醒；如果有第二个参数，被唤醒后，再判断第一个参数的返回值来决定继续阻塞，还是wait函数返回并执行下面的代码 if\u00a0(!loop)\u00a0break; cout\u00a0&lt;&lt;\u00a0endl&lt;&lt;\u00a0&#34;thread\u00a0id:\u00a0&#34;\u00a0&lt;&lt;\u00a0this_thread::get_id()\u00a0&lt;&lt;\u00a0&#34;\u00a0;\u00a0出队元素:&#34;; while\u00a0(!msg_queue.empty())\u00a0//将队列元素全部出队 { int\u00a0tmp\u00a0=\u00a0msg_queue.front(); msg_queue.pop_front(); cout\u00a0&lt;&lt;\u00a0tmp\u00a0&lt;&lt;\u00a0&#39;\u00a0&#39;;\u00a0} }\u00a0} MsgList(/*\u00a0args\u00a0*/){}; ~MsgList(){}; }; int\u00a0main() { MsgList\u00a0mlist; int\u00a0read_thread_num\u00a0=\u00a05;\u00a0//5个读线程 thread\u00a0read_threads[read_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0{ read_threads[i]\u00a0=\u00a0thread(&amp;MsgList::read_msg,\u00a0&amp;mlist);\u00a0//第一个参数是函数指针（函数的地址），第二个参数是函数的参数，这里是一个实例化的对象的地址 //让这个线程去执行这个实例化的对象的函数 } int\u00a0write_thread_num\u00a0=\u00a050;\u00a0//50个写线程，一次性的 thread\u00a0write_threads[write_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i) { write_threads[i]\u00a0=\u00a0thread(&amp;MsgList::write_msg,\u00a0&amp;mlist); //\u00a0write_threads[i].join(); this_thread::sleep_for(chrono::milliseconds(20));\u00a0//主线程休眠20ms } for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i)\u00a0write_threads[i].join();\u00a0//等待所有的写线程结束 loop\u00a0=\u00a0false;\u00a0//设置loop为false，\u00a0退出循环 mlist.notify_all();\u00a0//唤醒所有的阻塞的线程，退出循环,结束线程 for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0read_threads[i].join();\u00a0//等待所有的读线程结束 return\u00a00; } ">
+<title>C&#43;&#43;多线程及同步</title>
 
 <link rel='canonical' href='https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E5%90%8C%E6%AD%A5/'>
 
-<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='C&#43;&#43;多线程及同步'>
-<meta property='og:description' content='lock_guard&amp;lt;mutex&amp;gt; lock(my_mutex) 它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;
-unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级加强版，它具有 lock_guard 的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock
-条件变量（condition_variable）唤醒阻塞线程的方式： notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争
-示例1 1 2 3 4 5 6 7 8 9 10 //mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的 //condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计 //condition_variable一般和互斥量一起使用 mutex mtx; //手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁 mtx.lock(); //代码段 ...直接使用mutex的加锁功能，能实现简单的互斥， ...mtx被其他线程lock之后，当前线程会阻塞，直到其他线程unlock，所有的阻塞进程会竞争该锁 ... mtx.unlock() 示例2 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 #include &amp;lt;iostream&amp;gt; #include &amp;lt;thread&amp;gt; #include &amp;lt;mutex&amp;gt; #include &amp;lt;deque&amp;gt; #include &amp;lt;condition_variable&amp;gt; #include &amp;lt;atomic&amp;gt; using namespace std; //是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量 //volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据 //而不是从编译器优化后的寄存器中读取，防止出现不一致的情况 volatile atomic_bool loop(true); class MsgList { private: deque&amp;lt;int&amp;gt; msg_queue; mutex mtx; condition_variable cond_var; public: void notify_all() { cond_var.'>
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="C++多线程及同步">
+<meta property='og:description' content=" lock_guard&lt;mutex&gt; lock(my_mutex) 它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;\nunique_lock\u00a0&lt;mutex&gt; lock(my_mutex)，是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock\n条件变量（condition_variable）唤醒阻塞线程的方式： notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争\n示例1 1 2 3 4 5 6 7 8 9 10 //mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的 //condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计 //condition_variable一般和互斥量一起使用 mutex mtx; //手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁 mtx.lock(); //代码段 ...直接使用mutex的加锁功能，能实现简单的互斥， ...mtx被其他线程lock之后，当前线程会阻塞，直到其他线程unlock，所有的阻塞进程会竞争该锁 ... mtx.unlock() 示例2 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 #include\u00a0&lt;iostream&gt; #include\u00a0&lt;thread&gt; #include\u00a0&lt;mutex&gt; #include\u00a0&lt;deque&gt; #include\u00a0&lt;condition_variable&gt; #include\u00a0&lt;atomic&gt; using\u00a0namespace\u00a0std; //是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量 //volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据 //而不是从编译器优化后的寄存器中读取，防止出现不一致的情况 volatile\u00a0atomic_bool\u00a0loop(true);\u00a0class\u00a0MsgList { private: deque&lt;int&gt;\u00a0msg_queue; mutex\u00a0mtx; condition_variable\u00a0cond_var; public: void\u00a0notify_all() { cond_var.notify_all(); } void\u00a0write_msg() { unique_lock&lt;mutex&gt;\u00a0lock(mtx); //锁的作用域：整个函数，函数返回后自动释放 for\u00a0(size_t\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a05;\u00a0++i) { msg_queue.push_back(i); } //全部数据写入后，唤醒一个阻塞的线程 //notify_all()唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 //这里用notify_one()，唤醒的顺序是阻塞的顺序，先阻塞先唤醒，后阻塞后唤醒，没有竞争 cond_var.notify_one(); } /* lock_guard对象时，它将尝试获取提供给它的互斥锁的所有权。 当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量; unique_lock\u00a0是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能， 同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要; condition_variable\u00a0条件变量需要该类型的锁作为参数，必须使用unique_lock */ void\u00a0read_msg() { /* 在这个例子中，如果不用condition_variable，下面的代码是等价的： void\u00a0read_msg(){ while\u00a0(loop){\u00a0//死循环 unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//加锁 while\u00a0(!msg_queue.empty()){\u00a0//不为空 //do\u00a0something } } } 这种写法存在的问题是： 当写线程没有数据的写入的时候（队列始终为空），所有的读线程会一直循环加锁、检测队列是否为空，造成CPU资源浪费 所以就有了下面的条件变量 */ while\u00a0(loop) { unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//实现对{}内的代码段实现能自动上锁和自动解锁，look是自定义的变量名称，在离开作用域时会析构（既是解锁） cond_var.wait(lock,\u00a0[this]()\u00a0-&gt;\u00a0bool\u00a0{\u00a0return\u00a0!msg_queue.empty()\u00a0||\u00a0!loop;\u00a0}\u00a0); //调用wait函数： //1.如果只有第一个参数，先解锁lock，然后将当前线程添加到当前condition_variable对象的等待线程列表中 //当前线程将继续阻塞，直到另外某个线程调用\u00a0notify_*\u00a0唤醒了当前线程，wait函数自动重新上锁并返回，继续执行下面的代码 //2.如果有第二个参数（是一个返回值为bool的可调用对象，这里用匿名函数） //先解锁、阻塞和1是一样的，当前线程被其他线程唤醒后，再判可调用对象的返回值(bool),如果为fals, //如果返回true（这里是队列不为空返回true），wait函数自动重新上锁并返回，继续执行下面的代码 //这里的!loop是判断是否要退出循环的，loop为false，\u00a0!lopp为true，则会执行下面的break代码，退出死循环，结束线程 //在第二个参数中，还可以判断读线程的个数，既是允许最大的读线程个数（限制资源的用户量） //wait函数总结就是，先解锁和阻塞，等唤醒；如果有第二个参数，被唤醒后，再判断第一个参数的返回值来决定继续阻塞，还是wait函数返回并执行下面的代码 if\u00a0(!loop)\u00a0break; cout\u00a0&lt;&lt;\u00a0endl&lt;&lt;\u00a0&#34;thread\u00a0id:\u00a0&#34;\u00a0&lt;&lt;\u00a0this_thread::get_id()\u00a0&lt;&lt;\u00a0&#34;\u00a0;\u00a0出队元素:&#34;; while\u00a0(!msg_queue.empty())\u00a0//将队列元素全部出队 { int\u00a0tmp\u00a0=\u00a0msg_queue.front(); msg_queue.pop_front(); cout\u00a0&lt;&lt;\u00a0tmp\u00a0&lt;&lt;\u00a0&#39;\u00a0&#39;;\u00a0} }\u00a0} MsgList(/*\u00a0args\u00a0*/){}; ~MsgList(){}; }; int\u00a0main() { MsgList\u00a0mlist; int\u00a0read_thread_num\u00a0=\u00a05;\u00a0//5个读线程 thread\u00a0read_threads[read_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0{ read_threads[i]\u00a0=\u00a0thread(&amp;MsgList::read_msg,\u00a0&amp;mlist);\u00a0//第一个参数是函数指针（函数的地址），第二个参数是函数的参数，这里是一个实例化的对象的地址 //让这个线程去执行这个实例化的对象的函数 } int\u00a0write_thread_num\u00a0=\u00a050;\u00a0//50个写线程，一次性的 thread\u00a0write_threads[write_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i) { write_threads[i]\u00a0=\u00a0thread(&amp;MsgList::write_msg,\u00a0&amp;mlist); //\u00a0write_threads[i].join(); this_thread::sleep_for(chrono::milliseconds(20));\u00a0//主线程休眠20ms } for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i)\u00a0write_threads[i].join();\u00a0//等待所有的写线程结束 loop\u00a0=\u00a0false;\u00a0//设置loop为false，\u00a0退出循环 mlist.notify_all();\u00a0//唤醒所有的阻塞的线程，退出循环,结束线程 for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0read_threads[i].join();\u00a0//等待所有的读线程结束 return\u00a00; } ">
 <meta property='og:url' content='https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E5%90%8C%E6%AD%A5/'>
 <meta property='og:site_name' content='Charent的博客'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2020-10-09T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2020-10-09T00:00:00&#43;00:00'/>
-<meta name="twitter:title" content="C&#43;&#43;多线程及同步">
-<meta name="twitter:description" content="lock_guard&amp;lt;mutex&amp;gt; lock(my_mutex) 它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;
-unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级加强版，它具有 lock_guard 的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock
-条件变量（condition_variable）唤醒阻塞线程的方式： notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争
-示例1 1 2 3 4 5 6 7 8 9 10 //mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的 //condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计 //condition_variable一般和互斥量一起使用 mutex mtx; //手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁 mtx.lock(); //代码段 ...直接使用mutex的加锁功能，能实现简单的互斥， ...mtx被其他线程lock之后，当前线程会阻塞，直到其他线程unlock，所有的阻塞进程会竞争该锁 ... mtx.unlock() 示例2 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 #include &amp;lt;iostream&amp;gt; #include &amp;lt;thread&amp;gt; #include &amp;lt;mutex&amp;gt; #include &amp;lt;deque&amp;gt; #include &amp;lt;condition_variable&amp;gt; #include &amp;lt;atomic&amp;gt; using namespace std; //是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量 //volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据 //而不是从编译器优化后的寄存器中读取，防止出现不一致的情况 volatile atomic_bool loop(true); class MsgList { private: deque&amp;lt;int&amp;gt; msg_queue; mutex mtx; condition_variable cond_var; public: void notify_all() { cond_var.">
+<meta name="twitter:title" content="C++多线程及同步">
+<meta name="twitter:description" content=" lock_guard&lt;mutex&gt; lock(my_mutex) 它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;\nunique_lock\u00a0&lt;mutex&gt; lock(my_mutex)，是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock\n条件变量（condition_variable）唤醒阻塞线程的方式： notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争\n示例1 1 2 3 4 5 6 7 8 9 10 //mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的 //condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计 //condition_variable一般和互斥量一起使用 mutex mtx; //手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁 mtx.lock(); //代码段 ...直接使用mutex的加锁功能，能实现简单的互斥， ...mtx被其他线程lock之后，当前线程会阻塞，直到其他线程unlock，所有的阻塞进程会竞争该锁 ... mtx.unlock() 示例2 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 #include\u00a0&lt;iostream&gt; #include\u00a0&lt;thread&gt; #include\u00a0&lt;mutex&gt; #include\u00a0&lt;deque&gt; #include\u00a0&lt;condition_variable&gt; #include\u00a0&lt;atomic&gt; using\u00a0namespace\u00a0std; //是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量 //volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据 //而不是从编译器优化后的寄存器中读取，防止出现不一致的情况 volatile\u00a0atomic_bool\u00a0loop(true);\u00a0class\u00a0MsgList { private: deque&lt;int&gt;\u00a0msg_queue; mutex\u00a0mtx; condition_variable\u00a0cond_var; public: void\u00a0notify_all() { cond_var.notify_all(); } void\u00a0write_msg() { unique_lock&lt;mutex&gt;\u00a0lock(mtx); //锁的作用域：整个函数，函数返回后自动释放 for\u00a0(size_t\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a05;\u00a0++i) { msg_queue.push_back(i); } //全部数据写入后，唤醒一个阻塞的线程 //notify_all()唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 //这里用notify_one()，唤醒的顺序是阻塞的顺序，先阻塞先唤醒，后阻塞后唤醒，没有竞争 cond_var.notify_one(); } /* lock_guard对象时，它将尝试获取提供给它的互斥锁的所有权。 当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量; unique_lock\u00a0是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能， 同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要; condition_variable\u00a0条件变量需要该类型的锁作为参数，必须使用unique_lock */ void\u00a0read_msg() { /* 在这个例子中，如果不用condition_variable，下面的代码是等价的： void\u00a0read_msg(){ while\u00a0(loop){\u00a0//死循环 unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//加锁 while\u00a0(!msg_queue.empty()){\u00a0//不为空 //do\u00a0something } } } 这种写法存在的问题是： 当写线程没有数据的写入的时候（队列始终为空），所有的读线程会一直循环加锁、检测队列是否为空，造成CPU资源浪费 所以就有了下面的条件变量 */ while\u00a0(loop) { unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//实现对{}内的代码段实现能自动上锁和自动解锁，look是自定义的变量名称，在离开作用域时会析构（既是解锁） cond_var.wait(lock,\u00a0[this]()\u00a0-&gt;\u00a0bool\u00a0{\u00a0return\u00a0!msg_queue.empty()\u00a0||\u00a0!loop;\u00a0}\u00a0); //调用wait函数： //1.如果只有第一个参数，先解锁lock，然后将当前线程添加到当前condition_variable对象的等待线程列表中 //当前线程将继续阻塞，直到另外某个线程调用\u00a0notify_*\u00a0唤醒了当前线程，wait函数自动重新上锁并返回，继续执行下面的代码 //2.如果有第二个参数（是一个返回值为bool的可调用对象，这里用匿名函数） //先解锁、阻塞和1是一样的，当前线程被其他线程唤醒后，再判可调用对象的返回值(bool),如果为fals, //如果返回true（这里是队列不为空返回true），wait函数自动重新上锁并返回，继续执行下面的代码 //这里的!loop是判断是否要退出循环的，loop为false，\u00a0!lopp为true，则会执行下面的break代码，退出死循环，结束线程 //在第二个参数中，还可以判断读线程的个数，既是允许最大的读线程个数（限制资源的用户量） //wait函数总结就是，先解锁和阻塞，等唤醒；如果有第二个参数，被唤醒后，再判断第一个参数的返回值来决定继续阻塞，还是wait函数返回并执行下面的代码 if\u00a0(!loop)\u00a0break; cout\u00a0&lt;&lt;\u00a0endl&lt;&lt;\u00a0&#34;thread\u00a0id:\u00a0&#34;\u00a0&lt;&lt;\u00a0this_thread::get_id()\u00a0&lt;&lt;\u00a0&#34;\u00a0;\u00a0出队元素:&#34;; while\u00a0(!msg_queue.empty())\u00a0//将队列元素全部出队 { int\u00a0tmp\u00a0=\u00a0msg_queue.front(); msg_queue.pop_front(); cout\u00a0&lt;&lt;\u00a0tmp\u00a0&lt;&lt;\u00a0&#39;\u00a0&#39;;\u00a0} }\u00a0} MsgList(/*\u00a0args\u00a0*/){}; ~MsgList(){}; }; int\u00a0main() { MsgList\u00a0mlist; int\u00a0read_thread_num\u00a0=\u00a05;\u00a0//5个读线程 thread\u00a0read_threads[read_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0{ read_threads[i]\u00a0=\u00a0thread(&amp;MsgList::read_msg,\u00a0&amp;mlist);\u00a0//第一个参数是函数指针（函数的地址），第二个参数是函数的参数，这里是一个实例化的对象的地址 //让这个线程去执行这个实例化的对象的函数 } int\u00a0write_thread_num\u00a0=\u00a050;\u00a0//50个写线程，一次性的 thread\u00a0write_threads[write_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i) { write_threads[i]\u00a0=\u00a0thread(&amp;MsgList::write_msg,\u00a0&amp;mlist); //\u00a0write_threads[i].join(); this_thread::sleep_for(chrono::milliseconds(20));\u00a0//主线程休眠20ms } for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i)\u00a0write_threads[i].join();\u00a0//等待所有的写线程结束 loop\u00a0=\u00a0false;\u00a0//设置loop为false，\u00a0退出循环 mlist.notify_all();\u00a0//唤醒所有的阻塞的线程，退出循环,结束线程 for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0read_threads[i].join();\u00a0//等待所有的读线程结束 return\u00a00; } ">
     </head>
     <body class="
     article-page
@@ -64,8 +56,8 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
                     
                     
                         
-                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
                 </a>
@@ -80,13 +72,14 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
             <h1 class="site-name"><a href="/">Charent的博客</a></h1>
             <h2 class="site-description">不积硅步，无以至千里</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/charent'
                         target="_blank"
                         title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -105,7 +98,6 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -126,7 +118,6 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
         </li>
         
         
-
         <li >
             <a href='/archives/' >
                 
@@ -147,7 +138,6 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
         </li>
         
         
-
         <li >
             <a href='/search/' >
                 
@@ -167,7 +157,6 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
         </li>
         
         
-
         <li >
             <a href='/%E5%85%B3%E4%BA%8E/' >
                 
@@ -186,10 +175,11 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -200,19 +190,20 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://charent.github.io/" selected>中文</option>
-                        
-                            <option value="https://charent.github.io/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -220,7 +211,7 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -228,13 +219,17 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -262,6 +257,9 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -284,6 +282,7 @@ unique_lock &amp;lt;mutex&amp;gt; lock(my_mutex)，是 lock_guard 的升级�
 
     
 </div>
+
 </header>
 
     <section class="article-content">
@@ -608,26 +607,29 @@ notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有�
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
     window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
             delimiters: [
                 { left: "$$", right: "$$", display: true },
                 { left: "$", right: "$", display: false },
                 { left: "\\(", right: "\\)", display: false },
                 { left: "\\[", right: "\\]", display: true }
-            ]
+            ],
+            ignoredClasses: ["gist"]
         });})
 </script>
+
     
 </article>
 
@@ -635,9 +637,9 @@ notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有�
 
     
 
-<aside class="related-contents--wrapper">
+<aside class="related-content--wrapper">
     <h2 class="section-title">相关文章</h2>
-    <div class="related-contents">
+    <div class="related-content">
         <div class="flex article-list--tile">
             
                 
@@ -651,6 +653,7 @@ notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有�
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -663,6 +666,7 @@ notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有�
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -675,6 +679,7 @@ notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有�
         </div>
     </a>
 </article>
+
             
         </div>
     </div>
@@ -691,12 +696,12 @@ notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有�
         
             2018 - 
         
-        2024 Charent的博客
+        2025 Charent的博客
     </section>
     
     <section class="powerby">
-         <br />
-        
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 
@@ -773,21 +778,19 @@ notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有�
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
-    
-
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');

@@ -12,10 +12,9 @@
         <pubDate>Mon, 21 Aug 2023 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/parquet%E6%96%87%E4%BB%B6%E7%9A%84%E8%AF%BB%E5%86%99%E5%92%8C%E5%BE%AA%E7%8E%AF%E9%81%8D%E5%8E%86/</guid>
-        <description>&lt;h3 id=&#34;parquet文件介绍&#34;&gt;Parquet文件介绍&lt;/h3&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Parquet 是 Hadoop 生态圈中主流的列式存储格式，最早是由 Twitter 和 Cloudera 合作开发，2015 年 5 月从 Apache 孵化器里毕业成为 Apache 顶级项目。&lt;/p&gt;
-&lt;/blockquote&gt;
+        <description>&lt;h3 id=&#34;parquet文件介绍&#34;&gt;Parquet文件介绍
+&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;Parquet 是 Hadoop 生态圈中主流的列式存储格式，最早是由 Twitter 和 Cloudera 合作开发，2015 年 5 月从 Apache 孵化器里毕业成为 Apache 顶级项目。&lt;/p&gt;&lt;/blockquote&gt;
 &lt;p&gt;优点：&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;数据压缩比高，文件大小较小，适合网络传输;&lt;/li&gt;
@@ -23,8 +22,8 @@
 &lt;li&gt;I/O操作次数少，减少磁盘的使用率。&lt;/li&gt;
 &lt;li&gt;内存占用少，适合处理大数据集。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h3 id=&#34;读parquet文件&#34;&gt;读Parquet文件&lt;/h3&gt;
-&lt;ol&gt;
+&lt;h3 id=&#34;读parquet文件&#34;&gt;读Parquet文件
+&lt;/h3&gt;&lt;ol&gt;
 &lt;li&gt;&lt;code&gt;FastParquet&lt;/code&gt;读及遍历&lt;/li&gt;
 &lt;/ol&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;

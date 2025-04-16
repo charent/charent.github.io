@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='这是一个副标题'><title>机器学习特征选择之IV值计算</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="这是一个副标题">
+<title>机器学习特征选择之IV值计算</title>
 
 <link rel='canonical' href='https://charent.github.io/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/'>
 
-<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='机器学习特征选择之IV值计算'>
-<meta property='og:description' content='这是一个副标题'>
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="机器学习特征选择之IV值计算">
+<meta property='og:description' content="这是一个副标题">
 <meta property='og:url' content='https://charent.github.io/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/'>
 <meta property='og:site_name' content='Charent的博客'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2022-04-16T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2022-04-16T00:00:00&#43;00:00'/>
@@ -55,8 +56,8 @@
                     
                     
                         
-                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
                 </a>
@@ -71,13 +72,14 @@
             <h1 class="site-name"><a href="/">Charent的博客</a></h1>
             <h2 class="site-description">不积硅步，无以至千里</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/charent'
                         target="_blank"
                         title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,7 +98,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -117,7 +118,6 @@
         </li>
         
         
-
         <li >
             <a href='/archives/' >
                 
@@ -138,7 +138,6 @@
         </li>
         
         
-
         <li >
             <a href='/search/' >
                 
@@ -158,7 +157,6 @@
         </li>
         
         
-
         <li >
             <a href='/%E5%85%B3%E4%BA%8E/' >
                 
@@ -177,10 +175,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -191,19 +190,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://charent.github.io/" selected>中文</option>
-                        
-                            <option value="https://charent.github.io/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -211,7 +211,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -219,13 +219,55 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#前言">前言</a></li>
+    <li><a href="#iv值先验知识1分箱">IV值先验知识1：分箱</a></li>
+    <li><a href="#iv值先验知识2woe编码">IV值先验知识2：WOE编码</a>
+      <ol>
+        <li><a href="#qa为什么不直接使用原始数据中的连续变量而是先分箱为离散变量再将离散变量转换为连续变量woe编码">QA：为什么不直接使用原始数据中的连续变量，而是先分箱为离散变量，再将离散变量转换为连续变量WOE编码？</a></li>
+      </ol>
+    </li>
+    <li><a href="#iv值计算">IV值计算</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -257,6 +299,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -279,23 +324,24 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h2 id="前言">前言</h2>
-<p>  IV值（Information Value），信息价值指标，是评价一个特征好不好的指标之一。在金融风控领域广泛应用，尤其是在特征选择的场景下，会经常使用这个指标，特征选择得好不好，将直接影响模型的效果。</p>
+    <h2 id="前言">前言
+</h2><p>  IV值（Information Value），信息价值指标，是评价一个特征好不好的指标之一。在金融风控领域广泛应用，尤其是在特征选择的场景下，会经常使用这个指标，特征选择得好不好，将直接影响模型的效果。</p>
 <p>  在金融风控领域，我们处理的更多是二分类问题，即是判断一个账号黑账户还是白账户。风险识别模型的效果很大程度上取决于对黑账户特征的分析，分析的黑账户越多，特征经验越丰富，模型效果越好。但是如何挑选分析得到的特征呢？用什么样的标准去判断这个特征能不能用呢？最方便的方法当然是拿所有的特征去训练一个模型，看看特征重要性，但这不是本文讨论的内容，我们要在特征做完之后，立刻判断这个特征能不能用，而不是等所有特征做完再去看特征重要性。用IV值！</p>
-<h2 id="iv值先验知识1分箱">IV值先验知识1：分箱</h2>
-<p>  特征分箱主要是为了降低变量的复杂性和减少变量噪音对模型的影响，提高自变量和因变量的相关度，从而使模型更加稳定。</p>
+<h2 id="iv值先验知识1分箱">IV值先验知识1：分箱
+</h2><p>  特征分箱主要是为了降低变量的复杂性和减少变量噪音对模型的影响，提高自变量和因变量的相关度，从而使模型更加稳定。</p>
 <p>  监督学习中的分箱常用的有Split分箱和Merge分箱。</p>
 <ul>
 <li>Split 分箱是一段连续的值分为若干段离散的值，Split分箱和决策树比较相似，切分点的选择指标主要有信息熵、gini 指数等。比如，年龄可以分为 ≤18，19-24，25-35，35-54，≥55。</li>
 <li>Merge分箱则通过计算两个从小到大排序的数值的卡方值，将最小卡方值的相邻组合并为一组，再重新排序，重新计算卡方值，合并组，直到计算出的卡方值都不低于事先设定的阈值, 或者分组数达到一定的数量。</li>
 </ul>
-<h2 id="iv值先验知识2woe编码">IV值先验知识2：WOE编码</h2>
-<p>  分箱之后我们便得到了一系列的离散变量，接下来需要对变量进行编码，将离散变量转化为连续变量。WOE编码是评分卡模型常用的编码方式。<br>
+<h2 id="iv值先验知识2woe编码">IV值先验知识2：WOE编码
+</h2><p>  分箱之后我们便得到了一系列的离散变量，接下来需要对变量进行编码，将离散变量转化为连续变量。WOE编码是评分卡模型常用的编码方式。<br>
   WOE称为证据权重(weight of evidence)，是一种有监督的编码方式，将预测类别的集中度的属性作为编码的数值。对于自变量第 $i$ 箱的WOE值为：
 $$
 WOE_i = ln(\frac{P_{i_1}} {P_{i_0}} ) = ln(\frac {B_i / B_T} {
@@ -310,14 +356,13 @@ $$
   $B_T$ 是所有黑账户个数；<br>
   $G_T$ 是所有白账户个数。</p>
 <p>   变换以后可以看出，WOE也可以理解为当前分箱中黑账户和白账户的比值，和所有样本中这个比值的差异。WOE越大，这种差异越大，当前分组里的黑账户的可能性就越大，WOE越小，差异越小，这个分组里的样本响应的可能性就越小。当分箱中黑账户和白账户的比例等于样本中所有黑账户和白账户的比值时，说明这个分箱没有预测能力，即WOE=0。</p>
-<h3 id="qa为什么不直接使用原始数据中的连续变量而是先分箱为离散变量再将离散变量转换为连续变量woe编码">QA：为什么不直接使用原始数据中的连续变量，而是先分箱为离散变量，再将离散变量转换为连续变量WOE编码？</h3>
-<blockquote>
-<p>  WOE可以把相对于预测变量显现非线性的特征转换为线性。例如：很多黑账户的年龄在19-24岁，随着年龄的增长黑账户逐渐变小，黑账户数量（纵坐标，数值为黑账户占总账户比）和年龄是一个非线性的关系。分箱后转换为WOE编码，黑账户数量（纵坐标，数值为黑账户占总账户比）和WOE值呈线性关系。如下图所示，对于机器学习模型而言，线性关系更容易区分黑白账户。</p>
-</blockquote>
+<h3 id="qa为什么不直接使用原始数据中的连续变量而是先分箱为离散变量再将离散变量转换为连续变量woe编码">QA：为什么不直接使用原始数据中的连续变量，而是先分箱为离散变量，再将离散变量转换为连续变量WOE编码？
+</h3><blockquote>
+<p>  WOE可以把相对于预测变量显现非线性的特征转换为线性。例如：很多黑账户的年龄在19-24岁，随着年龄的增长黑账户逐渐变小，黑账户数量（纵坐标，数值为黑账户占总账户比）和年龄是一个非线性的关系。分箱后转换为WOE编码，黑账户数量（纵坐标，数值为黑账户占总账户比）和WOE值呈线性关系。如下图所示，对于机器学习模型而言，线性关系更容易区分黑白账户。</p></blockquote>
 <p><img src="/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/before_woe.png"
 	width="240"
 	height="204"
-	srcset="/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/before_woe_huf43de42c2f8c2ecec84dabaaee49e564_33528_480x0_resize_box_3.png 480w, /p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/before_woe_huf43de42c2f8c2ecec84dabaaee49e564_33528_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/before_woe_hu_7d6f9a8c5b314921.png 480w, /p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/before_woe_hu_aa2ae075814f10bc.png 1024w"
 	loading="lazy"
 	
 		alt="WOE变换前"
@@ -331,7 +376,7 @@ $$
 <p><img src="/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/after_woe.png"
 	width="240"
 	height="208"
-	srcset="/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/after_woe_hu817d1b854ba461d42c82dc778a618177_24034_480x0_resize_box_3.png 480w, /p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/after_woe_hu817d1b854ba461d42c82dc778a618177_24034_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/after_woe_hu_51a5f76a1be60090.png 480w, /p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/after_woe_hu_157eac1040cc0c8f.png 1024w"
 	loading="lazy"
 	
 		alt="WOE变换后"
@@ -342,8 +387,8 @@ $$
 		data-flex-basis="276px"
 	
 ></p>
-<h2 id="iv值计算">IV值计算</h2>
-<p>  特征变量中第 $i$ 个分箱对应的IV值的计算公式为：
+<h2 id="iv值计算">IV值计算
+</h2><p>  特征变量中第 $i$ 个分箱对应的IV值的计算公式为：
 $$
 IV_i = ( \frac{B_i} {B_T} - \frac{G_i} {G_T} ) \times ln(\frac {B_i / B_T} {
 G_i / G_T})   \
@@ -357,30 +402,30 @@ $$</p>
 IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑账户时，IV = +∞，当分箱中黑白账户比例等于整体黑白账户比例时，IV为0。</p>
 <p>IV值计算完成后，即可根据IV值的大小判断特征是否对有用（特征的预测能力是否强）。</p>
 <div class="table-wrapper"><table>
-<thead>
-<tr>
-<th>IV值范围</th>
-<th style="text-align:center">预测能力</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>＜0.02</td>
-<td style="text-align:center">无效特征，无预测能力</td>
-</tr>
-<tr>
-<td>[0.02, 0.10)</td>
-<td style="text-align:center">弱效果特征，预测能力弱</td>
-</tr>
-<tr>
-<td>[0.10, 0.50)</td>
-<td style="text-align:center">有效特征，预测能力中等</td>
-</tr>
-<tr>
-<td>≥0.50</td>
-<td style="text-align:center">强特征，预测能力强</td>
-</tr>
-</tbody>
+  <thead>
+      <tr>
+          <th>IV值范围</th>
+          <th style="text-align: center">预测能力</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>＜0.02</td>
+          <td style="text-align: center">无效特征，无预测能力</td>
+      </tr>
+      <tr>
+          <td>[0.02, 0.10)</td>
+          <td style="text-align: center">弱效果特征，预测能力弱</td>
+      </tr>
+      <tr>
+          <td>[0.10, 0.50)</td>
+          <td style="text-align: center">有效特征，预测能力中等</td>
+      </tr>
+      <tr>
+          <td>≥0.50</td>
+          <td style="text-align: center">强特征，预测能力强</td>
+      </tr>
+  </tbody>
 </table></div>
 
 </section>
@@ -395,26 +440,29 @@ IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑�
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
     window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
             delimiters: [
                 { left: "$$", right: "$$", display: true },
                 { left: "$", right: "$", display: false },
                 { left: "\\(", right: "\\)", display: false },
                 { left: "\\[", right: "\\]", display: true }
-            ]
+            ],
+            ignoredClasses: ["gist"]
         });})
 </script>
+
     
 </article>
 
@@ -422,9 +470,9 @@ IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑�
 
     
 
-<aside class="related-contents--wrapper">
+<aside class="related-content--wrapper">
     <h2 class="section-title">相关文章</h2>
-    <div class="related-contents">
+    <div class="related-content">
         <div class="flex article-list--tile">
             
                 
@@ -438,6 +486,7 @@ IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑�
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -450,6 +499,7 @@ IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑�
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -462,6 +512,7 @@ IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑�
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -474,6 +525,7 @@ IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑�
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -486,6 +538,7 @@ IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑�
         </div>
     </a>
 </article>
+
             
         </div>
     </div>
@@ -502,12 +555,12 @@ IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑�
         
             2018 - 
         
-        2024 Charent的博客
+        2025 Charent的博客
     </section>
     
     <section class="powerby">
-         <br />
-        
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 
@@ -584,59 +637,19 @@ IV值的取值范围是[0,+∞)，当分箱中只包含白账户或只包含黑�
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#前言">前言</a></li>
-    <li><a href="#iv值先验知识1分箱">IV值先验知识1：分箱</a></li>
-    <li><a href="#iv值先验知识2woe编码">IV值先验知识2：WOE编码</a>
-      <ol>
-        <li><a href="#qa为什么不直接使用原始数据中的连续变量而是先分箱为离散变量再将离散变量转换为连续变量woe编码">QA：为什么不直接使用原始数据中的连续变量，而是先分箱为离散变量，再将离散变量转换为连续变量WOE编码？</a></li>
-      </ol>
-    </li>
-    <li><a href="#iv值计算">IV值计算</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');

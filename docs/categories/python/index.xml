@@ -95,8 +95,8 @@
         <pubDate>Wed, 12 Sep 2018 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/condajupyterlab%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7/</guid>
-        <description>&lt;h3 id=&#34;conda&#34;&gt;conda&lt;/h3&gt;
-&lt;p&gt;创建环境:&lt;/p&gt;
+        <description>&lt;h3 id=&#34;conda&#34;&gt;conda
+&lt;/h3&gt;&lt;p&gt;创建环境:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -114,8 +114,8 @@
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;conda env remove --name py370
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;jupyter-lab&#34;&gt;jupyter-lab&lt;/h3&gt;
-&lt;p&gt;jupyter-lab默认使用base环境，如果想在创建notebook时使用自己其他的环境，执行以下命令即可。执行完要重启jupyter-lab&lt;/p&gt;
+&lt;/div&gt;&lt;h3 id=&#34;jupyter-lab&#34;&gt;jupyter-lab
+&lt;/h3&gt;&lt;p&gt;jupyter-lab默认使用base环境，如果想在创建notebook时使用自己其他的环境，执行以下命令即可。执行完要重启jupyter-lab&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1

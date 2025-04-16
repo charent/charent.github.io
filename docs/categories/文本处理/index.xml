@@ -12,11 +12,11 @@
         <pubDate>Tue, 17 Dec 2019 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/%E6%96%87%E6%9C%AC%E9%A2%84%E5%A4%84%E7%90%86%E4%B9%8Btfidf/</guid>
-        <description>&lt;h1 id=&#34;什么是tf-idf&#34;&gt;什么是TF-IDF？&lt;/h1&gt;
-&lt;p&gt;TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点&lt;/p&gt;
+        <description>&lt;h1 id=&#34;什么是tf-idf&#34;&gt;什么是TF-IDF？
+&lt;/h1&gt;&lt;p&gt;TFIDF全程叫做term frequency–inverse document frequency，翻译过来可以叫做文本频率与逆文档频率指数，TFIDF就是为了表征一个token（可以是一个字或者一个词）的重要程度，所以如果这个token出现的频数很高，会更重要一点&lt;/p&gt;
 &lt;p&gt;在文本挖掘的预处理中，向量化之后一般都伴随着TF-IDF的处理，那么什么是TF-IDF，为什么一般我们要加这一步预处理呢？这里就对TF-IDF的原理做一个总结。&lt;/p&gt;
-&lt;h1 id=&#34;文本向量化特征的不足&#34;&gt;文本向量化特征的不足&lt;/h1&gt;
-&lt;p&gt;在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：&lt;/p&gt;
+&lt;h1 id=&#34;文本向量化特征的不足&#34;&gt;文本向量化特征的不足
+&lt;/h1&gt;&lt;p&gt;在将文本分词并向量化后，我们可以得到词汇表中每个词在各个文本中形成的词向量，我们将下面4个短文本做了词频统计：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1

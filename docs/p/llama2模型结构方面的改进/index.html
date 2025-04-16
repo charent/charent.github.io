@@ -1,38 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='LLama系列模型 llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。
-LLama2模型结构的主要改进 1. 将Layer_norm更换为RMS_norm 在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。
-经典layer norm计算公式如下： $$ y = \frac {x - E(x)} {\sqrt{Var(x) &#43; \epsilon}} * \gamma &#43; \beta $$ $$ E(x) = \frac {1} {N} \sum^{N}_{i=0} {x_i} $$
-$$ Var(x) = \frac {1} {N} \sum^{N}_{i=0}{(x_i - E(x))^2} $$
-其中,$γ$和$β$是可学习的参数。分母加上一个极小的数$ε$防止分母为0。
-RMS norm其实是layer norm的变体，为了加快计算，省去了求均值的过程，也删除了偏置值$β$。 $$ y = \frac {x} { \sqrt {Mean(x^2) &#43; \epsilon}} * \gamma $$
-$$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参数
-1 2 3 4 5 6 7 8 9 10 11 12 13 class RMSNorm(torch.'><title>LLama2模型结构方面的改进</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="LLama系列模型 llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。\nLLama2模型结构的主要改进 1. 将Layer_norm更换为RMS_norm 在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。\n经典layer norm计算公式如下： $$ y = \\frac {x - E(x)} {\\sqrt{Var(x) + \\epsilon}} * \\gamma + \\beta $$ $$ E(x) = \\frac {1} {N} \\sum^{N}_{i=0} {x_i} $$\n$$ Var(x) = \\frac {1} {N} \\sum^{N}_{i=0}{(x_i - E(x))^2} $$\n其中,$γ$和$β$是可学习的参数。分母加上一个极小的数$ε$防止分母为0。\nRMS norm其实是layer norm的变体，为了加快计算，省去了求均值的过程，也删除了偏置值$β$。 $$ y = \\frac {x} { \\sqrt {Mean(x^2) + \\epsilon}} * \\gamma $$\n$$ Mean(x^2) = \\frac {1} {N} \\sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参数\n1 2 3 4 5 6 7 8 9 10 11 12 13 class RMSNorm(torch.nn.Module): def __init__(self, dim: int, eps: float = 1e-6): super().__init__() self.eps = eps # ε self.gama = nn.Parameter(torch.ones(dim)) #可学习参数γ \u200b def _norm(self, x): # RMSNorm return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps) \u200b def forward(self, x): output = self._norm(x.float()).type_as(x) return output * self.gama 2. Q在与K相乘之前，先使用RoPE进行位置编码 ">
+<title>LLama2模型结构方面的改进</title>
 
 <link rel='canonical' href='https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/'>
 
-<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='LLama2模型结构方面的改进'>
-<meta property='og:description' content='LLama系列模型 llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。
-LLama2模型结构的主要改进 1. 将Layer_norm更换为RMS_norm 在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。
-经典layer norm计算公式如下： $$ y = \frac {x - E(x)} {\sqrt{Var(x) &#43; \epsilon}} * \gamma &#43; \beta $$ $$ E(x) = \frac {1} {N} \sum^{N}_{i=0} {x_i} $$
-$$ Var(x) = \frac {1} {N} \sum^{N}_{i=0}{(x_i - E(x))^2} $$
-其中,$γ$和$β$是可学习的参数。分母加上一个极小的数$ε$防止分母为0。
-RMS norm其实是layer norm的变体，为了加快计算，省去了求均值的过程，也删除了偏置值$β$。 $$ y = \frac {x} { \sqrt {Mean(x^2) &#43; \epsilon}} * \gamma $$
-$$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参数
-1 2 3 4 5 6 7 8 9 10 11 12 13 class RMSNorm(torch.'>
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="LLama2模型结构方面的改进">
+<meta property='og:description' content="LLama系列模型 llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。\nLLama2模型结构的主要改进 1. 将Layer_norm更换为RMS_norm 在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。\n经典layer norm计算公式如下： $$ y = \\frac {x - E(x)} {\\sqrt{Var(x) + \\epsilon}} * \\gamma + \\beta $$ $$ E(x) = \\frac {1} {N} \\sum^{N}_{i=0} {x_i} $$\n$$ Var(x) = \\frac {1} {N} \\sum^{N}_{i=0}{(x_i - E(x))^2} $$\n其中,$γ$和$β$是可学习的参数。分母加上一个极小的数$ε$防止分母为0。\nRMS norm其实是layer norm的变体，为了加快计算，省去了求均值的过程，也删除了偏置值$β$。 $$ y = \\frac {x} { \\sqrt {Mean(x^2) + \\epsilon}} * \\gamma $$\n$$ Mean(x^2) = \\frac {1} {N} \\sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参数\n1 2 3 4 5 6 7 8 9 10 11 12 13 class RMSNorm(torch.nn.Module): def __init__(self, dim: int, eps: float = 1e-6): super().__init__() self.eps = eps # ε self.gama = nn.Parameter(torch.ones(dim)) #可学习参数γ \u200b def _norm(self, x): # RMSNorm return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps) \u200b def forward(self, x): output = self._norm(x.float()).type_as(x) return output * self.gama 2. Q在与K相乘之前，先使用RoPE进行位置编码 ">
 <meta property='og:url' content='https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/'>
 <meta property='og:site_name' content='Charent的博客'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2023-11-12T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2023-11-12T00:00:00&#43;00:00'/>
 <meta name="twitter:title" content="LLama2模型结构方面的改进">
-<meta name="twitter:description" content="LLama系列模型 llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。
-LLama2模型结构的主要改进 1. 将Layer_norm更换为RMS_norm 在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。
-经典layer norm计算公式如下： $$ y = \frac {x - E(x)} {\sqrt{Var(x) &#43; \epsilon}} * \gamma &#43; \beta $$ $$ E(x) = \frac {1} {N} \sum^{N}_{i=0} {x_i} $$
-$$ Var(x) = \frac {1} {N} \sum^{N}_{i=0}{(x_i - E(x))^2} $$
-其中,$γ$和$β$是可学习的参数。分母加上一个极小的数$ε$防止分母为0。
-RMS norm其实是layer norm的变体，为了加快计算，省去了求均值的过程，也删除了偏置值$β$。 $$ y = \frac {x} { \sqrt {Mean(x^2) &#43; \epsilon}} * \gamma $$
-$$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参数
-1 2 3 4 5 6 7 8 9 10 11 12 13 class RMSNorm(torch.">
+<meta name="twitter:description" content="LLama系列模型 llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。\nLLama2模型结构的主要改进 1. 将Layer_norm更换为RMS_norm 在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。\n经典layer norm计算公式如下： $$ y = \\frac {x - E(x)} {\\sqrt{Var(x) + \\epsilon}} * \\gamma + \\beta $$ $$ E(x) = \\frac {1} {N} \\sum^{N}_{i=0} {x_i} $$\n$$ Var(x) = \\frac {1} {N} \\sum^{N}_{i=0}{(x_i - E(x))^2} $$\n其中,$γ$和$β$是可学习的参数。分母加上一个极小的数$ε$防止分母为0。\nRMS norm其实是layer norm的变体，为了加快计算，省去了求均值的过程，也删除了偏置值$β$。 $$ y = \\frac {x} { \\sqrt {Mean(x^2) + \\epsilon}} * \\gamma $$\n$$ Mean(x^2) = \\frac {1} {N} \\sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参数\n1 2 3 4 5 6 7 8 9 10 11 12 13 class RMSNorm(torch.nn.Module): def __init__(self, dim: int, eps: float = 1e-6): super().__init__() self.eps = eps # ε self.gama = nn.Parameter(torch.ones(dim)) #可学习参数γ \u200b def _norm(self, x): # RMSNorm return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps) \u200b def forward(self, x): output = self._norm(x.float()).type_as(x) return output * self.gama 2. Q在与K相乘之前，先使用RoPE进行位置编码 ">
     </head>
     <body class="
     article-page
@@ -76,8 +56,8 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
                     
                     
                         
-                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
                 </a>
@@ -92,13 +72,14 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
             <h1 class="site-name"><a href="/">Charent的博客</a></h1>
             <h2 class="site-description">不积硅步，无以至千里</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/charent'
                         target="_blank"
                         title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -117,7 +98,6 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -138,7 +118,6 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
         </li>
         
         
-
         <li >
             <a href='/archives/' >
                 
@@ -159,7 +138,6 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
         </li>
         
         
-
         <li >
             <a href='/search/' >
                 
@@ -179,7 +157,6 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
         </li>
         
         
-
         <li >
             <a href='/%E5%85%B3%E4%BA%8E/' >
                 
@@ -198,10 +175,11 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -212,19 +190,20 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://charent.github.io/" selected>中文</option>
-                        
-                            <option value="https://charent.github.io/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -232,7 +211,7 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -240,13 +219,52 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#1-将layer_norm更换为rms_norm">1. 将Layer_norm更换为RMS_norm</a></li>
+    <li><a href="#2-q在与k相乘之前先使用rope进行位置编码">2. Q在与K相乘之前，先使用RoPE进行位置编码</a></li>
+    <li><a href="#3-引入kv-cache并采用group-query-attention">3. 引入KV Cache，并采用Group Query Attention</a></li>
+    <li><a href="#4-用silu激活函数代替relugelu">4. 用SiLU激活函数代替RELU/GELU</a></li>
+    <li><a href="#5-使用分组查询注意力-grouped-query-attention-gqa">5. 使用分组查询注意力 (Grouped Query Attention, GQA)</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -255,7 +273,7 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
     <header class="article-category">
         
             <a href="/categories/llm%E5%A4%A7%E6%A8%A1%E5%9E%8B/" >
-                llm大模型
+                Llm大模型
             </a>
         
     </header>
@@ -269,6 +287,9 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
         
     </div>
 
+    
+    
+    
     
     <footer class="article-time">
         
@@ -292,16 +313,17 @@ $$ Mean(x^2) = \frac {1} {N} \sum^{N}_{i=0}({x_i}^2) $$ $γ$是可学习的参�
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h1 id="llama系列模型">LLama系列模型</h1>
-<p>llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。</p>
-<h1 id="llama2模型结构的主要改进">LLama2模型结构的主要改进</h1>
-<h2 id="1-将layer_norm更换为rms_norm">1. 将Layer_norm更换为RMS_norm</h2>
-<p>在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。</p>
+    <h1 id="llama系列模型">LLama系列模型
+</h1><p>llama系列模型是闭源gpt3.5火爆之后开源的强大经典decoder-only模型，后面诞生的诸多llm多多少少都带有LLama的影子。</p>
+<h1 id="llama2模型结构的主要改进">LLama2模型结构的主要改进
+</h1><h2 id="1-将layer_norm更换为rms_norm">1. 将Layer_norm更换为RMS_norm
+</h2><p>在NLP模型中，归一化对模型训练过程中防止loss起飞有重要作用。</p>
 <ul>
 <li>经典layer norm计算公式如下：
 $$
@@ -357,11 +379,11 @@ $γ$是可学习的参数</p>
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">output</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gama</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="2-q在与k相乘之前先使用rope进行位置编码">2. Q在与K相乘之前，先使用RoPE进行位置编码</h2>
-<p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope.png"
+</div><h2 id="2-q在与k相乘之前先使用rope进行位置编码">2. Q在与K相乘之前，先使用RoPE进行位置编码
+</h2><p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope.png"
 	width="1072"
 	height="556"
-	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope_hua244ea9e08212bfb4ed03f83d4a6738d_87886_480x0_resize_box_3.png 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope_hua244ea9e08212bfb4ed03f83d4a6738d_87886_1024x0_resize_box_3.png 1024w"
+	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope_hu_496e396dc1efae10.png 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/rope_hu_7038d0f40a96deef.png 1024w"
 	loading="lazy"
 	
 		alt="rope"
@@ -524,11 +546,11 @@ $γ$是可学习的参数</p>
 </span></span><span class="line"><span class="cl">  <span class="c1"># ......</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="3-引入kv-cache并采用group-query-attention">3. 引入KV Cache，并采用Group Query Attention</h2>
-<p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache.jpg"
+</div><h2 id="3-引入kv-cache并采用group-query-attention">3. 引入KV Cache，并采用Group Query Attention
+</h2><p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache.jpg"
 	width="1566"
 	height="1054"
-	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache_hu506057db48b1cfc262d6b7344f6873c4_145994_480x0_resize_q75_box.jpg 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache_hu506057db48b1cfc262d6b7344f6873c4_145994_1024x0_resize_q75_box.jpg 1024w"
+	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache_hu_3645b72d9bd34c7c.jpg 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/kv-cache_hu_66f5fb393d2e44d0.jpg 1024w"
 	loading="lazy"
 	
 		alt="kv-cache"
@@ -580,11 +602,11 @@ $γ$是可学习的参数</p>
 </span></span><span class="line"><span class="cl">        <span class="n">qkv</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="4-用silu激活函数代替relugelu">4. 用SiLU激活函数代替RELU/GELU</h2>
-<p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun.png"
+</div><h2 id="4-用silu激活函数代替relugelu">4. 用SiLU激活函数代替RELU/GELU
+</h2><p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun.png"
 	width="720"
 	height="561"
-	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu1bf631b7966cd0dd3d56cd597aac1f28_72453_480x0_resize_box_3.png 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu1bf631b7966cd0dd3d56cd597aac1f28_72453_1024x0_resize_box_3.png 1024w"
+	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu_a790dfa302c41e16.png 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/act_fun_hu_2555c5097e34cad.png 1024w"
 	loading="lazy"
 	
 		alt="act fun"
@@ -603,11 +625,11 @@ $$</p>
 \sigma (x) = \frac{1} {1 + e^{-x} }
 $$</p>
 <p>其中，$σ$是<code>Sigmoid</code>函数， $\beta$ 是一个参数，上图为$β=0.5$时的函数图像。当$β=1$时，Swish函数就是SiLU函数。</p>
-<h2 id="5-使用分组查询注意力-grouped-query-attention-gqa">5. 使用分组查询注意力 (Grouped Query Attention, GQA)</h2>
-<p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa.png"
+<h2 id="5-使用分组查询注意力-grouped-query-attention-gqa">5. 使用分组查询注意力 (Grouped Query Attention, GQA)
+</h2><p><img src="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa.png"
 	width="1080"
 	height="349"
-	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu4b2c50f6cc9ed5691ca0aeb990bfde87_51507_480x0_resize_box_3.png 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu4b2c50f6cc9ed5691ca0aeb990bfde87_51507_1024x0_resize_box_3.png 1024w"
+	srcset="/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu_e6d76a16c47c4f53.png 480w, /p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/maq_gqa_hu_63d05b014e02fe0a.png 1024w"
 	loading="lazy"
 	
 		alt="maq_gqa"
@@ -855,26 +877,29 @@ $$</p>
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
     window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
             delimiters: [
                 { left: "$$", right: "$$", display: true },
                 { left: "$", right: "$", display: false },
                 { left: "\\(", right: "\\)", display: false },
                 { left: "\\[", right: "\\]", display: true }
-            ]
+            ],
+            ignoredClasses: ["gist"]
         });})
 </script>
+
     
 </article>
 
@@ -893,12 +918,12 @@ $$</p>
         
             2018 - 
         
-        2024 Charent的博客
+        2025 Charent的博客
     </section>
     
     <section class="powerby">
-         <br />
-        
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 
@@ -975,56 +1000,19 @@ $$</p>
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#1-将layer_norm更换为rms_norm">1. 将Layer_norm更换为RMS_norm</a></li>
-    <li><a href="#2-q在与k相乘之前先使用rope进行位置编码">2. Q在与K相乘之前，先使用RoPE进行位置编码</a></li>
-    <li><a href="#3-引入kv-cache并采用group-query-attention">3. 引入KV Cache，并采用Group Query Attention</a></li>
-    <li><a href="#4-用silu激活函数代替relugelu">4. 用SiLU激活函数代替RELU/GELU</a></li>
-    <li><a href="#5-使用分组查询注意力-grouped-query-attention-gqa">5. 使用分组查询注意力 (Grouped Query Attention, GQA)</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');

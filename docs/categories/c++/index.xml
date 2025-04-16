@@ -12,11 +12,11 @@
         <pubDate>Mon, 30 Oct 2023 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/</guid>
-        <description>&lt;h1 id=&#34;一个实现c快排的算法&#34;&gt;一个实现C++快排的算法&lt;/h1&gt;
-&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1.png&#34;
+        <description>&lt;h1 id=&#34;一个实现c快排的算法&#34;&gt;一个实现C++快排的算法
+&lt;/h1&gt;&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1.png&#34;
 	width=&#34;170&#34;
 	height=&#34;66&#34;
-	srcset=&#34;https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1_hud0630e01350383e78ce5fd3a764a49eb_4113_480x0_resize_box_3.png 480w, https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1_hud0630e01350383e78ce5fd3a764a49eb_4113_1024x0_resize_box_3.png 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1_hu_6361896a59d1ed7.png 480w, https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/1_hu_a46a163ded889b45.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;speed&#34;
@@ -255,8 +255,8 @@
         <pubDate>Tue, 27 Oct 2020 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/cpp%E4%BA%8C%E5%8F%89%E6%A0%91%E9%9D%9E%E9%80%92%E5%BD%92%E9%81%8D%E5%8E%86/</guid>
-        <description>&lt;h1 id=&#34;前序遍历&#34;&gt;前序遍历&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+        <description>&lt;h1 id=&#34;前序遍历&#34;&gt;前序遍历
+&lt;/h1&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
@@ -328,8 +328,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h1 id=&#34;中序遍历&#34;&gt;中序遍历&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;/div&gt;&lt;h1 id=&#34;中序遍历&#34;&gt;中序遍历
+&lt;/h1&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
@@ -407,8 +407,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h1 id=&#34;后序遍历&#34;&gt;后序遍历&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;/div&gt;&lt;h1 id=&#34;后序遍历&#34;&gt;后序遍历
+&lt;/h1&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
@@ -824,20 +824,20 @@ notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有�
         <pubDate>Sun, 27 Sep 2020 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/cpp%E5%9F%BA%E7%A1%80/</guid>
-        <description>&lt;h1 id=&#34;纯虚函数&#34;&gt;纯虚函数&lt;/h1&gt;
-&lt;ol&gt;
+        <description>&lt;h1 id=&#34;纯虚函数&#34;&gt;纯虚函数
+&lt;/h1&gt;&lt;ol&gt;
 &lt;li&gt;包含纯虚函数的类被称为抽象类。&lt;/li&gt;
 &lt;li&gt;抽象类中声明的纯虚函数必须在派生类中全部实现，否则编译不会通过。&lt;/li&gt;
 &lt;li&gt;抽象类无法声明对象。&lt;/li&gt;
 &lt;li&gt;仅含有纯虚函数而不含有任何其他成员函数和成员变量的类就叫做接口类。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h1 id=&#34;多进程&#34;&gt;多进程&lt;/h1&gt;
-&lt;p&gt;&lt;code&gt;fork&lt;/code&gt;: 子进程读的时候不复制父进程的数据，写的时候复制
+&lt;h1 id=&#34;多进程&#34;&gt;多进程
+&lt;/h1&gt;&lt;p&gt;&lt;code&gt;fork&lt;/code&gt;: 子进程读的时候不复制父进程的数据，写的时候复制
 &lt;code&gt;vfork&lt;/code&gt;:子进程和父进程共享数据，不复制
 参考：&lt;a class=&#34;link&#34; href=&#34;https://segmentfault.com/a/1190000003745529&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;https://segmentfault.com/a/1190000003745529&lt;/a&gt;&lt;/p&gt;
-&lt;h1 id=&#34;nt_maxint_min数值大小&#34;&gt;NT_MAX,INT_MIN数值大小&lt;/h1&gt;
-&lt;p&gt;因为int占4字节32位，根据二进制编码的规则，INT_MAX = 2^31-1，INT_MIN= -2^31.C/C++中，所有超过该限值的数，都会出现溢出，出现warning，但是并不会出现error。如果想表示的整数超过了该限值，可以使用长整型long long 占8字节64位。&lt;/p&gt;
+&lt;h1 id=&#34;nt_maxint_min数值大小&#34;&gt;NT_MAX,INT_MIN数值大小
+&lt;/h1&gt;&lt;p&gt;因为int占4字节32位，根据二进制编码的规则，INT_MAX = 2^31-1，INT_MIN= -2^31.C/C++中，所有超过该限值的数，都会出现溢出，出现warning，但是并不会出现error。如果想表示的整数超过了该限值，可以使用长整型long long 占8字节64位。&lt;/p&gt;
 &lt;p&gt;由于二进制编码按原码、补码和反码的规则进行运算，所有程序中对INT_MAX和INT_MIN的运算应当格外注意，在出现溢出的时候，不遵循数学规则。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;

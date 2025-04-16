@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>pytorch on Charent的博客</title>
+        <title>Pytorch on Charent的博客</title>
         <link>https://charent.github.io/categories/pytorch/</link>
-        <description>Recent content in pytorch on Charent的博客</description>
+        <description>Recent content in Pytorch on Charent的博客</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <lastBuildDate>Sun, 05 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://charent.github.io/categories/pytorch/index.xml" rel="self" type="application/rss+xml" /><item>
@@ -12,16 +12,16 @@
         <pubDate>Sun, 05 Nov 2023 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/pytorch%E5%8A%A0%E8%BD%BD%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%9B%86/</guid>
-        <description>&lt;h1 id=&#34;问题背景&#34;&gt;问题背景&lt;/h1&gt;
-&lt;p&gt;假设我们有一个很大的数据集（GB级别），需要加载到内存中，但是全部加载的话会导致内存爆炸。同时我们还要保证可以在训练的不同的epoch打乱数据，所以先打乱数据保存到文件，再一行一行（一个样本一个样本）加载进来行不通，而且一行一行加载会导致非常大的IO，速度还会变慢。&lt;/p&gt;
-&lt;h1 id=&#34;解决办法&#34;&gt;解决办法&lt;/h1&gt;
-&lt;ol&gt;
+        <description>&lt;h1 id=&#34;问题背景&#34;&gt;问题背景
+&lt;/h1&gt;&lt;p&gt;假设我们有一个很大的数据集（GB级别），需要加载到内存中，但是全部加载的话会导致内存爆炸。同时我们还要保证可以在训练的不同的epoch打乱数据，所以先打乱数据保存到文件，再一行一行（一个样本一个样本）加载进来行不通，而且一行一行加载会导致非常大的IO，速度还会变慢。&lt;/p&gt;
+&lt;h1 id=&#34;解决办法&#34;&gt;解决办法
+&lt;/h1&gt;&lt;ol&gt;
 &lt;li&gt;先把数据集转换为&lt;code&gt;parquet&lt;/code&gt;文件，这中个格式的好处是可以分块读取，有效降低磁盘IO。&lt;/li&gt;
 &lt;li&gt;在&lt;code&gt;torch&lt;/code&gt;数据集类&lt;code&gt;dataset&lt;/code&gt;中对&lt;code&gt;parquet&lt;/code&gt;文件循环，一次加载&lt;code&gt;N&lt;/code&gt;条数据到内存缓冲区中，对缓存中的N条数据执行打乱（shuffle）操作即可&lt;/li&gt;
 &lt;li&gt;为了实现每个&lt;code&gt;epoch&lt;/code&gt;都可以循环区数据集中的数据，可以使用&lt;code&gt;python&lt;/code&gt;的&lt;code&gt;yield&lt;/code&gt;特性实现迭代。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h1 id=&#34;代码示例&#34;&gt;代码示例&lt;/h1&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;h1 id=&#34;代码示例&#34;&gt;代码示例
+&lt;/h1&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;  1
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;  2
@@ -257,8 +257,8 @@
         <pubDate>Mon, 09 Oct 2023 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/pytorch%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%9B%86num_workers%E5%A4%A7%E4%BA%8E1%E5%86%85%E5%AD%98%E7%BC%93%E6%85%A2%E5%A2%9E%E6%B6%A8/</guid>
-        <description>&lt;h3 id=&#34;问题&#34;&gt;问题&lt;/h3&gt;
-&lt;p&gt;在用&lt;code&gt;dataloadaer&lt;/code&gt;加载数据集训练模型时，参数如下：&lt;/p&gt;
+        <description>&lt;h3 id=&#34;问题&#34;&gt;问题
+&lt;/h3&gt;&lt;p&gt;在用&lt;code&gt;dataloadaer&lt;/code&gt;加载数据集训练模型时，参数如下：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -282,8 +282,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;在训练过程中CPU内存缓慢增涨，训练一个epoch还没结束，60G内存就OOM了。&lt;/p&gt;
-&lt;h3 id=&#34;解决&#34;&gt;解决&lt;/h3&gt;
-&lt;p&gt;搜索后发现，&lt;code&gt;num_workers &amp;gt;= 2&lt;/code&gt;时，会把已经加载的batch数据缓存到CPU内存中，对于小数据集内存占用不明显，但是大数据集内存占用很可观。
+&lt;h3 id=&#34;解决&#34;&gt;解决
+&lt;/h3&gt;&lt;p&gt;搜索后发现，&lt;code&gt;num_workers &amp;gt;= 2&lt;/code&gt;时，会把已经加载的batch数据缓存到CPU内存中，对于小数据集内存占用不明显，但是大数据集内存占用很可观。
 设置&lt;code&gt;pin_memory=False&lt;/code&gt;和&lt;code&gt;num_workers=0&lt;/code&gt;后问题解决，但是num_workers=0会导致数据加载较慢，一个epoch会多消耗约30分钟，目前还没有特别好的解决方法。&lt;/p&gt;
 </description>
         </item>

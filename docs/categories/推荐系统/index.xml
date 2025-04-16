@@ -12,12 +12,12 @@
         <pubDate>Thu, 26 Dec 2019 00:00:00 +0000</pubDate>
         
         <guid>https://charent.github.io/p/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E8%A1%A1%E9%87%8F%E6%96%B9%E6%B3%95/</guid>
-        <description>&lt;h1 id=&#34;ab-test&#34;&gt;AB Test：&lt;/h1&gt;
-&lt;p&gt;A/B 测试是为Web或App界面或流程制作两个（A/B）或多个（A/B/n）版本，在同一时间维度，分别让组成成分相同（相似）的访客群组（目标人群）随机的访问这些版本，收集各群组的用户体验数据和业务数据，最后分析、评估出最好版本，正式采用。&lt;/p&gt;
-&lt;h1 id=&#34;点击通过率click-through-ratectr&#34;&gt;点击通过率（Click-through Rate，CTR）:&lt;/h1&gt;
-&lt;p&gt;一般指网络广告的点击到达率，即该广告的实际点击次数除以广告的展现量，即clicks/views。反映了网页上某一内容的受关注程度，常常用来衡量广告的吸引程度&lt;/p&gt;
-&lt;h1 id=&#34;roc曲线&#34;&gt;ROC曲线&lt;/h1&gt;
-&lt;p&gt;接受者操作特性曲线（receiver operating characteristic curve，简称ROC曲线）。曲线的横坐标为假阳性率（False Positive Rate, FPR）&lt;/p&gt;
+        <description>&lt;h1 id=&#34;ab-test&#34;&gt;AB Test：
+&lt;/h1&gt;&lt;p&gt;A/B 测试是为Web或App界面或流程制作两个（A/B）或多个（A/B/n）版本，在同一时间维度，分别让组成成分相同（相似）的访客群组（目标人群）随机的访问这些版本，收集各群组的用户体验数据和业务数据，最后分析、评估出最好版本，正式采用。&lt;/p&gt;
+&lt;h1 id=&#34;点击通过率click-through-ratectr&#34;&gt;点击通过率（Click-through Rate，CTR）:
+&lt;/h1&gt;&lt;p&gt;一般指网络广告的点击到达率，即该广告的实际点击次数除以广告的展现量，即clicks/views。反映了网页上某一内容的受关注程度，常常用来衡量广告的吸引程度&lt;/p&gt;
+&lt;h1 id=&#34;roc曲线&#34;&gt;ROC曲线
+&lt;/h1&gt;&lt;p&gt;接受者操作特性曲线（receiver operating characteristic curve，简称ROC曲线）。曲线的横坐标为假阳性率（False Positive Rate, FPR）&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -38,8 +38,8 @@ FP是N个负样本中被分类器预测为正样本的个数。
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
 &lt;/div&gt;&lt;p&gt;其中，P是真实正样本的个数，TP是P个正样本中被分类器预测为正样本的个数。&lt;/p&gt;
-&lt;h1 id=&#34;auc-roc曲线下方的面积大小&#34;&gt;AUC （ROC曲线下方的面积大小）：&lt;/h1&gt;
-&lt;p&gt;AUC（Area Under Curve）被定义为ROC曲线下与坐标轴围成的面积，显然这个面积的数值不会大于1。又由于ROC曲线一般都处于y=x这条直线的上方，所以AUC的取值范围在0.5和1之间。AUC越接近1.0，检测方法真实性越高;等于0.5时，则真实性最低，无应用价值。我们往往使用AUC值作为模型的评价标准是因为很多时候ROC曲线并不能清晰的说明哪个分类器的效果更好，而作为一个数值，对应AUC更大的分类器效果更好&lt;/p&gt;
+&lt;h1 id=&#34;auc-roc曲线下方的面积大小&#34;&gt;AUC （ROC曲线下方的面积大小）：
+&lt;/h1&gt;&lt;p&gt;AUC（Area Under Curve）被定义为ROC曲线下与坐标轴围成的面积，显然这个面积的数值不会大于1。又由于ROC曲线一般都处于y=x这条直线的上方，所以AUC的取值范围在0.5和1之间。AUC越接近1.0，检测方法真实性越高;等于0.5时，则真实性最低，无应用价值。我们往往使用AUC值作为模型的评价标准是因为很多时候ROC曲线并不能清晰的说明哪个分类器的效果更好，而作为一个数值，对应AUC更大的分类器效果更好&lt;/p&gt;
 </description>
         </item>
         <item>
@@ -62,8 +62,8 @@ FP是N个负样本中被分类器预测为正样本的个数。
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;set&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;map&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;lambda&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;],&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;n_movies&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;数据处理部分&#34;&gt;数据处理部分&lt;/h3&gt;
-&lt;ol&gt;
+&lt;/div&gt;&lt;h3 id=&#34;数据处理部分&#34;&gt;数据处理部分
+&lt;/h3&gt;&lt;ol&gt;
 &lt;li&gt;电影间的依赖关系：使用networkx随机生成有向无环图，共生成10个有向无环图，根据生成的图可以生成业务矩阵：&lt;/li&gt;
 &lt;/ol&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
@@ -99,7 +99,7 @@ FP是N个负样本中被分类器预测为正样本的个数。
 &lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1.png&#34;
 	width=&#34;440&#34;
 	height=&#34;251&#34;
-	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1_hu55904f10bf873e30e93cf3b36e8d850e_8825_480x0_resize_box_3.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1_hu55904f10bf873e30e93cf3b36e8d850e_8825_1024x0_resize_box_3.png 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1_hu_fe198683cf4ea9aa.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1_hu_2f9e86d8e97fb9f9.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;依赖图&#34;
@@ -110,8 +110,8 @@ FP是N个负样本中被分类器预测为正样本的个数。
 		data-flex-basis=&#34;420px&#34;
 	
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;数据处理过程&#34;&gt;数据处理过程&lt;/h3&gt;
-&lt;ol&gt;
+&lt;h3 id=&#34;数据处理过程&#34;&gt;数据处理过程
+&lt;/h3&gt;&lt;ol&gt;
 &lt;li&gt;电影选取：统计数据集中每部电影被用户交互过的次数，从大到小排序，从交互比较稠密的前200个电影中随机抽取152部。
 根据选取出的152部电影选出交互过这些电影是用户，如果用户交互过的所有电影的负样本的交集为空，则不选择该用户；并且，每个用户交互过的电影必须大于4个，防止用户交互信息过于稀疏。&lt;/li&gt;
 &lt;li&gt;生成用户行为数据：根据选出的用户和其交互过的电影信息，生成[用户id，业务id，评分，上一次交互id，时间戳] 格式的行为数据，上一层交互id不存在用-1代替，业务id即是152个电影id。&lt;/li&gt;
@@ -120,12 +120,12 @@ FP是N个负样本中被分类器预测为正样本的个数。
 &lt;li&gt;将电影标题使用bert_as_service生成1x768的句子向量，给定一个在一定单词数在一定范围内的句子，bert as service能生成该句子的1x768的向量。&lt;/li&gt;
 &lt;li&gt;编写DataInput类，用于将行为数据中的用户id和用户信息（职业性别等向量）、电影id和电影信息（电影类型、发行年份的one hot向量，bert句子向量等）关联起来，生成一条样本数据。编写next_batc()方法用于生产下一批次的样本数据，作为模型的输入，next_batc()函数用参数isTrain来判断当前的next batch是训练数据还是测试数据。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h4 id=&#34;模型部分&#34;&gt;模型部分&lt;/h4&gt;
-&lt;p&gt;模型如图所示
+&lt;h4 id=&#34;模型部分&#34;&gt;模型部分
+&lt;/h4&gt;&lt;p&gt;模型如图所示
 &lt;img src=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2.png&#34;
 	width=&#34;1174&#34;
 	height=&#34;695&#34;
-	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2_hu96c74fffb945ff6bdf3f8c0bc01f2484_49449_480x0_resize_box_3.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2_hu96c74fffb945ff6bdf3f8c0bc01f2484_49449_1024x0_resize_box_3.png 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2_hu_b1f52d948733733d.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2_hu_81c91fb078429739.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;模型&#34;
@@ -409,7 +409,7 @@ FP是N个负样本中被分类器预测为正样本的个数。
 &lt;img src=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3.png&#34;
 	width=&#34;1002&#34;
 	height=&#34;695&#34;
-	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3_hu3312ada72458b20945710664f7deb06a_64011_480x0_resize_box_3.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3_hu3312ada72458b20945710664f7deb06a_64011_1024x0_resize_box_3.png 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3_hu_ff3f51de2d91a324.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3_hu_c25568175f81f26e.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;训练过程&#34;
@@ -432,7 +432,7 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
 &lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate.png&#34;
 	width=&#34;1440&#34;
 	height=&#34;720&#34;
-	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate_hu7d8c1701c71a5659c7f526d2a802aedc_53100_480x0_resize_box_3.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate_hu7d8c1701c71a5659c7f526d2a802aedc_53100_1024x0_resize_box_3.png 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate_hu_bccbe7ee870030b5.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate_hu_b626e89258e64541.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;召回率&#34;
@@ -449,7 +449,7 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
 &lt;p&gt;&lt;img src=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4.png&#34;
 	width=&#34;399&#34;
 	height=&#34;146&#34;
-	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4_huca5677bb6e95f0ed893cd4369cf964dc_6035_480x0_resize_box_3.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4_huca5677bb6e95f0ed893cd4369cf964dc_6035_1024x0_resize_box_3.png 1024w&#34;
+	srcset=&#34;https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4_hu_407bb8dd287b774e.png 480w, https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4_hu_9086b8262218e776.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;loss_function&#34;

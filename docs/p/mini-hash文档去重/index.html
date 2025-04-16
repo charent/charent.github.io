@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='基于mini hash的文档去重 实现代码 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 from datasketch import MinHash, MinHashLSH from collections import defaultdict # 结束标点符号 END_PUN = set(&amp;#34;.'><title>Mini hash文档去重</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="基于mini hash的文档去重 实现代码 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 from datasketch import MinHash, MinHashLSH from collections import defaultdict # 结束标点符号 END_PUN = set(&#34;.。!！）)》}】?？\\&#34;”&#34;) # 保留中文和英文、下划线，不要标点符号 NON_CHAR = re.compile(&#34;[^[\\u4E00-\\u9FA5|A-Za-z_0-9]&#34;) def _get_doc_mini_hash(doc: list[str] | str, num_perm: int) -&gt; MinHash: &#39;&#39;&#39; 获取一段文本的mini hash &#39;&#39;&#39; mini_hash = MinHash(num_perm=num_perm) for s in doc: mini_hash.update(s.encode(&#39;utf-8&#39;)) return mini_hash class DropDatasetDuplicate: def __init__(self, threshold: float=0.85, num_perm: int=256) -&gt; None: &#39;&#39;&#39; 获取一个数据集中所有重复（相似的超过threshold）的index，输入为：list[str]，一个str元素为一段文本(doc) 如输入： [a, b, c, d, c, d, e] 返回：{4, 5} (后面两个 c, d 的index) &#39;&#39;&#39; self.similar_index_cluster = defaultdict(set) self.data_lsh = MinHashLSH(threshold=threshold, num_perm=num_perm) self.num_perm = num_perm def add_doc(self, index: object, doc: str,) -&gt; set[int]: &#39;&#39;&#39; 添加文档， index： 文档的索引 doc: 文档本身 &#39;&#39;&#39; # 只保留中文和英文、下划线，不要标点符号 doc = &#39;&#39;.join(NON_CHAR.split(doc)) # doc = [&#39;&#39;.join(t) for t in list(ngrams(doc, 3))] doc_hash = _get_doc_mini_hash(doc, self.num_perm) close_duplicates = self.data_lsh.query(doc_hash) self.data_lsh.insert(index, doc_hash) # 所有相似的doc在similar_index_cluster中的key都是最早出现的idx # 如：data中索引inndex 2, 7, 8, 9, 10, 12 是相似的，则在similar_index_cluster中表现为 {2: {8, 9, 10, 12}} if len(close_duplicates) &gt; 0: min_idx= min(close_duplicates) self.similar_index_cluster[min_idx].add(index) def get_duplicate_indexs(self): &#39;&#39;&#39; 返回所有的重复文档索引 &#39;&#39;&#39; similar_index_cluster = self.similar_index_cluster need_to_remove_idx = set() for key_idx in similar_index_cluster.keys(): need_to_remove_idx |= similar_index_cluster[key_idx] return need_to_remove_idx 使用方法 单进程速度非常慢，需要多进程处理（待补充）\n">
+<title>Mini hash文档去重</title>
 
 <link rel='canonical' href='https://charent.github.io/p/mini-hash%E6%96%87%E6%A1%A3%E5%8E%BB%E9%87%8D/'>
 
-<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='Mini hash文档去重'>
-<meta property='og:description' content='基于mini hash的文档去重 实现代码 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 from datasketch import MinHash, MinHashLSH from collections import defaultdict # 结束标点符号 END_PUN = set(&amp;#34;.'>
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="Mini hash文档去重">
+<meta property='og:description' content="基于mini hash的文档去重 实现代码 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 from datasketch import MinHash, MinHashLSH from collections import defaultdict # 结束标点符号 END_PUN = set(&#34;.。!！）)》}】?？\\&#34;”&#34;) # 保留中文和英文、下划线，不要标点符号 NON_CHAR = re.compile(&#34;[^[\\u4E00-\\u9FA5|A-Za-z_0-9]&#34;) def _get_doc_mini_hash(doc: list[str] | str, num_perm: int) -&gt; MinHash: &#39;&#39;&#39; 获取一段文本的mini hash &#39;&#39;&#39; mini_hash = MinHash(num_perm=num_perm) for s in doc: mini_hash.update(s.encode(&#39;utf-8&#39;)) return mini_hash class DropDatasetDuplicate: def __init__(self, threshold: float=0.85, num_perm: int=256) -&gt; None: &#39;&#39;&#39; 获取一个数据集中所有重复（相似的超过threshold）的index，输入为：list[str]，一个str元素为一段文本(doc) 如输入： [a, b, c, d, c, d, e] 返回：{4, 5} (后面两个 c, d 的index) &#39;&#39;&#39; self.similar_index_cluster = defaultdict(set) self.data_lsh = MinHashLSH(threshold=threshold, num_perm=num_perm) self.num_perm = num_perm def add_doc(self, index: object, doc: str,) -&gt; set[int]: &#39;&#39;&#39; 添加文档， index： 文档的索引 doc: 文档本身 &#39;&#39;&#39; # 只保留中文和英文、下划线，不要标点符号 doc = &#39;&#39;.join(NON_CHAR.split(doc)) # doc = [&#39;&#39;.join(t) for t in list(ngrams(doc, 3))] doc_hash = _get_doc_mini_hash(doc, self.num_perm) close_duplicates = self.data_lsh.query(doc_hash) self.data_lsh.insert(index, doc_hash) # 所有相似的doc在similar_index_cluster中的key都是最早出现的idx # 如：data中索引inndex 2, 7, 8, 9, 10, 12 是相似的，则在similar_index_cluster中表现为 {2: {8, 9, 10, 12}} if len(close_duplicates) &gt; 0: min_idx= min(close_duplicates) self.similar_index_cluster[min_idx].add(index) def get_duplicate_indexs(self): &#39;&#39;&#39; 返回所有的重复文档索引 &#39;&#39;&#39; similar_index_cluster = self.similar_index_cluster need_to_remove_idx = set() for key_idx in similar_index_cluster.keys(): need_to_remove_idx |= similar_index_cluster[key_idx] return need_to_remove_idx 使用方法 单进程速度非常慢，需要多进程处理（待补充）\n">
 <meta property='og:url' content='https://charent.github.io/p/mini-hash%E6%96%87%E6%A1%A3%E5%8E%BB%E9%87%8D/'>
 <meta property='og:site_name' content='Charent的博客'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2024-01-17T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2024-01-17T00:00:00&#43;00:00'/>
 <meta name="twitter:title" content="Mini hash文档去重">
-<meta name="twitter:description" content="基于mini hash的文档去重 实现代码 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 from datasketch import MinHash, MinHashLSH from collections import defaultdict # 结束标点符号 END_PUN = set(&amp;#34;.">
+<meta name="twitter:description" content="基于mini hash的文档去重 实现代码 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 from datasketch import MinHash, MinHashLSH from collections import defaultdict # 结束标点符号 END_PUN = set(&#34;.。!！）)》}】?？\\&#34;”&#34;) # 保留中文和英文、下划线，不要标点符号 NON_CHAR = re.compile(&#34;[^[\\u4E00-\\u9FA5|A-Za-z_0-9]&#34;) def _get_doc_mini_hash(doc: list[str] | str, num_perm: int) -&gt; MinHash: &#39;&#39;&#39; 获取一段文本的mini hash &#39;&#39;&#39; mini_hash = MinHash(num_perm=num_perm) for s in doc: mini_hash.update(s.encode(&#39;utf-8&#39;)) return mini_hash class DropDatasetDuplicate: def __init__(self, threshold: float=0.85, num_perm: int=256) -&gt; None: &#39;&#39;&#39; 获取一个数据集中所有重复（相似的超过threshold）的index，输入为：list[str]，一个str元素为一段文本(doc) 如输入： [a, b, c, d, c, d, e] 返回：{4, 5} (后面两个 c, d 的index) &#39;&#39;&#39; self.similar_index_cluster = defaultdict(set) self.data_lsh = MinHashLSH(threshold=threshold, num_perm=num_perm) self.num_perm = num_perm def add_doc(self, index: object, doc: str,) -&gt; set[int]: &#39;&#39;&#39; 添加文档， index： 文档的索引 doc: 文档本身 &#39;&#39;&#39; # 只保留中文和英文、下划线，不要标点符号 doc = &#39;&#39;.join(NON_CHAR.split(doc)) # doc = [&#39;&#39;.join(t) for t in list(ngrams(doc, 3))] doc_hash = _get_doc_mini_hash(doc, self.num_perm) close_duplicates = self.data_lsh.query(doc_hash) self.data_lsh.insert(index, doc_hash) # 所有相似的doc在similar_index_cluster中的key都是最早出现的idx # 如：data中索引inndex 2, 7, 8, 9, 10, 12 是相似的，则在similar_index_cluster中表现为 {2: {8, 9, 10, 12}} if len(close_duplicates) &gt; 0: min_idx= min(close_duplicates) self.similar_index_cluster[min_idx].add(index) def get_duplicate_indexs(self): &#39;&#39;&#39; 返回所有的重复文档索引 &#39;&#39;&#39; similar_index_cluster = self.similar_index_cluster need_to_remove_idx = set() for key_idx in similar_index_cluster.keys(): need_to_remove_idx |= similar_index_cluster[key_idx] return need_to_remove_idx 使用方法 单进程速度非常慢，需要多进程处理（待补充）\n">
     </head>
     <body class="
     article-page
@@ -55,8 +56,8 @@
                     
                     
                         
-                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
                 </a>
@@ -71,13 +72,14 @@
             <h1 class="site-name"><a href="/">Charent的博客</a></h1>
             <h2 class="site-description">不积硅步，无以至千里</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/charent'
                         target="_blank"
                         title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,7 +98,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -117,7 +118,6 @@
         </li>
         
         
-
         <li >
             <a href='/archives/' >
                 
@@ -138,7 +138,6 @@
         </li>
         
         
-
         <li >
             <a href='/search/' >
                 
@@ -158,7 +157,6 @@
         </li>
         
         
-
         <li >
             <a href='/%E5%85%B3%E4%BA%8E/' >
                 
@@ -177,10 +175,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -191,19 +190,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://charent.github.io/" selected>中文</option>
-                        
-                            <option value="https://charent.github.io/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -211,7 +211,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -219,13 +219,49 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#实现代码">实现代码</a></li>
+    <li><a href="#使用方法">使用方法</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -249,6 +285,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -271,14 +310,15 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
     
     
-    <h1 id="基于mini-hash的文档去重">基于mini hash的文档去重</h1>
-<h2 id="实现代码">实现代码</h2>
-<div class="highlight"><div class="chroma">
+    <h1 id="基于mini-hash的文档去重">基于mini hash的文档去重
+</h1><h2 id="实现代码">实现代码
+</h2><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
 </span><span class="lnt"> 2
@@ -410,8 +450,8 @@
 </span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">need_to_remove_idx</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="使用方法">使用方法</h2>
-<p>单进程速度非常慢，需要多进程处理（待补充）</p>
+</div><h2 id="使用方法">使用方法
+</h2><p>单进程速度非常慢，需要多进程处理（待补充）</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -451,26 +491,29 @@
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
     window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
             delimiters: [
                 { left: "$$", right: "$$", display: true },
                 { left: "$", right: "$", display: false },
                 { left: "\\(", right: "\\)", display: false },
                 { left: "\\[", right: "\\]", display: true }
-            ]
+            ],
+            ignoredClasses: ["gist"]
         });})
 </script>
+
     
 </article>
 
@@ -489,12 +532,12 @@
         
             2018 - 
         
-        2024 Charent的博客
+        2025 Charent的博客
     </section>
     
     <section class="powerby">
-         <br />
-        
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 
@@ -571,53 +614,19 @@
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#实现代码">实现代码</a></li>
-    <li><a href="#使用方法">使用方法</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');

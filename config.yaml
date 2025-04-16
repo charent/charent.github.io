@@ -1,7 +1,7 @@
 baseurl: /
 languageCode: zh-cn
 theme: hugo-theme-stack
-paginate: 25
+pagerSize: 25
 title: Charent的博客
 
 languages:

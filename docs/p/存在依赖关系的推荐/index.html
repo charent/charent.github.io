@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='1 2 3 4 #对于一些简单的for循环用map和lambda优化，加快脚本运行速度， 如 lines = list(map(lambda x : list(eval(x)), lines)) #对于一些经常要判定一个元素是否在某个数组里面的操作，将数组转换为集合，加快查找速度 set(map(lambda x : x[0], n_movies)) 数据处理部分 电影间的依赖关系：使用networkx随机生成有向无环图，共生成10个有向无环图，根据生成的图可以生成业务矩阵： 1 2 3 4 5 6 7 8 9 10 11 12 矩阵的列：vertex, next_job, negative_job, clicked_job, parents 一个顶点的next_job生成： 1)取该顶点v的孩子顶点，记为v_children 2)取该顶点v所有父顶点中孩子顶点，但这些孩子顶点不是v的父顶点,记为v_p_c 3)v_children和v_p_c取并集，该并集即是next_job 一个顶点的negative_job生成： 1)取该顶点v所在连通子图的所有顶点v_connect 2)在v_connect中删除该顶点v本身，删除v的所有孩子顶点，删除v的所有父顶点以及父顶点的孩子顶点，剩余的顶点记为v_res 3)将v_res和其它连通子图（即所有非顶点v所属的连通子图）的所有顶点取并集，该并集即是negative_job clicked_job=parents 数据处理过程 电影选取：统计数据集中每部电影被用户交互过的次数，从大到小排序，从交互比较稠密的前200个电影中随机抽取152部。 根据选取出的152部电影选出交互过这些电影是用户，如果用户交互过的所有电影的负样本的交集为空，则不选择该用户；并且，每个用户交互过的电影必须大于4个，防止用户交互信息过于稀疏。 生成用户行为数据：根据选出的用户和其交互过的电影信息，生成[用户id，业务id，评分，上一次交互id，时间戳] 格式的行为数据，上一层交互id不存在用-1代替，业务id即是152个电影id。 将选出的电影特征做处理，将电影上映年份、种类处理为one hot向量。 将用户信息的邮政编码归一化处理，将用户的性别、职业、年龄等信息处理为 one hot 向量。 将电影标题使用bert_as_service生成1x768的句子向量，给定一个在一定单词数在一定范围内的句子，bert as service能生成该句子的1x768的向量。 编写DataInput类，用于将行为数据中的用户id和用户信息（职业性别等向量）、电影id和电影信息（电影类型、发行年份的one hot向量，bert句子向量等）关联起来，生成一条样本数据。编写next_batc()方法用于生产下一批次的样本数据，作为模型的输入，next_batc()函数用参数isTrain来判断当前的next batch是训练数据还是测试数据。 模型部分 模型如图所示 在忽略batch size的情况下，用户信息的输入tensor为 1x30；正样本的输入tensor为 2 * 796，2是lstm cell输入的max time，即是有2个时间序列，表示电影依赖关系a-&amp;gt;b的序列，796中的768是电影标题的句子向量，剩下的28是电影种类、发行年份的one hot 向量；负样本的输入仅仅是一个电影的信息向量，1x796。'><title>存在依赖关系的推荐</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content=" 1 2 3 4 #对于一些简单的for循环用map和lambda优化，加快脚本运行速度， 如 lines = list(map(lambda x : list(eval(x)), lines)) #对于一些经常要判定一个元素是否在某个数组里面的操作，将数组转换为集合，加快查找速度 set(map(lambda x : x[0], n_movies)) 数据处理部分 电影间的依赖关系：使用networkx随机生成有向无环图，共生成10个有向无环图，根据生成的图可以生成业务矩阵： 1 2 3 4 5 6 7 8 9 10 11 12 矩阵的列：vertex, next_job, negative_job, clicked_job, parents 一个顶点的next_job生成： 1)取该顶点v的孩子顶点，记为v_children 2)取该顶点v所有父顶点中孩子顶点，但这些孩子顶点不是v的父顶点,记为v_p_c 3)v_children和v_p_c取并集，该并集即是next_job 一个顶点的negative_job生成： 1)取该顶点v所在连通子图的所有顶点v_connect 2)在v_connect中删除该顶点v本身，删除v的所有孩子顶点，删除v的所有父顶点以及父顶点的孩子顶点，剩余的顶点记为v_res 3)将v_res和其它连通子图（即所有非顶点v所属的连通子图）的所有顶点取并集，该并集即是negative_job clicked_job=parents 数据处理过程 电影选取：统计数据集中每部电影被用户交互过的次数，从大到小排序，从交互比较稠密的前200个电影中随机抽取152部。 根据选取出的152部电影选出交互过这些电影是用户，如果用户交互过的所有电影的负样本的交集为空，则不选择该用户；并且，每个用户交互过的电影必须大于4个，防止用户交互信息过于稀疏。 生成用户行为数据：根据选出的用户和其交互过的电影信息，生成[用户id，业务id，评分，上一次交互id，时间戳] 格式的行为数据，上一层交互id不存在用-1代替，业务id即是152个电影id。 将选出的电影特征做处理，将电影上映年份、种类处理为one hot向量。 将用户信息的邮政编码归一化处理，将用户的性别、职业、年龄等信息处理为 one hot 向量。 将电影标题使用bert_as_service生成1x768的句子向量，给定一个在一定单词数在一定范围内的句子，bert as service能生成该句子的1x768的向量。 编写DataInput类，用于将行为数据中的用户id和用户信息（职业性别等向量）、电影id和电影信息（电影类型、发行年份的one hot向量，bert句子向量等）关联起来，生成一条样本数据。编写next_batc()方法用于生产下一批次的样本数据，作为模型的输入，next_batc()函数用参数isTrain来判断当前的next batch是训练数据还是测试数据。 模型部分 模型如图所示 ">
+<title>存在依赖关系的推荐</title>
 
 <link rel='canonical' href='https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/'>
 
-<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content='存在依赖关系的推荐'>
-<meta property='og:description' content='1 2 3 4 #对于一些简单的for循环用map和lambda优化，加快脚本运行速度， 如 lines = list(map(lambda x : list(eval(x)), lines)) #对于一些经常要判定一个元素是否在某个数组里面的操作，将数组转换为集合，加快查找速度 set(map(lambda x : x[0], n_movies)) 数据处理部分 电影间的依赖关系：使用networkx随机生成有向无环图，共生成10个有向无环图，根据生成的图可以生成业务矩阵： 1 2 3 4 5 6 7 8 9 10 11 12 矩阵的列：vertex, next_job, negative_job, clicked_job, parents 一个顶点的next_job生成： 1)取该顶点v的孩子顶点，记为v_children 2)取该顶点v所有父顶点中孩子顶点，但这些孩子顶点不是v的父顶点,记为v_p_c 3)v_children和v_p_c取并集，该并集即是next_job 一个顶点的negative_job生成： 1)取该顶点v所在连通子图的所有顶点v_connect 2)在v_connect中删除该顶点v本身，删除v的所有孩子顶点，删除v的所有父顶点以及父顶点的孩子顶点，剩余的顶点记为v_res 3)将v_res和其它连通子图（即所有非顶点v所属的连通子图）的所有顶点取并集，该并集即是negative_job clicked_job=parents 数据处理过程 电影选取：统计数据集中每部电影被用户交互过的次数，从大到小排序，从交互比较稠密的前200个电影中随机抽取152部。 根据选取出的152部电影选出交互过这些电影是用户，如果用户交互过的所有电影的负样本的交集为空，则不选择该用户；并且，每个用户交互过的电影必须大于4个，防止用户交互信息过于稀疏。 生成用户行为数据：根据选出的用户和其交互过的电影信息，生成[用户id，业务id，评分，上一次交互id，时间戳] 格式的行为数据，上一层交互id不存在用-1代替，业务id即是152个电影id。 将选出的电影特征做处理，将电影上映年份、种类处理为one hot向量。 将用户信息的邮政编码归一化处理，将用户的性别、职业、年龄等信息处理为 one hot 向量。 将电影标题使用bert_as_service生成1x768的句子向量，给定一个在一定单词数在一定范围内的句子，bert as service能生成该句子的1x768的向量。 编写DataInput类，用于将行为数据中的用户id和用户信息（职业性别等向量）、电影id和电影信息（电影类型、发行年份的one hot向量，bert句子向量等）关联起来，生成一条样本数据。编写next_batc()方法用于生产下一批次的样本数据，作为模型的输入，next_batc()函数用参数isTrain来判断当前的next batch是训练数据还是测试数据。 模型部分 模型如图所示 在忽略batch size的情况下，用户信息的输入tensor为 1x30；正样本的输入tensor为 2 * 796，2是lstm cell输入的max time，即是有2个时间序列，表示电影依赖关系a-&amp;gt;b的序列，796中的768是电影标题的句子向量，剩下的28是电影种类、发行年份的one hot 向量；负样本的输入仅仅是一个电影的信息向量，1x796。'>
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="存在依赖关系的推荐">
+<meta property='og:description' content=" 1 2 3 4 #对于一些简单的for循环用map和lambda优化，加快脚本运行速度， 如 lines = list(map(lambda x : list(eval(x)), lines)) #对于一些经常要判定一个元素是否在某个数组里面的操作，将数组转换为集合，加快查找速度 set(map(lambda x : x[0], n_movies)) 数据处理部分 电影间的依赖关系：使用networkx随机生成有向无环图，共生成10个有向无环图，根据生成的图可以生成业务矩阵： 1 2 3 4 5 6 7 8 9 10 11 12 矩阵的列：vertex, next_job, negative_job, clicked_job, parents 一个顶点的next_job生成： 1)取该顶点v的孩子顶点，记为v_children 2)取该顶点v所有父顶点中孩子顶点，但这些孩子顶点不是v的父顶点,记为v_p_c 3)v_children和v_p_c取并集，该并集即是next_job 一个顶点的negative_job生成： 1)取该顶点v所在连通子图的所有顶点v_connect 2)在v_connect中删除该顶点v本身，删除v的所有孩子顶点，删除v的所有父顶点以及父顶点的孩子顶点，剩余的顶点记为v_res 3)将v_res和其它连通子图（即所有非顶点v所属的连通子图）的所有顶点取并集，该并集即是negative_job clicked_job=parents 数据处理过程 电影选取：统计数据集中每部电影被用户交互过的次数，从大到小排序，从交互比较稠密的前200个电影中随机抽取152部。 根据选取出的152部电影选出交互过这些电影是用户，如果用户交互过的所有电影的负样本的交集为空，则不选择该用户；并且，每个用户交互过的电影必须大于4个，防止用户交互信息过于稀疏。 生成用户行为数据：根据选出的用户和其交互过的电影信息，生成[用户id，业务id，评分，上一次交互id，时间戳] 格式的行为数据，上一层交互id不存在用-1代替，业务id即是152个电影id。 将选出的电影特征做处理，将电影上映年份、种类处理为one hot向量。 将用户信息的邮政编码归一化处理，将用户的性别、职业、年龄等信息处理为 one hot 向量。 将电影标题使用bert_as_service生成1x768的句子向量，给定一个在一定单词数在一定范围内的句子，bert as service能生成该句子的1x768的向量。 编写DataInput类，用于将行为数据中的用户id和用户信息（职业性别等向量）、电影id和电影信息（电影类型、发行年份的one hot向量，bert句子向量等）关联起来，生成一条样本数据。编写next_batc()方法用于生产下一批次的样本数据，作为模型的输入，next_batc()函数用参数isTrain来判断当前的next batch是训练数据还是测试数据。 模型部分 模型如图所示 ">
 <meta property='og:url' content='https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/'>
 <meta property='og:site_name' content='Charent的博客'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2019-07-31T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2019-07-31T00:00:00&#43;00:00'/>
 <meta name="twitter:title" content="存在依赖关系的推荐">
-<meta name="twitter:description" content="1 2 3 4 #对于一些简单的for循环用map和lambda优化，加快脚本运行速度， 如 lines = list(map(lambda x : list(eval(x)), lines)) #对于一些经常要判定一个元素是否在某个数组里面的操作，将数组转换为集合，加快查找速度 set(map(lambda x : x[0], n_movies)) 数据处理部分 电影间的依赖关系：使用networkx随机生成有向无环图，共生成10个有向无环图，根据生成的图可以生成业务矩阵： 1 2 3 4 5 6 7 8 9 10 11 12 矩阵的列：vertex, next_job, negative_job, clicked_job, parents 一个顶点的next_job生成： 1)取该顶点v的孩子顶点，记为v_children 2)取该顶点v所有父顶点中孩子顶点，但这些孩子顶点不是v的父顶点,记为v_p_c 3)v_children和v_p_c取并集，该并集即是next_job 一个顶点的negative_job生成： 1)取该顶点v所在连通子图的所有顶点v_connect 2)在v_connect中删除该顶点v本身，删除v的所有孩子顶点，删除v的所有父顶点以及父顶点的孩子顶点，剩余的顶点记为v_res 3)将v_res和其它连通子图（即所有非顶点v所属的连通子图）的所有顶点取并集，该并集即是negative_job clicked_job=parents 数据处理过程 电影选取：统计数据集中每部电影被用户交互过的次数，从大到小排序，从交互比较稠密的前200个电影中随机抽取152部。 根据选取出的152部电影选出交互过这些电影是用户，如果用户交互过的所有电影的负样本的交集为空，则不选择该用户；并且，每个用户交互过的电影必须大于4个，防止用户交互信息过于稀疏。 生成用户行为数据：根据选出的用户和其交互过的电影信息，生成[用户id，业务id，评分，上一次交互id，时间戳] 格式的行为数据，上一层交互id不存在用-1代替，业务id即是152个电影id。 将选出的电影特征做处理，将电影上映年份、种类处理为one hot向量。 将用户信息的邮政编码归一化处理，将用户的性别、职业、年龄等信息处理为 one hot 向量。 将电影标题使用bert_as_service生成1x768的句子向量，给定一个在一定单词数在一定范围内的句子，bert as service能生成该句子的1x768的向量。 编写DataInput类，用于将行为数据中的用户id和用户信息（职业性别等向量）、电影id和电影信息（电影类型、发行年份的one hot向量，bert句子向量等）关联起来，生成一条样本数据。编写next_batc()方法用于生产下一批次的样本数据，作为模型的输入，next_batc()函数用参数isTrain来判断当前的next batch是训练数据还是测试数据。 模型部分 模型如图所示 在忽略batch size的情况下，用户信息的输入tensor为 1x30；正样本的输入tensor为 2 * 796，2是lstm cell输入的max time，即是有2个时间序列，表示电影依赖关系a-&amp;gt;b的序列，796中的768是电影标题的句子向量，剩下的28是电影种类、发行年份的one hot 向量；负样本的输入仅仅是一个电影的信息向量，1x796。">
+<meta name="twitter:description" content=" 1 2 3 4 #对于一些简单的for循环用map和lambda优化，加快脚本运行速度， 如 lines = list(map(lambda x : list(eval(x)), lines)) #对于一些经常要判定一个元素是否在某个数组里面的操作，将数组转换为集合，加快查找速度 set(map(lambda x : x[0], n_movies)) 数据处理部分 电影间的依赖关系：使用networkx随机生成有向无环图，共生成10个有向无环图，根据生成的图可以生成业务矩阵： 1 2 3 4 5 6 7 8 9 10 11 12 矩阵的列：vertex, next_job, negative_job, clicked_job, parents 一个顶点的next_job生成： 1)取该顶点v的孩子顶点，记为v_children 2)取该顶点v所有父顶点中孩子顶点，但这些孩子顶点不是v的父顶点,记为v_p_c 3)v_children和v_p_c取并集，该并集即是next_job 一个顶点的negative_job生成： 1)取该顶点v所在连通子图的所有顶点v_connect 2)在v_connect中删除该顶点v本身，删除v的所有孩子顶点，删除v的所有父顶点以及父顶点的孩子顶点，剩余的顶点记为v_res 3)将v_res和其它连通子图（即所有非顶点v所属的连通子图）的所有顶点取并集，该并集即是negative_job clicked_job=parents 数据处理过程 电影选取：统计数据集中每部电影被用户交互过的次数，从大到小排序，从交互比较稠密的前200个电影中随机抽取152部。 根据选取出的152部电影选出交互过这些电影是用户，如果用户交互过的所有电影的负样本的交集为空，则不选择该用户；并且，每个用户交互过的电影必须大于4个，防止用户交互信息过于稀疏。 生成用户行为数据：根据选出的用户和其交互过的电影信息，生成[用户id，业务id，评分，上一次交互id，时间戳] 格式的行为数据，上一层交互id不存在用-1代替，业务id即是152个电影id。 将选出的电影特征做处理，将电影上映年份、种类处理为one hot向量。 将用户信息的邮政编码归一化处理，将用户的性别、职业、年龄等信息处理为 one hot 向量。 将电影标题使用bert_as_service生成1x768的句子向量，给定一个在一定单词数在一定范围内的句子，bert as service能生成该句子的1x768的向量。 编写DataInput类，用于将行为数据中的用户id和用户信息（职业性别等向量）、电影id和电影信息（电影类型、发行年份的one hot向量，bert句子向量等）关联起来，生成一条样本数据。编写next_batc()方法用于生产下一批次的样本数据，作为模型的输入，next_batc()函数用参数isTrain来判断当前的next batch是训练数据还是测试数据。 模型部分 模型如图所示 ">
     </head>
     <body class="
     article-page
@@ -55,8 +56,8 @@
                     
                     
                         
-                        <img src="/img/avatar_hu544a9780599d84daff7ca906f17dd84c_13353_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
                 </a>
@@ -71,13 +72,14 @@
             <h1 class="site-name"><a href="/">Charent的博客</a></h1>
             <h2 class="site-description">不积硅步，无以至千里</h2>
         </div>
-    </header><ol class="social-menu">
+    </header><ol class="menu-social">
             
                 <li>
                     <a 
                         href='https://github.com/charent'
                         target="_blank"
                         title="GitHub"
+                        rel="me"
                     >
                         
                         
@@ -96,7 +98,6 @@
         
         
         
-
         <li >
             <a href='/' >
                 
@@ -117,7 +118,6 @@
         </li>
         
         
-
         <li >
             <a href='/archives/' >
                 
@@ -138,7 +138,6 @@
         </li>
         
         
-
         <li >
             <a href='/search/' >
                 
@@ -158,7 +157,6 @@
         </li>
         
         
-
         <li >
             <a href='/%E5%85%B3%E4%BA%8E/' >
                 
@@ -177,10 +175,11 @@
             </a>
         </li>
         
-
-        <div class="menu-bottom-section">
-                <li id="i18n-switch">  
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
   <path d="M4 5h7" />
   <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
@@ -191,19 +190,20 @@
 
 
 
-                    <select name="language" onchange="window.location.href = this.selectedOptions[0].value">
-                        
-                            <option value="https://charent.github.io/" selected>中文</option>
-                        
-                            <option value="https://charent.github.io/en/" >English</option>
-                        
-                    </select>
-                </li>
-            
-            
-            
-                <li id="dark-mode-toggle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="8" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -211,7 +211,7 @@
 
 
 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <circle cx="16" cy="12" r="2" />
   <rect x="2" y="6" width="20" height="12" rx="6" />
@@ -219,13 +219,57 @@
 
 
 
-                    <span>暗色模式</span>
-                </li>
-            
-        </div>
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
     </ol>
 </aside>
-<main class="main full-width">
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li>
+      <ol>
+        <li><a href="#数据处理部分">数据处理部分</a></li>
+        <li><a href="#数据处理过程">数据处理过程</a>
+          <ol>
+            <li><a href="#模型部分">模型部分</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
     <article class="main-article">
     <header class="article-header">
 
@@ -253,6 +297,9 @@
     </div>
 
     
+    
+    
+    
     <footer class="article-time">
         
             <div>
@@ -275,6 +322,7 @@
 
     
 </div>
+
 </header>
 
     <section class="article-content">
@@ -294,8 +342,8 @@
 </span></span><span class="line"><span class="cl"><span class="nb">set</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_movies</span><span class="p">))</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="数据处理部分">数据处理部分</h3>
-<ol>
+</div><h3 id="数据处理部分">数据处理部分
+</h3><ol>
 <li>电影间的依赖关系：使用networkx随机生成有向无环图，共生成10个有向无环图，根据生成的图可以生成业务矩阵：</li>
 </ol>
 <div class="highlight"><div class="chroma">
@@ -331,7 +379,7 @@
 </div><p><img src="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1.png"
 	width="440"
 	height="251"
-	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1_hu55904f10bf873e30e93cf3b36e8d850e_8825_480x0_resize_box_3.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1_hu55904f10bf873e30e93cf3b36e8d850e_8825_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1_hu_fe198683cf4ea9aa.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p1_hu_2f9e86d8e97fb9f9.png 1024w"
 	loading="lazy"
 	
 		alt="依赖图"
@@ -342,8 +390,8 @@
 		data-flex-basis="420px"
 	
 ></p>
-<h3 id="数据处理过程">数据处理过程</h3>
-<ol>
+<h3 id="数据处理过程">数据处理过程
+</h3><ol>
 <li>电影选取：统计数据集中每部电影被用户交互过的次数，从大到小排序，从交互比较稠密的前200个电影中随机抽取152部。
 根据选取出的152部电影选出交互过这些电影是用户，如果用户交互过的所有电影的负样本的交集为空，则不选择该用户；并且，每个用户交互过的电影必须大于4个，防止用户交互信息过于稀疏。</li>
 <li>生成用户行为数据：根据选出的用户和其交互过的电影信息，生成[用户id，业务id，评分，上一次交互id，时间戳] 格式的行为数据，上一层交互id不存在用-1代替，业务id即是152个电影id。</li>
@@ -352,12 +400,12 @@
 <li>将电影标题使用bert_as_service生成1x768的句子向量，给定一个在一定单词数在一定范围内的句子，bert as service能生成该句子的1x768的向量。</li>
 <li>编写DataInput类，用于将行为数据中的用户id和用户信息（职业性别等向量）、电影id和电影信息（电影类型、发行年份的one hot向量，bert句子向量等）关联起来，生成一条样本数据。编写next_batc()方法用于生产下一批次的样本数据，作为模型的输入，next_batc()函数用参数isTrain来判断当前的next batch是训练数据还是测试数据。</li>
 </ol>
-<h4 id="模型部分">模型部分</h4>
-<p>模型如图所示
+<h4 id="模型部分">模型部分
+</h4><p>模型如图所示
 <img src="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2.png"
 	width="1174"
 	height="695"
-	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2_hu96c74fffb945ff6bdf3f8c0bc01f2484_49449_480x0_resize_box_3.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2_hu96c74fffb945ff6bdf3f8c0bc01f2484_49449_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2_hu_b1f52d948733733d.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p2_hu_81c91fb078429739.png 1024w"
 	loading="lazy"
 	
 		alt="模型"
@@ -641,7 +689,7 @@
 <img src="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3.png"
 	width="1002"
 	height="695"
-	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3_hu3312ada72458b20945710664f7deb06a_64011_480x0_resize_box_3.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3_hu3312ada72458b20945710664f7deb06a_64011_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3_hu_ff3f51de2d91a324.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p3_hu_c25568175f81f26e.png 1024w"
 	loading="lazy"
 	
 		alt="训练过程"
@@ -664,7 +712,7 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
 <p><img src="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate.png"
 	width="1440"
 	height="720"
-	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate_hu7d8c1701c71a5659c7f526d2a802aedc_53100_480x0_resize_box_3.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate_hu7d8c1701c71a5659c7f526d2a802aedc_53100_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate_hu_bccbe7ee870030b5.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/recall_rate_hu_b626e89258e64541.png 1024w"
 	loading="lazy"
 	
 		alt="召回率"
@@ -681,7 +729,7 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
 <p><img src="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4.png"
 	width="399"
 	height="146"
-	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4_huca5677bb6e95f0ed893cd4369cf964dc_6035_480x0_resize_box_3.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4_huca5677bb6e95f0ed893cd4369cf964dc_6035_1024x0_resize_box_3.png 1024w"
+	srcset="/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4_hu_407bb8dd287b774e.png 480w, /p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/p4_hu_9086b8262218e776.png 1024w"
 	loading="lazy"
 	
 		alt="loss_function"
@@ -705,26 +753,29 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.css"integrity="sha384-RZU/ijkSsFbcmivfdRBQDtwuwVqK7GMOw6IMvKyeWL2K5UAlyp6WonmB8m7Jd0Hn"crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/katex.min.js"integrity="sha384-pK1WpvzWVBQiP0/GjnvRxV4mOb0oxFuyRxJlk6vVw146n3egcN5C925NCP7a7BY8"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.13.13/dist/contrib/auto-render.min.js"integrity="sha384-vZTG03m&#43;2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl"crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
     window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
             delimiters: [
                 { left: "$$", right: "$$", display: true },
                 { left: "$", right: "$", display: false },
                 { left: "\\(", right: "\\)", display: false },
                 { left: "\\[", right: "\\]", display: true }
-            ]
+            ],
+            ignoredClasses: ["gist"]
         });})
 </script>
+
     
 </article>
 
@@ -732,9 +783,9 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
 
     
 
-<aside class="related-contents--wrapper">
+<aside class="related-content--wrapper">
     <h2 class="section-title">相关文章</h2>
-    <div class="related-contents">
+    <div class="related-content">
         <div class="flex article-list--tile">
             
                 
@@ -748,6 +799,31 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
         </div>
     </a>
 </article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/%E5%B0%96%E5%88%BA/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/%E5%B0%96%E5%88%BA/1.a38dbbd21257b1eb1f42c15fb529f890_hu_47109822d3710042.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 大模型微调出现loss尖峰/尖刺"
+                        
+                        data-hash="md5-o4270hJXsesfQsFftSn4kA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">大模型微调出现loss尖峰/尖刺</h2>
+        </div>
+    </a>
+</article>
+
             
                 
 <article class="">
@@ -760,6 +836,7 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -772,6 +849,7 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
         </div>
     </a>
 </article>
+
             
                 
 <article class="">
@@ -784,18 +862,7 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
         </div>
     </a>
 </article>
-            
-                
-<article class="">
-    <a href="/p/%E5%B0%8F%E6%A0%B7%E6%9C%AC%E5%AD%A6%E4%B9%A0/">
-        
-        
 
-        <div class="article-details">
-            <h2 class="article-title">小样本学习</h2>
-        </div>
-    </a>
-</article>
             
         </div>
     </div>
@@ -812,12 +879,12 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
         
             2018 - 
         
-        2024 Charent的博客
+        2025 Charent的博客
     </section>
     
     <section class="powerby">
-         <br />
-        
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
     </section>
 </footer>
 
@@ -894,61 +961,19 @@ d. 该用户的召回率 = len(i_set) / len(test_set)。最后求所有用户的
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.css"integrity="sha256-c0uckgykQ9v5k&#43;IqViZOZKc47Jn7KQil4/MP3ySA3F8="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.css"integrity="sha256-SBLU4vv6CA6lHsZ1XyTdhyjJxCjPif/TRkjnsyGAGnE="crossorigin="anonymous"
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li>
-      <ol>
-        <li><a href="#数据处理部分">数据处理部分</a></li>
-        <li><a href="#数据处理过程">数据处理过程</a>
-          <ol>
-            <li><a href="#模型部分">模型部分</a></li>
-          </ol>
-        </li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js"integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g="crossorigin="anonymous"
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
