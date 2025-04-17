@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="一个实现C++快排的算法 #include &lt;iostream&gt; #include &lt;thread&gt; #include &lt;ctime&gt; using namespace std; #define N 10000000 void rand_nums(int* nums, int n) { srand((unsigned int)time(NULL)); for (int i = 0; i &lt; n; ++i) { nums[i] = rand() % N; } } void quick_sort_sigle_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); quick_sort_sigle_thread(nums, left, i - 1); quick_sort_sigle_thread(nums, i + 1, right); } void quick_sort_multi_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); thread threads[2]; if (right - left &lt;= 100000) { //小于10w用递归 threads[0] = thread(quick_sort_sigle_thread, nums, left, i - 1); threads[1] = thread(quick_sort_sigle_thread, nums, i + 1, right); } else { //大于10w继续用多线程分割 threads[0] = thread(quick_sort_multi_thread, nums, left, i - 1); threads[1] = thread(quick_sort_multi_thread, nums, i + 1, right); } for (int i = 0; i &lt; 2; ++ i) threads[i].join(); } void print_nums(int* nums, int end, int start = 0) { for (int i = start; i &lt; start + end; ++i) { cout &lt;&lt; nums[i] &lt;&lt; &#39; &#39;; } cout &lt;&lt; endl; } int main() { int *nums = new int[N]; rand_nums(nums, N); // print_nums(nums, N); cout &lt;&lt; &#34;数组大小：&#34; &lt;&lt; N &lt;&lt; endl; int start_time, end_time; start_time = clock(); quick_sort_sigle_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;单线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); rand_nums(nums, N); start_time = clock(); quick_sort_multi_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;多线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); delete[] nums; return 0; } ">
+<title>C&#43;&#43;多线程实现快速排序算法</title>
+
+<link rel='canonical' href='https://charent.github.io/post/c&#43;&#43;%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%BF%AB%E6%8E%92/'>
+
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="C++多线程实现快速排序算法">
+<meta property='og:description' content="一个实现C++快排的算法 #include &lt;iostream&gt; #include &lt;thread&gt; #include &lt;ctime&gt; using namespace std; #define N 10000000 void rand_nums(int* nums, int n) { srand((unsigned int)time(NULL)); for (int i = 0; i &lt; n; ++i) { nums[i] = rand() % N; } } void quick_sort_sigle_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); quick_sort_sigle_thread(nums, left, i - 1); quick_sort_sigle_thread(nums, i + 1, right); } void quick_sort_multi_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); thread threads[2]; if (right - left &lt;= 100000) { //小于10w用递归 threads[0] = thread(quick_sort_sigle_thread, nums, left, i - 1); threads[1] = thread(quick_sort_sigle_thread, nums, i + 1, right); } else { //大于10w继续用多线程分割 threads[0] = thread(quick_sort_multi_thread, nums, left, i - 1); threads[1] = thread(quick_sort_multi_thread, nums, i + 1, right); } for (int i = 0; i &lt; 2; ++ i) threads[i].join(); } void print_nums(int* nums, int end, int start = 0) { for (int i = start; i &lt; start + end; ++i) { cout &lt;&lt; nums[i] &lt;&lt; &#39; &#39;; } cout &lt;&lt; endl; } int main() { int *nums = new int[N]; rand_nums(nums, N); // print_nums(nums, N); cout &lt;&lt; &#34;数组大小：&#34; &lt;&lt; N &lt;&lt; endl; int start_time, end_time; start_time = clock(); quick_sort_sigle_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;单线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); rand_nums(nums, N); start_time = clock(); quick_sort_multi_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;多线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); delete[] nums; return 0; } ">
+<meta property='og:url' content='https://charent.github.io/post/c&#43;&#43;%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%BF%AB%E6%8E%92/'>
+<meta property='og:site_name' content='Charent的博客'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2023-10-30T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2023-10-30T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="C++多线程实现快速排序算法">
+<meta name="twitter:description" content="一个实现C++快排的算法 #include &lt;iostream&gt; #include &lt;thread&gt; #include &lt;ctime&gt; using namespace std; #define N 10000000 void rand_nums(int* nums, int n) { srand((unsigned int)time(NULL)); for (int i = 0; i &lt; n; ++i) { nums[i] = rand() % N; } } void quick_sort_sigle_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); quick_sort_sigle_thread(nums, left, i - 1); quick_sort_sigle_thread(nums, i + 1, right); } void quick_sort_multi_thread(int* nums, int left, int right) { if (left &gt;= right) return; int i = left, j = right, base = nums[left]; while (i &lt; j) { while (i &lt; j &amp;&amp; nums[j] &gt;= base) --j; //找一个比base小的 while (i &lt; j &amp;&amp; nums[i] &lt;= base) ++i; //找一个比base大的 if (i &lt; j) swap(nums[i], nums[j]); } swap(nums[left], nums[i]); thread threads[2]; if (right - left &lt;= 100000) { //小于10w用递归 threads[0] = thread(quick_sort_sigle_thread, nums, left, i - 1); threads[1] = thread(quick_sort_sigle_thread, nums, i + 1, right); } else { //大于10w继续用多线程分割 threads[0] = thread(quick_sort_multi_thread, nums, left, i - 1); threads[1] = thread(quick_sort_multi_thread, nums, i + 1, right); } for (int i = 0; i &lt; 2; ++ i) threads[i].join(); } void print_nums(int* nums, int end, int start = 0) { for (int i = start; i &lt; start + end; ++i) { cout &lt;&lt; nums[i] &lt;&lt; &#39; &#39;; } cout &lt;&lt; endl; } int main() { int *nums = new int[N]; rand_nums(nums, N); // print_nums(nums, N); cout &lt;&lt; &#34;数组大小：&#34; &lt;&lt; N &lt;&lt; endl; int start_time, end_time; start_time = clock(); quick_sort_sigle_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;单线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); rand_nums(nums, N); start_time = clock(); quick_sort_multi_thread(nums, 0, N - 1); end_time = clock(); cout &lt;&lt; &#34;多线程用时：&#34; &lt;&lt; (end_time - start_time) / 1000.0 &lt;&lt; &#39;s&#39; &lt;&lt; endl; // print_nums(nums, N); delete[] nums; return 0; } ">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">😆</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Charent的博客</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='https://github.com/charent' target="_blank">
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                
+                <span>GitHub</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/c&#43;&#43;/" >
+                C&#43;&#43;
+            </a>
+        
+            <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" >
+                多线程
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/c&#43;&#43;%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%BF%AB%E6%8E%92/">C&#43;&#43;多线程实现快速排序算法</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Oct 30, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 2 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="一个实现c快排的算法">一个实现C++快排的算法
+</h1><p><img src="/post/c&#43;&#43;%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%BF%AB%E6%8E%92/1.png"
+	width="170"
+	height="66"
+	srcset="/post/c&#43;&#43;%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%BF%AB%E6%8E%92/1_hu_6361896a59d1ed7.png 480w, /post/c&#43;&#43;%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%BF%AB%E6%8E%92/1_hu_a46a163ded889b45.png 1024w"
+	loading="lazy"
+	
+		alt="speed"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="257"
+		data-flex-basis="618px"
+	
+></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;thread&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;ctime&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> <span style="color:#66d9ef">namespace</span> std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define N 10000000
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">rand_nums</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">*</span> nums, <span style="color:#66d9ef">int</span> n)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    srand((<span style="color:#66d9ef">unsigned</span> <span style="color:#66d9ef">int</span>)time(NULL));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        nums[i] <span style="color:#f92672">=</span> rand() <span style="color:#f92672">%</span> N;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">quick_sort_sigle_thread</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">*</span> nums, <span style="color:#66d9ef">int</span> left, <span style="color:#66d9ef">int</span> right)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (left <span style="color:#f92672">&gt;=</span> right) <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> left, j <span style="color:#f92672">=</span> right, base <span style="color:#f92672">=</span> nums[left];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (i <span style="color:#f92672">&lt;</span> j)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (i <span style="color:#f92672">&lt;</span> j <span style="color:#f92672">&amp;&amp;</span> nums[j] <span style="color:#f92672">&gt;=</span> base) <span style="color:#f92672">--</span>j; <span style="color:#75715e">//找一个比base小的
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> (i <span style="color:#f92672">&lt;</span> j <span style="color:#f92672">&amp;&amp;</span> nums[i] <span style="color:#f92672">&lt;=</span> base) <span style="color:#f92672">++</span>i; <span style="color:#75715e">//找一个比base大的
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> (i <span style="color:#f92672">&lt;</span> j) swap(nums[i], nums[j]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    swap(nums[left], nums[i]);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    quick_sort_sigle_thread(nums, left, i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    quick_sort_sigle_thread(nums, i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, right);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">quick_sort_multi_thread</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">*</span> nums, <span style="color:#66d9ef">int</span> left, <span style="color:#66d9ef">int</span> right)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (left <span style="color:#f92672">&gt;=</span> right) <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> left, j <span style="color:#f92672">=</span> right, base <span style="color:#f92672">=</span> nums[left];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (i <span style="color:#f92672">&lt;</span> j)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (i <span style="color:#f92672">&lt;</span> j <span style="color:#f92672">&amp;&amp;</span> nums[j] <span style="color:#f92672">&gt;=</span> base) <span style="color:#f92672">--</span>j; <span style="color:#75715e">//找一个比base小的
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> (i <span style="color:#f92672">&lt;</span> j <span style="color:#f92672">&amp;&amp;</span> nums[i] <span style="color:#f92672">&lt;=</span> base) <span style="color:#f92672">++</span>i; <span style="color:#75715e">//找一个比base大的
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> (i <span style="color:#f92672">&lt;</span> j) swap(nums[i], nums[j]);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    swap(nums[left], nums[i]);
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">thread</span> threads[<span style="color:#ae81ff">2</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (right <span style="color:#f92672">-</span> left <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">100000</span>)
+</span></span><span style="display:flex;"><span>    {   <span style="color:#75715e">//小于10w用递归
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        threads[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#66d9ef">thread</span>(quick_sort_sigle_thread, nums, left, i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>        threads[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#66d9ef">thread</span>(quick_sort_sigle_thread, nums, i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, right);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//大于10w继续用多线程分割
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        threads[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#66d9ef">thread</span>(quick_sort_multi_thread, nums, left, i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>        threads[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#66d9ef">thread</span>(quick_sort_multi_thread, nums, i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, right);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">2</span>; <span style="color:#f92672">++</span> i) threads[i].join(); 
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">print_nums</span>(<span style="color:#66d9ef">int</span><span style="color:#f92672">*</span> nums, <span style="color:#66d9ef">int</span> end, <span style="color:#66d9ef">int</span> start <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> start; i <span style="color:#f92672">&lt;</span> start <span style="color:#f92672">+</span>  end; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        cout <span style="color:#f92672">&lt;&lt;</span> nums[i] <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#39; &#39;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> endl;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>nums <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span>[N];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    rand_nums(nums, N);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// print_nums(nums, N);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;数组大小：&#34;</span> <span style="color:#f92672">&lt;&lt;</span> N <span style="color:#f92672">&lt;&lt;</span> endl;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> start_time, end_time;
+</span></span><span style="display:flex;"><span>    start_time <span style="color:#f92672">=</span> clock();
+</span></span><span style="display:flex;"><span>    quick_sort_sigle_thread(nums, <span style="color:#ae81ff">0</span>, N <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    end_time <span style="color:#f92672">=</span> clock();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;单线程用时：&#34;</span> <span style="color:#f92672">&lt;&lt;</span> (end_time <span style="color:#f92672">-</span> start_time) <span style="color:#f92672">/</span> <span style="color:#ae81ff">1000.0</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#39;s&#39;</span> <span style="color:#f92672">&lt;&lt;</span> endl;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// print_nums(nums, N);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    rand_nums(nums, N);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    start_time <span style="color:#f92672">=</span> clock();
+</span></span><span style="display:flex;"><span>    quick_sort_multi_thread(nums, <span style="color:#ae81ff">0</span>, N <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    end_time <span style="color:#f92672">=</span> clock();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;多线程用时：&#34;</span> <span style="color:#f92672">&lt;&lt;</span> (end_time <span style="color:#f92672">-</span> start_time) <span style="color:#f92672">/</span> <span style="color:#ae81ff">1000.0</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#39;s&#39;</span> <span style="color:#f92672">&lt;&lt;</span> endl;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// print_nums(nums, N);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">delete</span>[] nums;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredClasses: ["gist"]
+        });})
+</script>
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2025 Charent的博客
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

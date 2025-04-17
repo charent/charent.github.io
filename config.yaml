@@ -1,8 +1,7 @@
-baseurl: /
-languageCode: zh-cn
-theme: hugo-theme-stack
-pagerSize: 25
-title: Charent的博客
+module:
+    hugoVersion:
+        extended: true
+        min: "0.87.0"
 
 languages:
     zh-cn:
@@ -13,25 +12,14 @@ languages:
         languageName: English
         title: Charent's Blog
         weight: 2
-   
 
-# Change it to your Disqus shortname before using
-disqusShortname: hugo-theme-stack
-
-# GA Tracking ID
-googleAnalytics:
-
-# Theme i18n support
-# Available values: en, fr, id, ja, ko, pt-br, zh-cn, zh-tw, es, de, nl, it, th, el, uk, ar
 DefaultContentLanguage: zh-cn
 
-# Set hasCJKLanguage to true if DefaultContentLanguage is in [zh-cn ja ko]
-# This will make .Summary and .WordCount behave correctly for CJK languages.
-hasCJKLanguage: false
+googleAnalytics:
 
-permalinks:
-    post: /p/:slug/
-    page: /:slug/
+# permalinks:
+#     post: /p/:slug/
+#     page: /:slug/
 
 params:
     mainSections:
@@ -45,21 +33,23 @@ params:
         customText:
 
     dateFormat:
-        published:  2006-01-02
-        lastUpdated: 2006-01-02 15:04:05
+        published: Jan 02, 2006
+        lastUpdated: Jan 02, 2006 15:04 MST
 
     sidebar:
+        compact: false
         emoji: 😆
-        subtitle: 不积硅步，无以至千里
+        subtitle: 
         avatar:
             enabled: true
             local: true
             src: img/avatar.png
 
     article:
+        headingAnchor: false
         math: true
         toc: true
-        readingTime: false
+        readingTime: true
         license:
             enabled: false
             default: Licensed under CC BY-NC-SA 4.0
@@ -80,6 +70,12 @@ params:
             issueTerm: pathname
             label:
 
+        beaudar:
+            repo:
+            issueTerm: pathname
+            label:
+            theme:        
+
         remark42:
             host:
             site:
@@ -93,7 +89,7 @@ params:
             clientSecret:
             autoCreateIssue: false
 
-        # Waline client configuration see: https://waline.js.org/en/reference/client.html
+        # Waline client configuration see: https://waline.js.org/en/reference/client/props.html
         waline:
             serverURL:
             lang:
@@ -102,12 +98,11 @@ params:
             emoji:
                 - https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo
             requiredMeta:
-                - name
-                - email
-                - url
-            placeholder:
+                - nick
+                - mail
             locale:
                 admin: Admin
+                placeholder:
 
         twikoo:
             envId:
@@ -115,22 +110,19 @@ params:
             path:
             lang:
 
-        # See https://cactus.chat/docs/reference/web-client/#configuration for description of the various options
-        cactus:
-            defaultHomeserverUrl: "https://matrix.cactus.chat:8448"
-            serverName: "cactus.chat"
-            siteName: "" # You must insert a unique identifier here matching the one you registered (See https://cactus.chat/docs/getting-started/quick-start/#register-your-site)
-
         giscus:
             repo:
             repoID:
             category:
             categoryID:
             mapping:
+            strict:
             lightTheme:
             darkTheme:
             reactionsEnabled: 1
             emitMetadata: 0
+            inputPosition:
+            lang:
 
         gitalk:
             owner:
@@ -142,28 +134,18 @@ params:
         cusdis:
             host:
             id:
+
     widgets:
-        homepage:
-            - type: search
-            - type: archives
-              params:
-                  limit: 5
-            - type: categories
-              params:
-                  limit: 20
-            - type: tag-cloud
-              params:
-                  limit: 10
-        page:
-            - type: toc
+        homepage: []
+        page: []
 
     opengraph:
-        # twitter:
-        #     # Your Twitter username
-        #     site:
+        twitter:
+            # Your Twitter username
+            site:
 
-        #     # Available values: summary, summary_large_image
-        #     card: summary_large_image
+            # Available values: summary, summary_large_image
+            card: summary_large_image
 
     defaultImage:
         opengraph:
@@ -183,57 +165,12 @@ params:
             enabled: true
         content:
             enabled: true
-
-### Custom menu
-### See https://docs.stack.jimmycai.com/configuration/custom-menu.html
-### To remove about, archive and search page menu item, remove `menu` field from their FrontMatter
 menu:
-    main: []
-
-    social:
+    main:
         - identifier: github
           name: GitHub
           url: https://github.com/charent
+          weight: -100
           params:
-              icon: brand-github
-
-
-        # - identifier: gitee
-        #   name: Gitee
-        #   url: https://gitee.com/charent
-        #   params:
-        #       icon: brand-github
-        # - identifier: twitter
-        #   name: Twitter
-        #   url: https://twitter.com
-        #   params:
-        #       icon: brand-twitter
-
-related:
-    includeNewer: true
-    threshold: 60
-    toLower: false
-    indices:
-        - name: tags
-          weight: 100
-
-        - name: categories
-          weight: 200
-
-markup:
-    goldmark:
-        renderer:
-            ## Set to true if you have HTML content inside Markdown
-            unsafe: false
-    tableOfContents:
-        endLevel: 4
-        ordered: true
-        startLevel: 2
-    highlight:
-        noClasses: false
-        codeFences: true
-        guessSyntax: true
-        lineNoStart: 1
-        lineNos: true
-        lineNumbersInTable: true
-        tabWidth: 4
+            icon: brand-github
+            newTab: true

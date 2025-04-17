@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="数据集： 新闻标题数据集，14个类，训练集共75万条数据。\n解决思路： 使用“一对多”拆分策略：每次将一个类别作为正类（正样本），其余其他类别作为反类（负样本），产生N个二分类任务。 为什么不用“一对一”的拆分策略？一对一的拆分策略会产生 N ( N - 1 ) / 2 个分类任务，100个分类将会产生约5000个分类器，训练5000个分类器会花费大量时间，而“一对一”拆分将训练100个分类器，花费的时间更少。\n“一对多”策略产生的问题： 正负样本不均衡。当训练一个类别的时候，其余类别都是反类，产生了正负样本不均衡的问题。 解决方法： 每一类的训练数据中，正样本选N个，负样本从其余类别的样本中随机选N个样本。分批、分类别训练，随机取负样本，负样本尽可能多地包含所有其他类别。\n字向量： 使用开源的基于人民日报语料、Word + Ngram训练的预训练词向量，包含1664K的字、词。每个字、词的维度是300。向量矩阵大小：972M\n数据预处理： 数据集共包含14个类别，每个类别的样本从几万到二十几万不等，为了避免加载二十几万的正样本+二十几万的负样本造成内存爆炸，故限制每个类别的样本不超过5万条。 经过处理后，14个类的训练数据共 42 6208 条，测试数据 3 2081 条 统计句子长度，如下图。取句子最大长度为30，大于30的句子做截断处理，小于30的用0填充。 模型设计： BinaryClassifyModel( Conv1D(filters=196, kernel_size=4, strides=2, activation=&#39;relu&#39;) Conv1D(filters=64, kernel_size=3, strides=2, activation=&#39;relu&#39;) Dense(128, activation=&#39;relu&#39;) Dense(64, activation=&#39;relu&#39;) Dense(1, activation=&#39;sigmoid&#39;) ) 损失函数：二分类交叉熵 2层1维卷积+3层全连接，模型的最后输出的激活函数为sigmoid，sigmoid函数将输出映射到[0,1]，当sigmoid输出 $y&gt;0.5$ 时，认为输入x属于当前分类器的类；当sigmoid输出 $y ≤ 0.5$ 时，认为输入x不属于该类别。\n训练： 机器配置：CPU：i5-8300H；显卡：1050TI；内存：16G；显存：4G\n">
+<title>使用二分类实现多分类</title>
+
+<link rel='canonical' href='https://charent.github.io/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/'>
+
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="使用二分类实现多分类">
+<meta property='og:description' content="数据集： 新闻标题数据集，14个类，训练集共75万条数据。\n解决思路： 使用“一对多”拆分策略：每次将一个类别作为正类（正样本），其余其他类别作为反类（负样本），产生N个二分类任务。 为什么不用“一对一”的拆分策略？一对一的拆分策略会产生 N ( N - 1 ) / 2 个分类任务，100个分类将会产生约5000个分类器，训练5000个分类器会花费大量时间，而“一对一”拆分将训练100个分类器，花费的时间更少。\n“一对多”策略产生的问题： 正负样本不均衡。当训练一个类别的时候，其余类别都是反类，产生了正负样本不均衡的问题。 解决方法： 每一类的训练数据中，正样本选N个，负样本从其余类别的样本中随机选N个样本。分批、分类别训练，随机取负样本，负样本尽可能多地包含所有其他类别。\n字向量： 使用开源的基于人民日报语料、Word + Ngram训练的预训练词向量，包含1664K的字、词。每个字、词的维度是300。向量矩阵大小：972M\n数据预处理： 数据集共包含14个类别，每个类别的样本从几万到二十几万不等，为了避免加载二十几万的正样本+二十几万的负样本造成内存爆炸，故限制每个类别的样本不超过5万条。 经过处理后，14个类的训练数据共 42 6208 条，测试数据 3 2081 条 统计句子长度，如下图。取句子最大长度为30，大于30的句子做截断处理，小于30的用0填充。 模型设计： BinaryClassifyModel( Conv1D(filters=196, kernel_size=4, strides=2, activation=&#39;relu&#39;) Conv1D(filters=64, kernel_size=3, strides=2, activation=&#39;relu&#39;) Dense(128, activation=&#39;relu&#39;) Dense(64, activation=&#39;relu&#39;) Dense(1, activation=&#39;sigmoid&#39;) ) 损失函数：二分类交叉熵 2层1维卷积+3层全连接，模型的最后输出的激活函数为sigmoid，sigmoid函数将输出映射到[0,1]，当sigmoid输出 $y&gt;0.5$ 时，认为输入x属于当前分类器的类；当sigmoid输出 $y ≤ 0.5$ 时，认为输入x不属于该类别。\n训练： 机器配置：CPU：i5-8300H；显卡：1050TI；内存：16G；显存：4G\n">
+<meta property='og:url' content='https://charent.github.io/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/'>
+<meta property='og:site_name' content='Charent的博客'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2020-02-21T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2020-02-21T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="使用二分类实现多分类">
+<meta name="twitter:description" content="数据集： 新闻标题数据集，14个类，训练集共75万条数据。\n解决思路： 使用“一对多”拆分策略：每次将一个类别作为正类（正样本），其余其他类别作为反类（负样本），产生N个二分类任务。 为什么不用“一对一”的拆分策略？一对一的拆分策略会产生 N ( N - 1 ) / 2 个分类任务，100个分类将会产生约5000个分类器，训练5000个分类器会花费大量时间，而“一对一”拆分将训练100个分类器，花费的时间更少。\n“一对多”策略产生的问题： 正负样本不均衡。当训练一个类别的时候，其余类别都是反类，产生了正负样本不均衡的问题。 解决方法： 每一类的训练数据中，正样本选N个，负样本从其余类别的样本中随机选N个样本。分批、分类别训练，随机取负样本，负样本尽可能多地包含所有其他类别。\n字向量： 使用开源的基于人民日报语料、Word + Ngram训练的预训练词向量，包含1664K的字、词。每个字、词的维度是300。向量矩阵大小：972M\n数据预处理： 数据集共包含14个类别，每个类别的样本从几万到二十几万不等，为了避免加载二十几万的正样本+二十几万的负样本造成内存爆炸，故限制每个类别的样本不超过5万条。 经过处理后，14个类的训练数据共 42 6208 条，测试数据 3 2081 条 统计句子长度，如下图。取句子最大长度为30，大于30的句子做截断处理，小于30的用0填充。 模型设计： BinaryClassifyModel( Conv1D(filters=196, kernel_size=4, strides=2, activation=&#39;relu&#39;) Conv1D(filters=64, kernel_size=3, strides=2, activation=&#39;relu&#39;) Dense(128, activation=&#39;relu&#39;) Dense(64, activation=&#39;relu&#39;) Dense(1, activation=&#39;sigmoid&#39;) ) 损失函数：二分类交叉熵 2层1维卷积+3层全连接，模型的最后输出的激活函数为sigmoid，sigmoid函数将输出映射到[0,1]，当sigmoid输出 $y&gt;0.5$ 时，认为输入x属于当前分类器的类；当sigmoid输出 $y ≤ 0.5$ 时，认为输入x不属于该类别。\n训练： 机器配置：CPU：i5-8300H；显卡：1050TI；内存：16G；显存：4G\n">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">😆</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Charent的博客</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='https://github.com/charent' target="_blank">
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                
+                <span>GitHub</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" >
+                深度学习
+            </a>
+        
+            <a href="/categories/%E5%88%86%E7%B1%BB%E7%AE%97%E6%B3%95/" >
+                分类算法
+            </a>
+        
+            <a href="/categories/tensorflow/" >
+                Tensorflow
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/">使用二分类实现多分类</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Feb 21, 2020</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 5 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="数据集">数据集：
+</h1><p>新闻标题数据集，14个类，训练集共75万条数据。</p>
+<h2 id="解决思路">解决思路：
+</h2><p>使用“一对多”拆分策略：每次将一个类别作为正类（正样本），其余其他类别作为反类（负样本），产生N个二分类任务。
+为什么不用“一对一”的拆分策略？一对一的拆分策略会产生 N ( N - 1 ) / 2 个分类任务，100个分类将会产生约5000个分类器，训练5000个分类器会花费大量时间，而“一对一”拆分将训练100个分类器，花费的时间更少。</p>
+<h2 id="一对多策略产生的问题">“一对多”策略产生的问题：
+</h2><p>正负样本不均衡。当训练一个类别的时候，其余类别都是反类，产生了正负样本不均衡的问题。
+解决方法：
+每一类的训练数据中，正样本选N个，负样本从其余类别的样本中随机选N个样本。分批、分类别训练，随机取负样本，负样本尽可能多地包含所有其他类别。</p>
+<h2 id="字向量">字向量：
+</h2><p>使用开源的基于人民日报语料、Word + Ngram训练的预训练词向量，包含1664K的字、词。每个字、词的维度是300。向量矩阵大小：972M</p>
+<h2 id="数据预处理">数据预处理：
+</h2><p>数据集共包含14个类别，每个类别的样本从几万到二十几万不等，为了避免加载二十几万的正样本+二十几万的负样本造成内存爆炸，故限制每个类别的样本不超过5万条。
+经过处理后，14个类的训练数据共 42 6208 条，测试数据 3 2081 条
+统计句子长度，如下图。取句子最大长度为30，大于30的句子做截断处理，小于30的用0填充。
+<img src="/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/1.png"
+	width="472"
+	height="292"
+	srcset="/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/1_hu_b4b4a35a26c08303.png 480w, /post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/1_hu_ee163f4fe274faca.png 1024w"
+	loading="lazy"
+	
+		alt="length"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="161"
+		data-flex-basis="387px"
+	
+></p>
+<h1 id="模型设计">模型设计：
+</h1><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>BinaryClassifyModel(
+</span></span><span style="display:flex;"><span>  Conv1D(filters<span style="color:#f92672">=</span><span style="color:#ae81ff">196</span>, kernel_size<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>, strides<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>)
+</span></span><span style="display:flex;"><span>  Conv1D(filters<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span>, kernel_size<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>, strides<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>)
+</span></span><span style="display:flex;"><span>  Dense(<span style="color:#ae81ff">128</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>)
+</span></span><span style="display:flex;"><span>  Dense(<span style="color:#ae81ff">64</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>)
+</span></span><span style="display:flex;"><span>  Dense(<span style="color:#ae81ff">1</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;sigmoid&#39;</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><h2 id="损失函数二分类交叉熵">损失函数：二分类交叉熵
+</h2><p>2层1维卷积+3层全连接，模型的最后输出的激活函数为<code>sigmoid</code>，<code>sigmoid</code>函数将输出映射到[0,1]，当<code>sigmoid</code>输出 $y&gt;0.5$ 时，认为输入x属于当前分类器的类；当<code>sigmoid</code>输出 $y ≤ 0.5$ 时，认为输入x不属于该类别。</p>
+<h2 id="训练">训练：
+</h2><p>机器配置：CPU：i5-8300H；显卡：1050TI；内存：16G；显存：4G</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>BATCH_SIZE <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span> <span style="color:#75715e">#批次大小</span>
+</span></span><span style="display:flex;"><span>EPOCH <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span> <span style="color:#75715e">#训练轮次</span>
+</span></span><span style="display:flex;"><span>LEARNING_RATE <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.005</span> <span style="color:#75715e">#学习率</span>
+</span></span></code></pre></div><ul>
+<li>使用Adam优化器
+每个类训练完成后，将模型保存到 ./model_save/class_ + category_id 文件夹内，category_id 为分类id，从0到13，共14个分类。
+42万训练数据，14个二分类器训练共用了15分49秒，平均每个分类器训练用时67秒。
+训练过程中的平均正确率没有统计，下图展示类别6的在训练过程中的损失和正确率：
+<img src="/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/2.png"
+	width="451"
+	height="616"
+	srcset="/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/2_hu_5470aed0c1c88e41.png 480w, /post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/2_hu_1f9c975f3a7d3eee.png 1024w"
+	loading="lazy"
+	
+		alt="loss"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="73"
+		data-flex-basis="175px"
+	
+></li>
+</ul>
+<h2 id="测试">测试：
+</h2><p>模型训练完成后会将模型的参数保存到文件中，测试时先从文件加载训练好的二分类模型，再让测试数据依次通过14二分类模型，记录下每个二分类模型的输出概率（由于使用了sigmoid函数，输出在[0,1]之间），哪个二分类模型的输出概率最大，则认为测试样本属于该类。
+测试数据如下图所示，平均正确率：88.59%，3万条测试数据共花了40秒，平均每个样本通过14个二分器用时1.3毫秒。
+<img src="/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/3.png"
+	width="516"
+	height="406"
+	srcset="/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/3_hu_b6052e410f6a2a18.png 480w, /post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/3_hu_fb132ef2953118d7.png 1024w"
+	loading="lazy"
+	
+		alt="test"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="127"
+		data-flex-basis="305px"
+	
+></p>
+<h1 id="结论">结论：
+</h1><p>不管从训练用时、模型计算用时、模型大小等方面考虑，使用二分类实现多分类对文本分类可行。新增加一个分类，只需要新添加一个二分类器即可，当分类更改时对二分类器做微调也比较方便，不改变模型的输入输出大小。不像传统做法：只有一个模型，模型参数巨大，新增或者删除一个分类，要对模型最后的全连接层调整，以调整输出的大小。对于多标签分类，每个标签训练一个二分类器即可解决。对于长文本，可以用自注意力层替换第一层卷积层，最大文本长度可以支持1000以上。</p>
+<ul>
+<li>缺点：需要大量的训练数据。</li>
+</ul>
+<h2 id="附代码">附代码
+</h2><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> tensorflow <span style="color:#66d9ef">as</span> tf
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> matplotlib  <span style="color:#f92672">import</span> pyplot <span style="color:#66d9ef">as</span> plt
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> gensim.models <span style="color:#f92672">import</span> KeyedVectors
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> datetime
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TRAIN_TEXT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;./data/新闻标题分类Train.txt&#39;</span>
+</span></span><span style="display:flex;"><span>TEST_TEXT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;./data/新闻标题分类Test.txt&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#人民日报预训练字向量</span>
+</span></span><span style="display:flex;"><span>EMBEDDINGD_DIR <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;../Word_Embeddings/sgns.renmin.bigram-char&#39;</span>
+</span></span><span style="display:flex;"><span>embedding <span style="color:#f92672">=</span> KeyedVectors<span style="color:#f92672">.</span>load_word2vec_format(EMBEDDINGD_DIR, binary<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>,limit<span style="color:#f92672">=</span><span style="color:#ae81ff">50000</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">word_to_vector</span>(words_array, words_embedding, max_len<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    将字转为字嵌入，words_array为一维数组，每个元素是一句话
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    words_vector <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> sentence <span style="color:#f92672">in</span> words_array:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> max_len <span style="color:#f92672">!=</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>            current_vector <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros((max_len,<span style="color:#ae81ff">300</span>),dtype <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>float32)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            current_vector <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>zeros((len(sentence), <span style="color:#ae81ff">300</span>), dtype <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>float32)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         print(current_vector.shape)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        index <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> word <span style="color:#f92672">in</span> sentence:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>                current_vector[index] <span style="color:#f92672">=</span> words_embedding[word]
+</span></span><span style="display:flex;"><span>                index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> index <span style="color:#f92672">==</span> max_len:
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">except</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">#可能会出现某个字在embedding中不存在的情况，则跳过这个字</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">continue</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">#end for</span>
+</span></span><span style="display:flex;"><span>        words_vector<span style="color:#f92672">.</span>append(current_vector)
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         print(words_vector.shape)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         break</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#end for</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> np<span style="color:#f92672">.</span>array(words_vector)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">read_data</span>(train_text):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    读取训练文件，并划分训练集和测试集
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    category <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    news_data <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    news_label <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> open(train_text,<span style="color:#e6db74">&#39;r&#39;</span>, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;utf-8&#39;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>        lines <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span>readlines()
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    current_category <span style="color:#f92672">=</span> int(<span style="color:#e6db74">&#39;0&#39;</span>)
+</span></span><span style="display:flex;"><span>    category<span style="color:#f92672">.</span>append([current_category, <span style="color:#e6db74">&#39;财经&#39;</span>])
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#[&#39;0&#39;, &#39;财经&#39;, &#39;上证50ETF净申购突增\n&#39;]</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#每个类别保留的最大样本数目，防止内存爆炸</span>
+</span></span><span style="display:flex;"><span>    count <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    max_keep <span style="color:#f92672">=</span> <span style="color:#ae81ff">50000</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> line <span style="color:#f92672">in</span> lines:
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        line <span style="color:#f92672">=</span> line<span style="color:#f92672">.</span>strip()<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\t</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        cate <span style="color:#f92672">=</span> int(line[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">#还是当前类，但是count已经到达最大max_keep，不处理</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> cate <span style="color:#f92672">==</span> current_category <span style="color:#f92672">and</span> count <span style="color:#f92672">&gt;=</span> max_keep:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">continue</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> cate <span style="color:#f92672">!=</span> current_category:
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#             print(count)</span>
+</span></span><span style="display:flex;"><span>            current_category <span style="color:#f92672">=</span> cate
+</span></span><span style="display:flex;"><span>            category<span style="color:#f92672">.</span>append([current_category, line[<span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>            count <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        news_data<span style="color:#f92672">.</span>append(line[<span style="color:#ae81ff">2</span>])
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        news_label<span style="color:#f92672">.</span>append(cate)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        count <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    news_data <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array(news_data)
+</span></span><span style="display:flex;"><span>    news_label <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array(news_label)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#划分训练集和测试集</span>
+</span></span><span style="display:flex;"><span>    n <span style="color:#f92672">=</span> len(news_data)
+</span></span><span style="display:flex;"><span>    sample_index <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>permutation(n)<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>    train_index <span style="color:#f92672">=</span> sample_index[ : int(n <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.93</span>)]
+</span></span><span style="display:flex;"><span>    test_index <span style="color:#f92672">=</span> sample_index[int(n <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.93</span>) : ]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    train_data <span style="color:#f92672">=</span> news_data[train_index]
+</span></span><span style="display:flex;"><span>    train_label <span style="color:#f92672">=</span> news_label[train_index]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    test_data <span style="color:#f92672">=</span> news_data[test_index]
+</span></span><span style="display:flex;"><span>    test_label <span style="color:#f92672">=</span> news_label[test_index]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> np<span style="color:#f92672">.</span>array(category), train_data, train_label, test_data,test_label
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#取出第一类作为正样本,再从其余类中取出负样本</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_category_sample</span>(category_id, data, label, batch_size<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    取出一个类作为正样本，再从其余类中随机选出和正样本数量相当的负样本，尽可能包含所有类
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    pos_sample_index <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    other_sample_index <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    n <span style="color:#f92672">=</span> len(label)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> range(n):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> category_id <span style="color:#f92672">==</span> label[index]:
+</span></span><span style="display:flex;"><span>            pos_sample_index<span style="color:#f92672">.</span>append(index)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            other_sample_index<span style="color:#f92672">.</span>append(index)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#正样本个数</span>
+</span></span><span style="display:flex;"><span>    pos_n <span style="color:#f92672">=</span> len(pos_sample_index)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#随机取跟正样本数量一样的负样本</span>
+</span></span><span style="display:flex;"><span>    neg_sample_index <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>choice(other_sample_index, size<span style="color:#f92672">=</span>pos_n, replace<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#将正负样本的index拼接并打乱顺序</span>
+</span></span><span style="display:flex;"><span>    sample_index <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>concatenate((pos_sample_index, neg_sample_index))<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>    np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>shuffle(sample_index)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#用sample_index取出样本</span>
+</span></span><span style="display:flex;"><span>    n <span style="color:#f92672">=</span> len(sample_index)
+</span></span><span style="display:flex;"><span>    train_index <span style="color:#f92672">=</span> sample_index[ : int(n <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.9</span>)]
+</span></span><span style="display:flex;"><span>    test_index <span style="color:#f92672">=</span> sample_index[int(n <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.9</span>) : ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    train_data <span style="color:#f92672">=</span> data[train_index]
+</span></span><span style="display:flex;"><span>    train_label <span style="color:#f92672">=</span> label[train_index]
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     print(train_index.shape)</span>
+</span></span><span style="display:flex;"><span>    test_data <span style="color:#f92672">=</span> data[test_index]
+</span></span><span style="display:flex;"><span>    test_label <span style="color:#f92672">=</span> label[test_index]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#将当前类的label设置为1，其他类设置为0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">change_label</span>(lab):
+</span></span><span style="display:flex;"><span>        n <span style="color:#f92672">=</span> len(lab)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(n):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> lab[i] <span style="color:#f92672">==</span> category_id:
+</span></span><span style="display:flex;"><span>                lab[i] <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                lab[i] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> lab
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    train_label <span style="color:#f92672">=</span> change_label(train_label)
+</span></span><span style="display:flex;"><span>    test_label <span style="color:#f92672">=</span> change_label(test_label)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> train_data, train_label, test_data, test_label    
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#统计标题长度</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">count_len</span>(data):
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    max_len <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    n <span style="color:#f92672">=</span> len(data)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    len_dict <span style="color:#f92672">=</span> {}
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(n):
+</span></span><span style="display:flex;"><span>        sentence_len <span style="color:#f92672">=</span> len(data[i])
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> sentence_len <span style="color:#f92672">in</span> len_dict:
+</span></span><span style="display:flex;"><span>            len_dict[sentence_len] <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            len_dict[sentence_len] <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    lengths <span style="color:#f92672">=</span> [key <span style="color:#66d9ef">for</span> key <span style="color:#f92672">in</span> len_dict<span style="color:#f92672">.</span>keys()]
+</span></span><span style="display:flex;"><span>    lengths<span style="color:#f92672">.</span>sort()
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    count <span style="color:#f92672">=</span> [len_dict[key] <span style="color:#66d9ef">for</span> key <span style="color:#f92672">in</span> lengths]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    plt<span style="color:#f92672">.</span>bar(lengths, count)
+</span></span><span style="display:flex;"><span>    plt<span style="color:#f92672">.</span>show()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#二分类模型</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">BinaryClassifyModel</span>(tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>Model):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self,filters<span style="color:#f92672">=</span><span style="color:#ae81ff">196</span>, kernel_size<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>):
+</span></span><span style="display:flex;"><span>        super()<span style="color:#f92672">.</span>__init__()
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>conv1 <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Conv1D(filters, kernel_size, strides<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>maxpool1 <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>MaxPool1D(strides<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>conv2 <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Conv1D(filters<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span>, kernel_size<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>maxpool2 <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>MaxPool1D(strides<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>fc1 <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">128</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>fc2 <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">64</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;relu&#39;</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>fc3 <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>layers<span style="color:#f92672">.</span>Dense(<span style="color:#ae81ff">1</span>, activation<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;sigmoid&#39;</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">call</span>(self, inputs):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">#卷积层</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>conv1(inputs) <span style="color:#75715e">#shape: batch_size,new_steps(stpe / strides (- 1)), filters ,(batch_size, 14 ,196)</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>maxpool1(x) <span style="color:#75715e">#(batch_size,7, 196)</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>conv2(x) <span style="color:#75715e">#(batch_size,5, 64)</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>maxpool2(x) <span style="color:#75715e">#(batch_size,2, 64)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">#将三维向量reshape为二维矩阵，用于全连接层输入</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>reshape(x, (tf<span style="color:#f92672">.</span>shape(x)[<span style="color:#ae81ff">0</span>], <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)) <span style="color:#75715e">#(batch_size, 128)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         print(x.shape)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">#全连接层</span>
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>fc1(x)
+</span></span><span style="display:flex;"><span>        x <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>fc2(x)
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         output = tf.nn.softmax(self.fc3(x))</span>
+</span></span><span style="display:flex;"><span>        output <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>fc3(x)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> tf<span style="color:#f92672">.</span>reshape(output, [output<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>]])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">train_a_classifier</span>(train_vector,train_label, model, save_dir,learning_rate<span style="color:#f92672">=</span><span style="color:#ae81ff">0.001</span>, msg<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;&#39;</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    训练一个模型，
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    train_iterator <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>data<span style="color:#f92672">.</span>Dataset<span style="color:#f92672">.</span>from_tensor_slices((train_vector, train_label))<span style="color:#f92672">.</span>batch(BATCH_SIZE)<span style="color:#f92672">.</span>repeat(EPOCH)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    optimizer <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>optimizers<span style="color:#f92672">.</span>Adam(learning_rate<span style="color:#f92672">=</span>learning_rate)
+</span></span><span style="display:flex;"><span>    check_point <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>Checkpoint(binary_model <span style="color:#f92672">=</span> model)
+</span></span><span style="display:flex;"><span>    checkpoint_manager <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>CheckpointManager(check_point, directory<span style="color:#f92672">=</span>save_dir, max_to_keep<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>    acc_ary <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    loss_ary <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    steps <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> tf<span style="color:#f92672">.</span>device(<span style="color:#e6db74">&#39;/gpu:0&#39;</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> step,(x, y) <span style="color:#f92672">in</span> enumerate(train_iterator):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">with</span> tf<span style="color:#f92672">.</span>GradientTape() <span style="color:#66d9ef">as</span> tape:
+</span></span><span style="display:flex;"><span>             
+</span></span><span style="display:flex;"><span>                y_pred <span style="color:#f92672">=</span> model(x)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">#损失函数,二分类交叉熵</span>
+</span></span><span style="display:flex;"><span>                loss <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>keras<span style="color:#f92672">.</span>losses<span style="color:#f92672">.</span>binary_crossentropy(y_pred<span style="color:#f92672">=</span>y_pred, y_true<span style="color:#f92672">=</span>y)
+</span></span><span style="display:flex;"><span>               
+</span></span><span style="display:flex;"><span>                loss <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>reduce_mean(loss)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">#计算正确率</span>
+</span></span><span style="display:flex;"><span>                y_pred <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>where(y_pred <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.5</span>, x<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>zeros_like(y_pred), y<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>ones_like(y_pred))
+</span></span><span style="display:flex;"><span>                y_pred <span style="color:#f92672">=</span> y_pred<span style="color:#f92672">.</span>numpy()<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>                train_acc <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>sum(y_pred <span style="color:#f92672">==</span> y) <span style="color:#f92672">/</span> y<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                 print(y_pred)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                 print(y)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                 print(train_acc)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#                 break</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">#统计损失和正确率，用于画图</span>
+</span></span><span style="display:flex;"><span>                loss_ary<span style="color:#f92672">.</span>append(loss<span style="color:#f92672">.</span>numpy())
+</span></span><span style="display:flex;"><span>                acc_ary<span style="color:#f92672">.</span>append(train_acc)
+</span></span><span style="display:flex;"><span>                steps<span style="color:#f92672">.</span>append(step)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                grads <span style="color:#f92672">=</span> tape<span style="color:#f92672">.</span>gradient(loss, model<span style="color:#f92672">.</span>variables)
+</span></span><span style="display:flex;"><span>                optimizer<span style="color:#f92672">.</span>apply_gradients(grads_and_vars<span style="color:#f92672">=</span> zip(grads, model<span style="color:#f92672">.</span>variables))
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> step <span style="color:#f92672">%</span> <span style="color:#ae81ff">200</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>                    print(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">  setp: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> , loss : </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> , train acc : </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>format(msg, step, loss, train_acc))
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>        plt<span style="color:#f92672">.</span>plot(steps, loss_ary, c<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;r&#39;</span>)
+</span></span><span style="display:flex;"><span>        plt<span style="color:#f92672">.</span>title(msg <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;loss&#39;</span>)
+</span></span><span style="display:flex;"><span>        plt<span style="color:#f92672">.</span>show()
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        plt<span style="color:#f92672">.</span>plot(steps, acc_ary, c<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;b&#39;</span>)
+</span></span><span style="display:flex;"><span>        plt<span style="color:#f92672">.</span>title(msg <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;accuracy&#39;</span>)
+</span></span><span style="display:flex;"><span>        plt<span style="color:#f92672">.</span>show()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        path <span style="color:#f92672">=</span> checkpoint_manager<span style="color:#f92672">.</span>save()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;保存模型到：</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(path))
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> model
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">train_all_classifier</span>(category, train_data, train_label):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    训练所有分类器
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    categroy：二维数组，第一列为category_id, 第列为id对应的名称
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    train_data,train_laber：所有类别的训练数据和标签，都是一维数组，一个元素为一句话或一个标签
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    models_list <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    models_save_dir <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#     print(train_data.shape)</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> cate <span style="color:#f92672">in</span> category:
+</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> BinaryClassifyModel()
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        category_id <span style="color:#f92672">=</span> int(cate[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;当前训练：</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(category_id))
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        start_time <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>datetime<span style="color:#f92672">.</span>now()
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        data_train, label_train, data_test, label_test <span style="color:#f92672">=</span> get_category_sample(category_id, train_data, train_label)
+</span></span><span style="display:flex;"><span>        train_vector <span style="color:#f92672">=</span> word_to_vector(data_train, embedding, max_len<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;准备数据用时：</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(datetime<span style="color:#f92672">.</span>datetime<span style="color:#f92672">.</span>now() <span style="color:#f92672">-</span> start_time))
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#         test_vector = word_to_vector(data_test, embedding, max_len=30)</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">#MODEL_SAVE_DIR命名规则，MODEL_SAVE_DIR + category_id，如./model_save/class_1，./model_save/class_2</span>
+</span></span><span style="display:flex;"><span>        model <span style="color:#f92672">=</span> train_a_classifier(train_vector, label_train, model,save_dir<span style="color:#f92672">=</span>MODEL_SAVE_DIR <span style="color:#f92672">+</span> str(category_id), learning_rate<span style="color:#f92672">=</span>LEARNING_RATE, msg<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;class_&#39;</span><span style="color:#f92672">+</span>str(category_id))
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;训练用时：</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(datetime<span style="color:#f92672">.</span>datetime<span style="color:#f92672">.</span>now() <span style="color:#f92672">-</span> start_time))
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        models_list<span style="color:#f92672">.</span>append(model)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_all_classifier</span>(category, test_data, test_laber, need_load_checkpoint<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>, model_ary<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&#39;&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    测试所有分类器的性能
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    start_time <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>datetime<span style="color:#f92672">.</span>now()
+</span></span><span style="display:flex;"><span>    test_vector <span style="color:#f92672">=</span> word_to_vector(test_data, embedding, max_len<span style="color:#f92672">=</span><span style="color:#ae81ff">30</span>)
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;准备数据用时：</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(datetime<span style="color:#f92672">.</span>datetime<span style="color:#f92672">.</span>now() <span style="color:#f92672">-</span> start_time))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#从文件中加载训练好的模型</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> need_load_checkpoint:
+</span></span><span style="display:flex;"><span>        model_ary <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> cate <span style="color:#f92672">in</span> category:
+</span></span><span style="display:flex;"><span>            category_id <span style="color:#f92672">=</span> int(cate[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>            model <span style="color:#f92672">=</span> BinaryClassifyModel()
+</span></span><span style="display:flex;"><span>            check_point <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>Checkpoint(binary_model <span style="color:#f92672">=</span> model)
+</span></span><span style="display:flex;"><span>            check_point<span style="color:#f92672">.</span>restore(tf<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>latest_checkpoint(MODEL_SAVE_DIR <span style="color:#f92672">+</span> str(category_id)))
+</span></span><span style="display:flex;"><span>            model_ary<span style="color:#f92672">.</span>append(model)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>    start_time <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>datetime<span style="color:#f92672">.</span>now()
+</span></span><span style="display:flex;"><span>    test_iterator <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>data<span style="color:#f92672">.</span>Dataset<span style="color:#f92672">.</span>from_tensor_slices((test_vector, test_label))<span style="color:#f92672">.</span>batch(BATCH_SIZE)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    acc_ary <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    count <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> tf<span style="color:#f92672">.</span>device(<span style="color:#e6db74">&#39;/gpu:0&#39;</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> x,y <span style="color:#f92672">in</span> test_iterator:
+</span></span><span style="display:flex;"><span>            class_probability <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            n <span style="color:#f92672">=</span> len(model_ary)
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">#测试样本依次通过每个二分类分类器，并记录下是该类的概率,哪个分类器的输出概率最大，则认为是哪个类</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(n):
+</span></span><span style="display:flex;"><span>                y_pro <span style="color:#f92672">=</span> model_ary[i](x)
+</span></span><span style="display:flex;"><span>                class_probability<span style="color:#f92672">.</span>append(y_pro)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            y_pred <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>argmax(class_probability, axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)<span style="color:#f92672">.</span>numpy()<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>int32)
+</span></span><span style="display:flex;"><span>            test_acc <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>sum(y_pred <span style="color:#f92672">==</span> y) <span style="color:#f92672">/</span> y<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span>            acc_ary<span style="color:#f92672">.</span>append(test_acc)
+</span></span><span style="display:flex;"><span>            count <span style="color:#f92672">+=</span> y<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">#endfor</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#end with</span>
+</span></span><span style="display:flex;"><span>    end_time <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>datetime<span style="color:#f92672">.</span>now()
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;平均正确率: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(np<span style="color:#f92672">.</span>average(acc_ary)))
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;测试总用时：</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(end_time <span style="color:#f92672">-</span> start_time))
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;共测试 </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> 个样本，平均每个样本计算耗时：</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(count, (end_time <span style="color:#f92672">-</span> start_time) <span style="color:#f92672">/</span> count))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    plt<span style="color:#f92672">.</span>plot(np<span style="color:#f92672">.</span>arange(<span style="color:#ae81ff">0</span>, len(acc_ary)), acc_ary, c<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;g&#39;</span>)
+</span></span><span style="display:flex;"><span>    plt<span style="color:#f92672">.</span>title(<span style="color:#e6db74">&#39;test accuracy&#39;</span>)
+</span></span><span style="display:flex;"><span>    plt<span style="color:#f92672">.</span>show()
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>BATCH_SIZE <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>EPOCH <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>LEARNING_RATE <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.005</span>
+</span></span><span style="display:flex;"><span>LOG_DIR <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;./model_log&#39;</span>
+</span></span><span style="display:flex;"><span>MODEL_SAVE_DIR <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;./model_save/class_&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#读取训练数据</span>
+</span></span><span style="display:flex;"><span>category, train_data, train_label, test_data,test_label <span style="color:#f92672">=</span> read_data(TRAIN_TEXT)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#统计句子长度，确定最长序列</span>
+</span></span><span style="display:flex;"><span>count_len(train_data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#训练所有分类器</span>
+</span></span><span style="display:flex;"><span>start_time <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>datetime<span style="color:#f92672">.</span>now()
+</span></span><span style="display:flex;"><span>models_list <span style="color:#f92672">=</span> train_all_classifier(category, train_data, train_label)
+</span></span><span style="display:flex;"><span>end_time <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>datetime<span style="color:#f92672">.</span>now()
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#39;训练总用时：</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(end_time <span style="color:#f92672">-</span> start_time))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#测试所有分类器</span>
+</span></span><span style="display:flex;"><span>test_all_classifier(category, test_data, test_label,need_load_checkpoint<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div>
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredClasses: ["gist"]
+        });})
+</script>
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2025 Charent的博客
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

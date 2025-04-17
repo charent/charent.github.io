@@ -31,7 +31,7 @@
     <loc>https://charent.github.io/post/</loc>
     <lastmod>2025-01-12T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/%E5%B0%96%E5%88%BA/</loc>
+    <loc>https://charent.github.io/post/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/</loc>
     <lastmod>2025-01-12T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/</loc>
@@ -40,7 +40,7 @@
     <loc>https://charent.github.io/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</loc>
     <lastmod>2025-01-12T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/mini-hash%E6%96%87%E6%A1%A3%E5%8E%BB%E9%87%8D/</loc>
+    <loc>https://charent.github.io/post/minihash%E6%96%87%E6%A1%A3%E5%8E%BB%E9%87%8D/</loc>
     <lastmod>2024-01-17T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/</loc>
@@ -52,10 +52,10 @@
     <loc>https://charent.github.io/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/</loc>
     <lastmod>2024-01-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E6%8E%A8%E5%AF%BC/</loc>
+    <loc>https://charent.github.io/post/%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E6%8E%A8%E5%AF%BC/</loc>
     <lastmod>2024-01-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/llama2%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E6%96%B9%E9%9D%A2%E7%9A%84%E6%94%B9%E8%BF%9B/</loc>
+    <loc>https://charent.github.io/post/llama2%E7%9A%84%E6%94%B9%E8%BF%9B/</loc>
     <lastmod>2023-11-12T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/llm%E5%A4%A7%E6%A8%A1%E5%9E%8B/</loc>
@@ -64,7 +64,7 @@
     <loc>https://charent.github.io/categories/pytorch/</loc>
     <lastmod>2023-11-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/pytorch%E5%8A%A0%E8%BD%BD%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%9B%86/</loc>
+    <loc>https://charent.github.io/post/pytorch%E5%8A%A0%E8%BD%BD%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%9B%86/</loc>
     <lastmod>2023-11-05T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E6%95%B0%E6%8D%AE%E9%9B%86/</loc>
@@ -73,16 +73,16 @@
     <loc>https://charent.github.io/categories/c&#43;&#43;/</loc>
     <lastmod>2023-10-30T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%9E%E7%8E%B0%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/</loc>
+    <loc>https://charent.github.io/post/c&#43;&#43;%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%BF%AB%E6%8E%92/</loc>
     <lastmod>2023-10-30T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
     <lastmod>2023-10-30T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/pytorch%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%9B%86num_workers%E5%A4%A7%E4%BA%8E1%E5%86%85%E5%AD%98%E7%BC%93%E6%85%A2%E5%A2%9E%E6%B6%A8/</loc>
+    <loc>https://charent.github.io/post/pytorch%E5%A4%A7%E6%95%B0%E6%8D%AEnum_workers%E9%85%8D%E7%BD%AE%E5%86%85%E5%AD%98%E7%BC%93%E6%85%A2%E5%A2%9E%E6%B6%A8/</loc>
     <lastmod>2023-10-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/parquet%E6%96%87%E4%BB%B6%E7%9A%84%E8%AF%BB%E5%86%99%E5%92%8C%E5%BE%AA%E7%8E%AF%E9%81%8D%E5%8E%86/</loc>
+    <loc>https://charent.github.io/post/parquet%E6%96%87%E4%BB%B6%E7%9A%84%E8%AF%BB%E5%86%99%E5%92%8C%E5%BE%AA%E7%8E%AF%E9%81%8D%E5%8E%86/</loc>
     <lastmod>2023-08-21T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/</loc>
@@ -91,52 +91,52 @@
     <loc>https://charent.github.io/categories/leetcode/</loc>
     <lastmod>2023-05-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/prime%E7%AE%97%E6%B3%95/</loc>
+    <loc>https://charent.github.io/post/prime%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2023-05-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%B9%B6%E6%9F%A5%E9%9B%86/</loc>
+    <loc>https://charent.github.io/post/%E5%B9%B6%E6%9F%A5%E9%9B%86/</loc>
     <lastmod>2023-03-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%AD%97%E5%85%B8%E6%A0%91%E5%89%8D%E7%BC%80%E6%A0%91trie/</loc>
+    <loc>https://charent.github.io/post/%E5%AD%97%E5%85%B8%E6%A0%91%E5%89%8D%E7%BC%80%E6%A0%91trie/</loc>
     <lastmod>2022-11-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/</loc>
+    <loc>https://charent.github.io/post/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/</loc>
     <lastmod>2022-08-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/</loc>
+    <loc>https://charent.github.io/post/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%89%B9%E5%BE%81%E9%80%89%E5%88%99%E4%B9%8Biv%E5%80%BC%E8%AE%A1%E7%AE%97/</loc>
     <lastmod>2022-04-16T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9/</loc>
     <lastmod>2022-04-16T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/</loc>
+    <loc>https://charent.github.io/post/office%E5%85%AC%E5%BC%8F%E5%B1%85%E4%B8%AD/</loc>
     <lastmod>2021-02-26T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/windows/</loc>
     <lastmod>2021-02-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%88%B7%E9%A2%98%E6%A8%A1%E6%9D%BF/</loc>
+    <loc>https://charent.github.io/post/leetcode%E5%B8%B8%E8%A7%81%E6%A8%A1%E6%9D%BF/</loc>
     <lastmod>2021-02-26T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/git/</loc>
     <lastmod>2021-01-03T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E9%85%8D%E7%BD%AE%E9%A1%B9%E7%9B%AE%E5%8F%AF%E6%8E%A8%E9%80%81%E5%88%B0github%E5%92%8Cgitee/</loc>
+    <loc>https://charent.github.io/post/%E9%85%8D%E7%BD%AE%E9%A1%B9%E7%9B%AE%E5%8F%AF%E6%8E%A8%E9%80%81%E5%88%B0github%E5%92%8Cgitee/</loc>
     <lastmod>2021-01-03T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/cpp%E4%BA%8C%E5%8F%89%E6%A0%91%E9%9D%9E%E9%80%92%E5%BD%92%E9%81%8D%E5%8E%86/</loc>
+    <loc>https://charent.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E9%9D%9E%E9%80%92%E5%BD%92%E9%81%8D%E5%8E%86/</loc>
     <lastmod>2020-10-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/c-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E5%90%8C%E6%AD%A5/</loc>
+    <loc>https://charent.github.io/post/cpp%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E5%90%8C%E6%AD%A5/</loc>
     <lastmod>2020-10-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/cpp%E5%9F%BA%E7%A1%80/</loc>
+    <loc>https://charent.github.io/post/cpp%E5%9F%BA%E7%A1%80/</loc>
     <lastmod>2020-09-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/python/</loc>
     <lastmod>2020-05-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85python3.7/</loc>
+    <loc>https://charent.github.io/post/%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85python3.7/</loc>
     <lastmod>2020-05-25T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/api%E9%AB%98%E5%B9%B6%E5%8F%91/</loc>
@@ -145,22 +145,22 @@
     <loc>https://charent.github.io/categories/linux/</loc>
     <lastmod>2020-03-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/ubuntu%E9%85%8D%E7%BD%AEnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/</loc>
+    <loc>https://charent.github.io/post/ubuntu%E9%85%8D%E7%BD%AEnginx%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/</loc>
     <lastmod>2020-03-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/win10%E4%B8%8Blinux%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/</loc>
+    <loc>https://charent.github.io/post/win10%E4%B8%8Blinux%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/</loc>
     <lastmod>2020-03-26T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/</loc>
     <lastmod>2020-03-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/geventgunicornuvicorn%E4%BB%8B%E7%BB%8D/</loc>
+    <loc>https://charent.github.io/post/geventgunicornuvicorn/</loc>
     <lastmod>2020-03-24T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/flask%E9%AB%98%E5%B9%B6%E5%8F%91%E5%A4%84%E7%90%86/</loc>
+    <loc>https://charent.github.io/post/flask%E9%AB%98%E5%B9%B6%E5%8F%91%E5%A4%84%E7%90%86/</loc>
     <lastmod>2020-03-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%B0%8F%E6%A0%B7%E6%9C%AC%E5%AD%A6%E4%B9%A0/</loc>
+    <loc>https://charent.github.io/post/%E5%B0%8F%E6%A0%B7%E6%9C%AC%E5%AD%A6%E4%B9%A0/</loc>
     <lastmod>2020-03-15T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/tensorflow/</loc>
@@ -169,67 +169,67 @@
     <loc>https://charent.github.io/categories/%E5%88%86%E7%B1%BB%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2020-03-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/</loc>
+    <loc>https://charent.github.io/post/%E5%AD%AA%E7%94%9F%E7%BD%91%E7%BB%9C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BBsiamese-network/</loc>
     <lastmod>2020-03-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/</loc>
+    <loc>https://charent.github.io/post/%E4%BD%BF%E7%94%A8%E4%BA%8C%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB/</loc>
     <lastmod>2020-02-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%A4%9A%E6%A0%87%E7%AD%BE%E5%88%86%E7%B1%BB/</loc>
+    <loc>https://charent.github.io/post/%E5%A4%9A%E6%A0%87%E7%AD%BE%E5%88%86%E7%B1%BB/</loc>
     <lastmod>2020-02-10T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E8%AE%AD%E7%BB%83%E6%97%B6batch_size%E5%A4%A7%E5%B0%8F%E5%AF%B9%E6%94%B6%E6%95%9B%E7%9A%84%E5%BD%B1%E5%93%8D/</loc>
+    <loc>https://charent.github.io/post/%E8%AE%AD%E7%BB%83%E6%97%B6batch_size%E5%A4%A7%E5%B0%8F%E5%AF%B9%E6%94%B6%E6%95%9B%E7%9A%84%E5%BD%B1%E5%93%8D/</loc>
     <lastmod>2020-01-07T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/</loc>
     <lastmod>2019-12-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E8%A1%A1%E9%87%8F%E6%96%B9%E6%B3%95/</loc>
+    <loc>https://charent.github.io/post/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E8%A1%A1%E9%87%8F%E6%96%B9%E6%B3%95/</loc>
     <lastmod>2019-12-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E8%B4%9F%E6%A0%B7%E6%9C%AC%E8%B4%9F%E9%87%87%E6%A0%B7/</loc>
+    <loc>https://charent.github.io/post/%E8%B4%9F%E6%A0%B7%E6%9C%AC%E8%B4%9F%E9%87%87%E6%A0%B7/</loc>
     <lastmod>2019-12-19T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/categories/%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86/</loc>
     <lastmod>2019-12-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E6%96%87%E6%9C%AC%E9%A2%84%E5%A4%84%E7%90%86%E4%B9%8Btfidf/</loc>
+    <loc>https://charent.github.io/post/%E6%96%87%E6%9C%AC%E9%A2%84%E5%A4%84%E7%90%86%E4%B9%8Btfidf/</loc>
     <lastmod>2019-12-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E6%AD%A3%E5%88%99%E5%8C%96/</loc>
+    <loc>https://charent.github.io/post/%E6%B7%B1%E5%BA%A6%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E6%AD%A3%E5%88%99%E5%8C%96/</loc>
     <lastmod>2019-12-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/batch-normalization%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96/</loc>
+    <loc>https://charent.github.io/post/batchnormalization%E6%89%B9%E9%87%8F%E5%BD%92%E4%B8%80%E5%8C%96/</loc>
     <lastmod>2019-12-04T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90/</loc>
+    <loc>https://charent.github.io/post/%E5%AD%98%E5%9C%A8%E4%BE%9D%E8%B5%96%E5%85%B3%E7%B3%BB%E7%9A%84%E6%8E%A8%E8%8D%90%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2019-07-31T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/page/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/archives/</loc>
+    <loc>https://charent.github.io/page/archives/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</loc>
+    <loc>https://charent.github.io/post/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</loc>
     <lastmod>2019-02-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/</loc>
+    <loc>https://charent.github.io/post/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/</loc>
     <lastmod>2018-11-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E5%92%8C%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1/</loc>
+    <loc>https://charent.github.io/post/%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8%E5%92%8C%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1/</loc>
     <lastmod>2018-10-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/condajupyterlab%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7/</loc>
+    <loc>https://charent.github.io/post/condajupyterlab%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7/</loc>
     <lastmod>2018-09-12T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/tensorflow%E7%AC%94%E8%AE%B0/</loc>
+    <loc>https://charent.github.io/post/tensorflow%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2018-09-12T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/%E5%87%86%E7%A1%AE%E7%8E%87%E5%8F%AC%E5%9B%9E%E7%8E%87f1%E5%88%86%E6%95%B0%E7%81%B5%E6%95%8F%E5%BA%A6%E7%89%B9%E5%BC%82%E5%BA%A6/</loc>
+    <loc>https://charent.github.io/post/%E5%8F%AC%E5%9B%9E%E7%8E%87%E5%87%86%E7%A1%AE%E7%8E%87/</loc>
     <lastmod>2018-09-12T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/p/markdown%E6%A8%A1%E6%9D%BF/</loc>
+    <loc>https://charent.github.io/post/%E6%A8%A1%E6%9D%BF/</loc>
     <lastmod>2018-09-09T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/tags/</loc>
@@ -251,8 +251,8 @@
     <loc>https://charent.github.io/categories/%E6%9C%AA%E5%AE%9A%E4%B9%89%E5%88%86%E7%B1%BB/</loc>
     <lastmod>2018-09-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://charent.github.io/%E5%85%B3%E4%BA%8E/</loc>
+    <loc>https://charent.github.io/page/about/</loc>
   </url><url>
-    <loc>https://charent.github.io/search/</loc>
+    <loc>https://charent.github.io/page/search/</loc>
   </url>
 </urlset>

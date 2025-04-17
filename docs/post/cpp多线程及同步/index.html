@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content=" lock_guard&lt;mutex&gt; lock(my_mutex) 它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;\nunique_lock\u00a0&lt;mutex&gt; lock(my_mutex)，是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock\n条件变量（condition_variable）唤醒阻塞线程的方式： notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争\n示例1 //mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的 //condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计 //condition_variable一般和互斥量一起使用 mutex mtx; //手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁 mtx.lock(); //代码段 ...直接使用mutex的加锁功能，能实现简单的互斥， ...mtx被其他线程lock之后，当前线程会阻塞，直到其他线程unlock，所有的阻塞进程会竞争该锁 ... mtx.unlock() 示例2 #include\u00a0&lt;iostream&gt; #include\u00a0&lt;thread&gt; #include\u00a0&lt;mutex&gt; #include\u00a0&lt;deque&gt; #include\u00a0&lt;condition_variable&gt; #include\u00a0&lt;atomic&gt; using\u00a0namespace\u00a0std; //是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量 //volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据 //而不是从编译器优化后的寄存器中读取，防止出现不一致的情况 volatile\u00a0atomic_bool\u00a0loop(true);\u00a0class\u00a0MsgList { private: deque&lt;int&gt;\u00a0msg_queue; mutex\u00a0mtx; condition_variable\u00a0cond_var; public: void\u00a0notify_all() { cond_var.notify_all(); } void\u00a0write_msg() { unique_lock&lt;mutex&gt;\u00a0lock(mtx); //锁的作用域：整个函数，函数返回后自动释放 for\u00a0(size_t\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a05;\u00a0++i) { msg_queue.push_back(i); } //全部数据写入后，唤醒一个阻塞的线程 //notify_all()唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 //这里用notify_one()，唤醒的顺序是阻塞的顺序，先阻塞先唤醒，后阻塞后唤醒，没有竞争 cond_var.notify_one(); } /* lock_guard对象时，它将尝试获取提供给它的互斥锁的所有权。 当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量; unique_lock\u00a0是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能， 同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要; condition_variable\u00a0条件变量需要该类型的锁作为参数，必须使用unique_lock */ void\u00a0read_msg() { /* 在这个例子中，如果不用condition_variable，下面的代码是等价的： void\u00a0read_msg(){ while\u00a0(loop){\u00a0//死循环 unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//加锁 while\u00a0(!msg_queue.empty()){\u00a0//不为空 //do\u00a0something } } } 这种写法存在的问题是： 当写线程没有数据的写入的时候（队列始终为空），所有的读线程会一直循环加锁、检测队列是否为空，造成CPU资源浪费 所以就有了下面的条件变量 */ while\u00a0(loop) { unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//实现对{}内的代码段实现能自动上锁和自动解锁，look是自定义的变量名称，在离开作用域时会析构（既是解锁） cond_var.wait(lock,\u00a0[this]()\u00a0-&gt;\u00a0bool\u00a0{\u00a0return\u00a0!msg_queue.empty()\u00a0||\u00a0!loop;\u00a0}\u00a0); //调用wait函数： //1.如果只有第一个参数，先解锁lock，然后将当前线程添加到当前condition_variable对象的等待线程列表中 //当前线程将继续阻塞，直到另外某个线程调用\u00a0notify_*\u00a0唤醒了当前线程，wait函数自动重新上锁并返回，继续执行下面的代码 //2.如果有第二个参数（是一个返回值为bool的可调用对象，这里用匿名函数） //先解锁、阻塞和1是一样的，当前线程被其他线程唤醒后，再判可调用对象的返回值(bool),如果为fals, //如果返回true（这里是队列不为空返回true），wait函数自动重新上锁并返回，继续执行下面的代码 //这里的!loop是判断是否要退出循环的，loop为false，\u00a0!lopp为true，则会执行下面的break代码，退出死循环，结束线程 //在第二个参数中，还可以判断读线程的个数，既是允许最大的读线程个数（限制资源的用户量） //wait函数总结就是，先解锁和阻塞，等唤醒；如果有第二个参数，被唤醒后，再判断第一个参数的返回值来决定继续阻塞，还是wait函数返回并执行下面的代码 if\u00a0(!loop)\u00a0break; cout\u00a0&lt;&lt;\u00a0endl&lt;&lt;\u00a0&#34;thread\u00a0id:\u00a0&#34;\u00a0&lt;&lt;\u00a0this_thread::get_id()\u00a0&lt;&lt;\u00a0&#34;\u00a0;\u00a0出队元素:&#34;; while\u00a0(!msg_queue.empty())\u00a0//将队列元素全部出队 { int\u00a0tmp\u00a0=\u00a0msg_queue.front(); msg_queue.pop_front(); cout\u00a0&lt;&lt;\u00a0tmp\u00a0&lt;&lt;\u00a0&#39;\u00a0&#39;;\u00a0} }\u00a0} MsgList(/*\u00a0args\u00a0*/){}; ~MsgList(){}; }; int\u00a0main() { MsgList\u00a0mlist; int\u00a0read_thread_num\u00a0=\u00a05;\u00a0//5个读线程 thread\u00a0read_threads[read_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0{ read_threads[i]\u00a0=\u00a0thread(&amp;MsgList::read_msg,\u00a0&amp;mlist);\u00a0//第一个参数是函数指针（函数的地址），第二个参数是函数的参数，这里是一个实例化的对象的地址 //让这个线程去执行这个实例化的对象的函数 } int\u00a0write_thread_num\u00a0=\u00a050;\u00a0//50个写线程，一次性的 thread\u00a0write_threads[write_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i) { write_threads[i]\u00a0=\u00a0thread(&amp;MsgList::write_msg,\u00a0&amp;mlist); //\u00a0write_threads[i].join(); this_thread::sleep_for(chrono::milliseconds(20));\u00a0//主线程休眠20ms } for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i)\u00a0write_threads[i].join();\u00a0//等待所有的写线程结束 loop\u00a0=\u00a0false;\u00a0//设置loop为false，\u00a0退出循环 mlist.notify_all();\u00a0//唤醒所有的阻塞的线程，退出循环,结束线程 for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0read_threads[i].join();\u00a0//等待所有的读线程结束 return\u00a00; } ">
+<title>C&#43;&#43;多线程及同步</title>
+
+<link rel='canonical' href='https://charent.github.io/post/cpp%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E5%90%8C%E6%AD%A5/'>
+
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="C++多线程及同步">
+<meta property='og:description' content=" lock_guard&lt;mutex&gt; lock(my_mutex) 它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;\nunique_lock\u00a0&lt;mutex&gt; lock(my_mutex)，是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock\n条件变量（condition_variable）唤醒阻塞线程的方式： notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争\n示例1 //mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的 //condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计 //condition_variable一般和互斥量一起使用 mutex mtx; //手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁 mtx.lock(); //代码段 ...直接使用mutex的加锁功能，能实现简单的互斥， ...mtx被其他线程lock之后，当前线程会阻塞，直到其他线程unlock，所有的阻塞进程会竞争该锁 ... mtx.unlock() 示例2 #include\u00a0&lt;iostream&gt; #include\u00a0&lt;thread&gt; #include\u00a0&lt;mutex&gt; #include\u00a0&lt;deque&gt; #include\u00a0&lt;condition_variable&gt; #include\u00a0&lt;atomic&gt; using\u00a0namespace\u00a0std; //是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量 //volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据 //而不是从编译器优化后的寄存器中读取，防止出现不一致的情况 volatile\u00a0atomic_bool\u00a0loop(true);\u00a0class\u00a0MsgList { private: deque&lt;int&gt;\u00a0msg_queue; mutex\u00a0mtx; condition_variable\u00a0cond_var; public: void\u00a0notify_all() { cond_var.notify_all(); } void\u00a0write_msg() { unique_lock&lt;mutex&gt;\u00a0lock(mtx); //锁的作用域：整个函数，函数返回后自动释放 for\u00a0(size_t\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a05;\u00a0++i) { msg_queue.push_back(i); } //全部数据写入后，唤醒一个阻塞的线程 //notify_all()唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 //这里用notify_one()，唤醒的顺序是阻塞的顺序，先阻塞先唤醒，后阻塞后唤醒，没有竞争 cond_var.notify_one(); } /* lock_guard对象时，它将尝试获取提供给它的互斥锁的所有权。 当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量; unique_lock\u00a0是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能， 同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要; condition_variable\u00a0条件变量需要该类型的锁作为参数，必须使用unique_lock */ void\u00a0read_msg() { /* 在这个例子中，如果不用condition_variable，下面的代码是等价的： void\u00a0read_msg(){ while\u00a0(loop){\u00a0//死循环 unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//加锁 while\u00a0(!msg_queue.empty()){\u00a0//不为空 //do\u00a0something } } } 这种写法存在的问题是： 当写线程没有数据的写入的时候（队列始终为空），所有的读线程会一直循环加锁、检测队列是否为空，造成CPU资源浪费 所以就有了下面的条件变量 */ while\u00a0(loop) { unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//实现对{}内的代码段实现能自动上锁和自动解锁，look是自定义的变量名称，在离开作用域时会析构（既是解锁） cond_var.wait(lock,\u00a0[this]()\u00a0-&gt;\u00a0bool\u00a0{\u00a0return\u00a0!msg_queue.empty()\u00a0||\u00a0!loop;\u00a0}\u00a0); //调用wait函数： //1.如果只有第一个参数，先解锁lock，然后将当前线程添加到当前condition_variable对象的等待线程列表中 //当前线程将继续阻塞，直到另外某个线程调用\u00a0notify_*\u00a0唤醒了当前线程，wait函数自动重新上锁并返回，继续执行下面的代码 //2.如果有第二个参数（是一个返回值为bool的可调用对象，这里用匿名函数） //先解锁、阻塞和1是一样的，当前线程被其他线程唤醒后，再判可调用对象的返回值(bool),如果为fals, //如果返回true（这里是队列不为空返回true），wait函数自动重新上锁并返回，继续执行下面的代码 //这里的!loop是判断是否要退出循环的，loop为false，\u00a0!lopp为true，则会执行下面的break代码，退出死循环，结束线程 //在第二个参数中，还可以判断读线程的个数，既是允许最大的读线程个数（限制资源的用户量） //wait函数总结就是，先解锁和阻塞，等唤醒；如果有第二个参数，被唤醒后，再判断第一个参数的返回值来决定继续阻塞，还是wait函数返回并执行下面的代码 if\u00a0(!loop)\u00a0break; cout\u00a0&lt;&lt;\u00a0endl&lt;&lt;\u00a0&#34;thread\u00a0id:\u00a0&#34;\u00a0&lt;&lt;\u00a0this_thread::get_id()\u00a0&lt;&lt;\u00a0&#34;\u00a0;\u00a0出队元素:&#34;; while\u00a0(!msg_queue.empty())\u00a0//将队列元素全部出队 { int\u00a0tmp\u00a0=\u00a0msg_queue.front(); msg_queue.pop_front(); cout\u00a0&lt;&lt;\u00a0tmp\u00a0&lt;&lt;\u00a0&#39;\u00a0&#39;;\u00a0} }\u00a0} MsgList(/*\u00a0args\u00a0*/){}; ~MsgList(){}; }; int\u00a0main() { MsgList\u00a0mlist; int\u00a0read_thread_num\u00a0=\u00a05;\u00a0//5个读线程 thread\u00a0read_threads[read_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0{ read_threads[i]\u00a0=\u00a0thread(&amp;MsgList::read_msg,\u00a0&amp;mlist);\u00a0//第一个参数是函数指针（函数的地址），第二个参数是函数的参数，这里是一个实例化的对象的地址 //让这个线程去执行这个实例化的对象的函数 } int\u00a0write_thread_num\u00a0=\u00a050;\u00a0//50个写线程，一次性的 thread\u00a0write_threads[write_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i) { write_threads[i]\u00a0=\u00a0thread(&amp;MsgList::write_msg,\u00a0&amp;mlist); //\u00a0write_threads[i].join(); this_thread::sleep_for(chrono::milliseconds(20));\u00a0//主线程休眠20ms } for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i)\u00a0write_threads[i].join();\u00a0//等待所有的写线程结束 loop\u00a0=\u00a0false;\u00a0//设置loop为false，\u00a0退出循环 mlist.notify_all();\u00a0//唤醒所有的阻塞的线程，退出循环,结束线程 for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0read_threads[i].join();\u00a0//等待所有的读线程结束 return\u00a00; } ">
+<meta property='og:url' content='https://charent.github.io/post/cpp%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E5%90%8C%E6%AD%A5/'>
+<meta property='og:site_name' content='Charent的博客'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2020-10-09T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2020-10-09T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="C++多线程及同步">
+<meta name="twitter:description" content=" lock_guard&lt;mutex&gt; lock(my_mutex) 它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;\nunique_lock\u00a0&lt;mutex&gt; lock(my_mutex)，是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock\n条件变量（condition_variable）唤醒阻塞线程的方式： notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争\n示例1 //mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的 //condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计 //condition_variable一般和互斥量一起使用 mutex mtx; //手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁 mtx.lock(); //代码段 ...直接使用mutex的加锁功能，能实现简单的互斥， ...mtx被其他线程lock之后，当前线程会阻塞，直到其他线程unlock，所有的阻塞进程会竞争该锁 ... mtx.unlock() 示例2 #include\u00a0&lt;iostream&gt; #include\u00a0&lt;thread&gt; #include\u00a0&lt;mutex&gt; #include\u00a0&lt;deque&gt; #include\u00a0&lt;condition_variable&gt; #include\u00a0&lt;atomic&gt; using\u00a0namespace\u00a0std; //是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量 //volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据 //而不是从编译器优化后的寄存器中读取，防止出现不一致的情况 volatile\u00a0atomic_bool\u00a0loop(true);\u00a0class\u00a0MsgList { private: deque&lt;int&gt;\u00a0msg_queue; mutex\u00a0mtx; condition_variable\u00a0cond_var; public: void\u00a0notify_all() { cond_var.notify_all(); } void\u00a0write_msg() { unique_lock&lt;mutex&gt;\u00a0lock(mtx); //锁的作用域：整个函数，函数返回后自动释放 for\u00a0(size_t\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a05;\u00a0++i) { msg_queue.push_back(i); } //全部数据写入后，唤醒一个阻塞的线程 //notify_all()唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行 //这里用notify_one()，唤醒的顺序是阻塞的顺序，先阻塞先唤醒，后阻塞后唤醒，没有竞争 cond_var.notify_one(); } /* lock_guard对象时，它将尝试获取提供给它的互斥锁的所有权。 当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量; unique_lock\u00a0是\u00a0lock_guard\u00a0的升级加强版，它具有\u00a0lock_guard\u00a0的所有功能， 同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要; condition_variable\u00a0条件变量需要该类型的锁作为参数，必须使用unique_lock */ void\u00a0read_msg() { /* 在这个例子中，如果不用condition_variable，下面的代码是等价的： void\u00a0read_msg(){ while\u00a0(loop){\u00a0//死循环 unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//加锁 while\u00a0(!msg_queue.empty()){\u00a0//不为空 //do\u00a0something } } } 这种写法存在的问题是： 当写线程没有数据的写入的时候（队列始终为空），所有的读线程会一直循环加锁、检测队列是否为空，造成CPU资源浪费 所以就有了下面的条件变量 */ while\u00a0(loop) { unique_lock&lt;mutex&gt;\u00a0lock(mtx);\u00a0//实现对{}内的代码段实现能自动上锁和自动解锁，look是自定义的变量名称，在离开作用域时会析构（既是解锁） cond_var.wait(lock,\u00a0[this]()\u00a0-&gt;\u00a0bool\u00a0{\u00a0return\u00a0!msg_queue.empty()\u00a0||\u00a0!loop;\u00a0}\u00a0); //调用wait函数： //1.如果只有第一个参数，先解锁lock，然后将当前线程添加到当前condition_variable对象的等待线程列表中 //当前线程将继续阻塞，直到另外某个线程调用\u00a0notify_*\u00a0唤醒了当前线程，wait函数自动重新上锁并返回，继续执行下面的代码 //2.如果有第二个参数（是一个返回值为bool的可调用对象，这里用匿名函数） //先解锁、阻塞和1是一样的，当前线程被其他线程唤醒后，再判可调用对象的返回值(bool),如果为fals, //如果返回true（这里是队列不为空返回true），wait函数自动重新上锁并返回，继续执行下面的代码 //这里的!loop是判断是否要退出循环的，loop为false，\u00a0!lopp为true，则会执行下面的break代码，退出死循环，结束线程 //在第二个参数中，还可以判断读线程的个数，既是允许最大的读线程个数（限制资源的用户量） //wait函数总结就是，先解锁和阻塞，等唤醒；如果有第二个参数，被唤醒后，再判断第一个参数的返回值来决定继续阻塞，还是wait函数返回并执行下面的代码 if\u00a0(!loop)\u00a0break; cout\u00a0&lt;&lt;\u00a0endl&lt;&lt;\u00a0&#34;thread\u00a0id:\u00a0&#34;\u00a0&lt;&lt;\u00a0this_thread::get_id()\u00a0&lt;&lt;\u00a0&#34;\u00a0;\u00a0出队元素:&#34;; while\u00a0(!msg_queue.empty())\u00a0//将队列元素全部出队 { int\u00a0tmp\u00a0=\u00a0msg_queue.front(); msg_queue.pop_front(); cout\u00a0&lt;&lt;\u00a0tmp\u00a0&lt;&lt;\u00a0&#39;\u00a0&#39;;\u00a0} }\u00a0} MsgList(/*\u00a0args\u00a0*/){}; ~MsgList(){}; }; int\u00a0main() { MsgList\u00a0mlist; int\u00a0read_thread_num\u00a0=\u00a05;\u00a0//5个读线程 thread\u00a0read_threads[read_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0{ read_threads[i]\u00a0=\u00a0thread(&amp;MsgList::read_msg,\u00a0&amp;mlist);\u00a0//第一个参数是函数指针（函数的地址），第二个参数是函数的参数，这里是一个实例化的对象的地址 //让这个线程去执行这个实例化的对象的函数 } int\u00a0write_thread_num\u00a0=\u00a050;\u00a0//50个写线程，一次性的 thread\u00a0write_threads[write_thread_num]; for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i) { write_threads[i]\u00a0=\u00a0thread(&amp;MsgList::write_msg,\u00a0&amp;mlist); //\u00a0write_threads[i].join(); this_thread::sleep_for(chrono::milliseconds(20));\u00a0//主线程休眠20ms } for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0write_thread_num;\u00a0++i)\u00a0write_threads[i].join();\u00a0//等待所有的写线程结束 loop\u00a0=\u00a0false;\u00a0//设置loop为false，\u00a0退出循环 mlist.notify_all();\u00a0//唤醒所有的阻塞的线程，退出循环,结束线程 for\u00a0(int\u00a0i\u00a0=\u00a00;\u00a0i\u00a0&lt;\u00a0read_thread_num;\u00a0++i)\u00a0read_threads[i].join();\u00a0//等待所有的读线程结束 return\u00a00; } ">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_af2417ad4fea2f0c.png" width="300"
+                            height="284" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">😆</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Charent的博客</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='https://github.com/charent' target="_blank">
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                
+                <span>GitHub</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/c&#43;&#43;/" >
+                C&#43;&#43;
+            </a>
+        
+            <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" >
+                多线程
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/cpp%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%8F%8A%E5%90%8C%E6%AD%A5/">C&#43;&#43;多线程及同步</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Oct 09, 2020</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 2 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <ol>
+<li>
+<p><code>lock_guard&lt;mutex&gt; lock(my_mutex) </code>
+它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;</p>
+</li>
+<li>
+<p><code>unique_lock &lt;mutex&gt; lock(my_mutex)</code>，是 lock_guard 的升级加强版，它具有 lock_guard 的所有功能，同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要；条件变量需要该类型的锁作为参数时必须使用unique_lock</p>
+</li>
+<li>
+<p>条件变量（condition_variable）唤醒阻塞线程的方式：
+notify_all()：唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行
+notify_one()：唤醒的顺序是阻塞的顺序，先阻塞先唤醒，没有竞争</p>
+</li>
+</ol>
+<ul>
+<li>示例1</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">//mutex:互斥量，互斥量:为协调共同对一个共享资源的单独访问而设计的
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//condition_variable:、信号量(条件变量),为控制一个具有 有限数量用户 的资源而设计
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//condition_variable一般和互斥量一起使用
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>mutex mtx; <span style="color:#75715e">//手动上锁、解锁，lock_guard 和 unique_lock 是自动上锁和解锁
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>mtx.lock();
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//代码段
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>...<span style="color:#960050;background-color:#1e0010">直接使用</span>mutex的加锁功能<span style="color:#960050;background-color:#1e0010">，能实现简单的互斥，</span>
+</span></span><span style="display:flex;"><span>...mtx被其他线程lock之后<span style="color:#960050;background-color:#1e0010">，当前线程会阻塞，直到其他线程</span>unlock<span style="color:#960050;background-color:#1e0010">，所有的阻塞进程会竞争该锁</span>
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span>mtx.unlock()
+</span></span></code></pre></div><ul>
+<li>示例2</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;thread&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;mutex&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;deque&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;condition_variable&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;atomic&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> <span style="color:#66d9ef">namespace</span> std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//是否让线程循环的全局变量，使用原子类型，保证多线程下，同一时刻只有一个线程操作该变量
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//volatile让线程每次需要存储或读取这个变量的时候，都会直接从变量地址中读取数据
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//而不是从编译器优化后的寄存器中读取，防止出现不一致的情况
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">volatile</span> atomic_bool <span style="color:#a6e22e">loop</span>(true); 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MsgList</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    deque<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> msg_queue;
+</span></span><span style="display:flex;"><span>    mutex mtx;
+</span></span><span style="display:flex;"><span>    condition_variable cond_var;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> notify_all()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        cond_var.notify_all();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">write_msg</span>()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        unique_lock<span style="color:#f92672">&lt;</span>mutex<span style="color:#f92672">&gt;</span> lock(mtx); <span style="color:#75715e">//锁的作用域：整个函数，函数返回后自动释放
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> (size_t i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">5</span>; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            msg_queue.push_back(i);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//全部数据写入后，唤醒一个阻塞的线程
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">//notify_all()唤醒了等待的所有线程，但是这些被唤醒的线程需要去竞争锁，获取锁之后才能执行
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">//这里用notify_one()，唤醒的顺序是阻塞的顺序，先阻塞先唤醒，后阻塞后唤醒，没有竞争
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        cond_var.notify_one();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        lock_guard对象时，它将尝试获取提供给它的互斥锁的所有权。
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        unique_lock 是 lock_guard 的升级加强版，它具有 lock_guard 的所有功能，
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        同时又具有其他很多方法，可以随时加锁解锁，能够应对更复杂的锁定需要;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        condition_variable 条件变量需要该类型的锁作为参数，必须使用unique_lock
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">    */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">read_msg</span>()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">/*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">            在这个例子中，如果不用condition_variable，下面的代码是等价的：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">            void read_msg(){
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">                while (loop){ //死循环
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">                    unique_lock&lt;mutex&gt; lock(mtx);  //加锁
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">                    while (!msg_queue.empty()){ //不为空
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">                        //do something
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">                    }
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">                }
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">            }
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">            这种写法存在的问题是：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">            当写线程没有数据的写入的时候（队列始终为空），所有的读线程会一直循环加锁、检测队列是否为空，造成CPU资源浪费
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">            所以就有了下面的条件变量
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        */</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (loop)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            unique_lock<span style="color:#f92672">&lt;</span>mutex<span style="color:#f92672">&gt;</span> lock(mtx); <span style="color:#75715e">//实现对{}内的代码段实现能自动上锁和自动解锁，look是自定义的变量名称，在离开作用域时会析构（既是解锁）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            cond_var.wait(lock, [<span style="color:#66d9ef">this</span>]() <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">bool</span> { <span style="color:#66d9ef">return</span> <span style="color:#f92672">!</span>msg_queue.empty() <span style="color:#f92672">||</span> <span style="color:#f92672">!</span>loop; } );
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">//调用wait函数：
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#75715e">//1.如果只有第一个参数，先解锁lock，然后将当前线程添加到当前condition_variable对象的等待线程列表中
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#75715e">//当前线程将继续阻塞，直到另外某个线程调用 notify_* 唤醒了当前线程，wait函数自动重新上锁并返回，继续执行下面的代码
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">//2.如果有第二个参数（是一个返回值为bool的可调用对象，这里用匿名函数）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#75715e">//先解锁、阻塞和1是一样的，当前线程被其他线程唤醒后，再判可调用对象的返回值(bool),如果为fals,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#75715e">//如果返回true（这里是队列不为空返回true），wait函数自动重新上锁并返回，继续执行下面的代码
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">//这里的!loop是判断是否要退出循环的，loop为false， !lopp为true，则会执行下面的break代码，退出死循环，结束线程
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">//在第二个参数中，还可以判断读线程的个数，既是允许最大的读线程个数（限制资源的用户量）
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">//wait函数总结就是，先解锁和阻塞，等唤醒；如果有第二个参数，被唤醒后，再判断第一个参数的返回值来决定继续阻塞，还是wait函数返回并执行下面的代码
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>loop) <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>         
+</span></span><span style="display:flex;"><span>            cout <span style="color:#f92672">&lt;&lt;</span> endl<span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;thread id: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> this_thread<span style="color:#f92672">::</span>get_id() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; ; 出队元素:&#34;</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">while</span> (<span style="color:#f92672">!</span>msg_queue.empty()) <span style="color:#75715e">//将队列元素全部出队
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">int</span> tmp <span style="color:#f92672">=</span> msg_queue.front();
+</span></span><span style="display:flex;"><span>                msg_queue.pop_front();
+</span></span><span style="display:flex;"><span>                cout <span style="color:#f92672">&lt;&lt;</span> tmp  <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#39; &#39;</span>; 
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }   
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    MsgList(<span style="color:#75715e">/* args */</span>){};
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">~</span>MsgList(){};
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    MsgList mlist;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> read_thread_num <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>; <span style="color:#75715e">//5个读线程
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">thread</span> read_threads[read_thread_num];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> read_thread_num; <span style="color:#f92672">++</span>i)       
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        read_threads[i] <span style="color:#f92672">=</span> <span style="color:#66d9ef">thread</span>(<span style="color:#f92672">&amp;</span>MsgList<span style="color:#f92672">::</span>read_msg, <span style="color:#f92672">&amp;</span>mlist); 
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">//第一个参数是函数指针（函数的地址），第二个参数是函数的参数，这里是一个实例化的对象的地址
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#75715e">//让这个线程去执行这个实例化的对象的函数
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> write_thread_num <span style="color:#f92672">=</span> <span style="color:#ae81ff">50</span>; <span style="color:#75715e">//50个写线程，一次性的
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">thread</span> write_threads[write_thread_num];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> write_thread_num; <span style="color:#f92672">++</span>i)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        write_threads[i] <span style="color:#f92672">=</span> <span style="color:#66d9ef">thread</span>(<span style="color:#f92672">&amp;</span>MsgList<span style="color:#f92672">::</span>write_msg, <span style="color:#f92672">&amp;</span>mlist);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// write_threads[i].join();
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        this_thread<span style="color:#f92672">::</span>sleep_for(chrono<span style="color:#f92672">::</span>milliseconds(<span style="color:#ae81ff">20</span>)); <span style="color:#75715e">//主线程休眠20ms
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> write_thread_num; <span style="color:#f92672">++</span>i)  write_threads[i].join(); <span style="color:#75715e">//等待所有的写线程结束
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    
+</span></span><span style="display:flex;"><span>    loop <span style="color:#f92672">=</span> false; <span style="color:#75715e">//设置loop为false， 退出循环
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    mlist.notify_all(); <span style="color:#75715e">//唤醒所有的阻塞的线程，退出循环,结束线程
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> read_thread_num; <span style="color:#f92672">++</span>i) read_threads[i].join(); <span style="color:#75715e">//等待所有的读线程结束
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredClasses: ["gist"]
+        });})
+</script>
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2025 Charent的博客
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

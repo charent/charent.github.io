@@ -8,52 +8,30 @@
         <language>zh-cn</language>
         <lastBuildDate>Thu, 26 Mar 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://charent.github.io/categories/linux/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>win10下Linux子系统导入导出</title>
-        <link>https://charent.github.io/p/win10%E4%B8%8Blinux%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/</link>
+        <link>https://charent.github.io/post/win10%E4%B8%8Blinux%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/</link>
         <pubDate>Thu, 26 Mar 2020 00:00:00 +0000</pubDate>
         
-        <guid>https://charent.github.io/p/win10%E4%B8%8Blinux%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/</guid>
-        <description>&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wsl.exe --list --running
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#导出&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wsl --export Ubuntu-18.04 D:&lt;span class=&#34;se&#34;&gt;\b&lt;/span&gt;ackup&lt;span class=&#34;se&#34;&gt;\u&lt;/span&gt;buntu1804.tar
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#导入&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wsl.exe --import Ubuntu-18.04 D:&lt;span class=&#34;se&#34;&gt;\u&lt;/span&gt;buntu&lt;span class=&#34;se&#34;&gt;\U&lt;/span&gt;buntu-18.04 D:&lt;span class=&#34;se&#34;&gt;\b&lt;/span&gt;ackup&lt;span class=&#34;se&#34;&gt;\u&lt;/span&gt;buntu1804.tar
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#运行&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wsl --distribution Ubuntu-18.04
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#删除&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;wsl.exe --unregister Ubuntu-18.04
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;</description>
+        <guid>https://charent.github.io/post/win10%E4%B8%8Blinux%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/</guid>
+        <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wsl.exe --list --running
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#导出&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wsl --export Ubuntu-18.04 D:&lt;span style=&#34;color:#ae81ff&#34;&gt;\b&lt;/span&gt;ackup&lt;span style=&#34;color:#ae81ff&#34;&gt;\u&lt;/span&gt;buntu1804.tar
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#导入&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wsl.exe --import Ubuntu-18.04 D:&lt;span style=&#34;color:#ae81ff&#34;&gt;\u&lt;/span&gt;buntu&lt;span style=&#34;color:#ae81ff&#34;&gt;\U&lt;/span&gt;buntu-18.04 D:&lt;span style=&#34;color:#ae81ff&#34;&gt;\b&lt;/span&gt;ackup&lt;span style=&#34;color:#ae81ff&#34;&gt;\u&lt;/span&gt;buntu1804.tar
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#运行&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wsl --distribution Ubuntu-18.04
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#删除&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wsl.exe --unregister Ubuntu-18.04
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
         </item>
         <item>
         <title>Linux常用命令</title>
-        <link>https://charent.github.io/p/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</link>
+        <link>https://charent.github.io/post/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</link>
         <pubDate>Sun, 17 Feb 2019 00:00:00 +0000</pubDate>
         
-        <guid>https://charent.github.io/p/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</guid>
+        <guid>https://charent.github.io/post/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</guid>
         <description>&lt;h1 id=&#34;生成当前目录下所有文件的md5值&#34;&gt;生成当前目录下所有文件的md5值
-&lt;/h1&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;find ./ -type f -print0 &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; xargs -0 md5sum &amp;gt; ./md5.txt
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;</description>
+&lt;/h1&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;find ./ -type f -print0 | xargs -0 md5sum &amp;gt; ./md5.txt
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
         </item>
         
     </channel>

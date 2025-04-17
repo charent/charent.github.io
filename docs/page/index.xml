@@ -8,18 +8,18 @@
         <language>zh-cn</language>
         <lastBuildDate>Tue, 28 May 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://charent.github.io/page/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>归档</title>
-        <link>https://charent.github.io/archives/</link>
+        <link>https://charent.github.io/page/archives/</link>
         <pubDate>Tue, 28 May 2019 00:00:00 +0000</pubDate>
         
-        <guid>https://charent.github.io/archives/</guid>
+        <guid>https://charent.github.io/page/archives/</guid>
         <description></description>
         </item>
         <item>
         <title>关于</title>
-        <link>https://charent.github.io/%E5%85%B3%E4%BA%8E/</link>
+        <link>https://charent.github.io/page/about/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
         
-        <guid>https://charent.github.io/%E5%85%B3%E4%BA%8E/</guid>
+        <guid>https://charent.github.io/page/about/</guid>
         <description>&lt;h2 id=&#34;个人github主页&#34;&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/charent&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;个人Github主页&lt;/a&gt;
 &lt;/h2&gt;&lt;ul&gt;
@@ -46,10 +46,10 @@
         </item>
         <item>
         <title>搜索</title>
-        <link>https://charent.github.io/search/</link>
+        <link>https://charent.github.io/page/search/</link>
         <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
         
-        <guid>https://charent.github.io/search/</guid>
+        <guid>https://charent.github.io/page/search/</guid>
         <description></description>
         </item>
         
