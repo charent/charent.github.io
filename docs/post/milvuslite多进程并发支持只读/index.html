@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Milvus Lite向量数据库多进程并发支持 最近在用 Milvus Lite 数据库做数据表结构的检索和召回，要检索的文档数据量不大（千级别），本着能少部署一个服务就少部署一个服务的原则，就没有采用 Milvus Standalone 做部署。\n为了利用多进程提高并发量，在每个进程启动时用如下方法读取向量数据库文件：\nfrom pymilvus import MilvusClient db_file_path = &#39;/path/to/milvus_demo.db&#39; client = MilvusClient(db_file_path) 但是启动时报错了：\nOpen /path/to/milvus_demo.db failed, the file has been opened by another program 2025-07-09 21:24:12,429 [ERROR][_create_connection]: Failed to create new connection using: milvus_demo.db (milvus_client.py:916) .... ConnectionConfigException: &lt;ConnectionConfigException: (code=1, message=Open local milvus failed)&gt; 原来是不允多个进程读取同一个db个文件，但是我读取向量数据的需求是只读，不涉及写向量数据库，不存在锁的问题。这就好办了，利用linux的共享内存/dev/shm。进程启动时先把向量数据库db文件复制一份到共享内存，再读取共享内存那份数据就可以了。但是注意要做好清理工作，否则会造成内存泄漏（/dev/shm目录下一堆db文件）。\n代码实现如下：\nimport os import shutil from pymilvus import MilvusClient class Demo: # 省略其他初始化代码 def setup(slef): pid = os.getpid() origin_vector_db_path = &#34;/path/to&#34; vector_db_name = &#34;milvus_demo.db&#34; self.db_file_path = f&#34;/dev/shm/pid-{pid}-{vector_db_name}&#34; self.db_lock_file_path = f&#34;/dev/shm/.pid-{pid}-{vector_db_name}.lock&#34; logger.info( f&#34;using temp vector db file: `{self.db_file_path}` for multiple process,&#34; f&#34; we will remove it when service is stop.&#34; ) # 移动 db 文件到 /dev/ shutil.copy(f&#34;{origin_vector_db_path}/{vector_db_name}&#34;, self.db_file_path) # 多进程加载 self.client = MilvusClient(self.db_file_path) def clean_up(self): &#34;&#34;&#34; 析构函数，在进程终止时删除共享目录下的 db file &#34;&#34;&#34; try: self.client.close() except Exception as _: pass if os.path.exists(self.db_file_path): os.remove(self.db_file_path) logger.info(f&#34;removed `{self.db_file_path}`&#34;) if os.path.exists(self.db_lock_file_path): os.remove(self.db_lock_file_path) logger.info(f&#34;removed `{self.db_lock_file_path}`&#34;) 大功告成！\n">
+<title>Milvus Lite向量数据库多进程并发支持（只读）</title>
+
+<link rel='canonical' href='https://charent.github.io/post/milvuslite%E5%A4%9A%E8%BF%9B%E7%A8%8B%E5%B9%B6%E5%8F%91%E6%94%AF%E6%8C%81%E5%8F%AA%E8%AF%BB/'>
+
+<link rel="stylesheet" href="/scss/style.min.65463afd28d606277b44441c8bbb8b0277823a2d0c03ab8ba9d0567d274f7b43.css"><meta property='og:title' content="Milvus Lite向量数据库多进程并发支持（只读）">
+<meta property='og:description' content="Milvus Lite向量数据库多进程并发支持 最近在用 Milvus Lite 数据库做数据表结构的检索和召回，要检索的文档数据量不大（千级别），本着能少部署一个服务就少部署一个服务的原则，就没有采用 Milvus Standalone 做部署。\n为了利用多进程提高并发量，在每个进程启动时用如下方法读取向量数据库文件：\nfrom pymilvus import MilvusClient db_file_path = &#39;/path/to/milvus_demo.db&#39; client = MilvusClient(db_file_path) 但是启动时报错了：\nOpen /path/to/milvus_demo.db failed, the file has been opened by another program 2025-07-09 21:24:12,429 [ERROR][_create_connection]: Failed to create new connection using: milvus_demo.db (milvus_client.py:916) .... ConnectionConfigException: &lt;ConnectionConfigException: (code=1, message=Open local milvus failed)&gt; 原来是不允多个进程读取同一个db个文件，但是我读取向量数据的需求是只读，不涉及写向量数据库，不存在锁的问题。这就好办了，利用linux的共享内存/dev/shm。进程启动时先把向量数据库db文件复制一份到共享内存，再读取共享内存那份数据就可以了。但是注意要做好清理工作，否则会造成内存泄漏（/dev/shm目录下一堆db文件）。\n代码实现如下：\nimport os import shutil from pymilvus import MilvusClient class Demo: # 省略其他初始化代码 def setup(slef): pid = os.getpid() origin_vector_db_path = &#34;/path/to&#34; vector_db_name = &#34;milvus_demo.db&#34; self.db_file_path = f&#34;/dev/shm/pid-{pid}-{vector_db_name}&#34; self.db_lock_file_path = f&#34;/dev/shm/.pid-{pid}-{vector_db_name}.lock&#34; logger.info( f&#34;using temp vector db file: `{self.db_file_path}` for multiple process,&#34; f&#34; we will remove it when service is stop.&#34; ) # 移动 db 文件到 /dev/ shutil.copy(f&#34;{origin_vector_db_path}/{vector_db_name}&#34;, self.db_file_path) # 多进程加载 self.client = MilvusClient(self.db_file_path) def clean_up(self): &#34;&#34;&#34; 析构函数，在进程终止时删除共享目录下的 db file &#34;&#34;&#34; try: self.client.close() except Exception as _: pass if os.path.exists(self.db_file_path): os.remove(self.db_file_path) logger.info(f&#34;removed `{self.db_file_path}`&#34;) if os.path.exists(self.db_lock_file_path): os.remove(self.db_lock_file_path) logger.info(f&#34;removed `{self.db_lock_file_path}`&#34;) 大功告成！\n">
+<meta property='og:url' content='https://charent.github.io/post/milvuslite%E5%A4%9A%E8%BF%9B%E7%A8%8B%E5%B9%B6%E5%8F%91%E6%94%AF%E6%8C%81%E5%8F%AA%E8%AF%BB/'>
+<meta property='og:site_name' content='Charent的博客'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2025-07-09T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2025-07-09T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="Milvus Lite向量数据库多进程并发支持（只读）">
+<meta name="twitter:description" content="Milvus Lite向量数据库多进程并发支持 最近在用 Milvus Lite 数据库做数据表结构的检索和召回，要检索的文档数据量不大（千级别），本着能少部署一个服务就少部署一个服务的原则，就没有采用 Milvus Standalone 做部署。\n为了利用多进程提高并发量，在每个进程启动时用如下方法读取向量数据库文件：\nfrom pymilvus import MilvusClient db_file_path = &#39;/path/to/milvus_demo.db&#39; client = MilvusClient(db_file_path) 但是启动时报错了：\nOpen /path/to/milvus_demo.db failed, the file has been opened by another program 2025-07-09 21:24:12,429 [ERROR][_create_connection]: Failed to create new connection using: milvus_demo.db (milvus_client.py:916) .... ConnectionConfigException: &lt;ConnectionConfigException: (code=1, message=Open local milvus failed)&gt; 原来是不允多个进程读取同一个db个文件，但是我读取向量数据的需求是只读，不涉及写向量数据库，不存在锁的问题。这就好办了，利用linux的共享内存/dev/shm。进程启动时先把向量数据库db文件复制一份到共享内存，再读取共享内存那份数据就可以了。但是注意要做好清理工作，否则会造成内存泄漏（/dev/shm目录下一堆db文件）。\n代码实现如下：\nimport os import shutil from pymilvus import MilvusClient class Demo: # 省略其他初始化代码 def setup(slef): pid = os.getpid() origin_vector_db_path = &#34;/path/to&#34; vector_db_name = &#34;milvus_demo.db&#34; self.db_file_path = f&#34;/dev/shm/pid-{pid}-{vector_db_name}&#34; self.db_lock_file_path = f&#34;/dev/shm/.pid-{pid}-{vector_db_name}.lock&#34; logger.info( f&#34;using temp vector db file: `{self.db_file_path}` for multiple process,&#34; f&#34; we will remove it when service is stop.&#34; ) # 移动 db 文件到 /dev/ shutil.copy(f&#34;{origin_vector_db_path}/{vector_db_name}&#34;, self.db_file_path) # 多进程加载 self.client = MilvusClient(self.db_file_path) def clean_up(self): &#34;&#34;&#34; 析构函数，在进程终止时删除共享目录下的 db file &#34;&#34;&#34; try: self.client.close() except Exception as _: pass if os.path.exists(self.db_file_path): os.remove(self.db_file_path) logger.info(f&#34;removed `{self.db_file_path}`&#34;) if os.path.exists(self.db_lock_file_path): os.remove(self.db_lock_file_path) logger.info(f&#34;removed `{self.db_lock_file_path}`&#34;) 大功告成！\n">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_ec4966b9294004c6.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">😆</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Charent的博客</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='https://github.com/charent' target="_blank">
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                
+                <span>GitHub</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/page/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="https://charent.github.io/" selected>中文</option>
+                                
+                                    <option value="https://charent.github.io/en/" >English</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2/" >
+                向量检索
+            </a>
+        
+            <a href="/categories/%E5%A4%9A%E8%BF%9B%E7%A8%8B/" >
+                多进程
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/milvuslite%E5%A4%9A%E8%BF%9B%E7%A8%8B%E5%B9%B6%E5%8F%91%E6%94%AF%E6%8C%81%E5%8F%AA%E8%AF%BB/">Milvus Lite向量数据库多进程并发支持（只读）</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Jul 09, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 1 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="milvus-lite向量数据库多进程并发支持">Milvus Lite向量数据库多进程并发支持
+</h1><p>最近在用 Milvus Lite 数据库做数据表结构的检索和召回，要检索的文档数据量不大（千级别），本着能少部署一个服务就少部署一个服务的原则，就没有采用 Milvus Standalone 做部署。<br>
+为了利用多进程提高并发量，在每个进程启动时用如下方法读取向量数据库文件：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> pymilvus <span style="color:#f92672">import</span> MilvusClient
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>db_file_path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;/path/to/milvus_demo.db&#39;</span>
+</span></span><span style="display:flex;"><span>client <span style="color:#f92672">=</span> MilvusClient(db_file_path)
+</span></span></code></pre></div><p>但是启动时报错了：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Open /path/to/milvus_demo.db failed, the file has been opened by another program
+</span></span><span style="display:flex;"><span>2025-07-09 21:24:12,429 <span style="color:#f92672">[</span>ERROR<span style="color:#f92672">][</span>_create_connection<span style="color:#f92672">]</span>: Failed to create new connection using: milvus_demo.db <span style="color:#f92672">(</span>milvus_client.py:916<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>....
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ConnectionConfigException: &lt;ConnectionConfigException: <span style="color:#f92672">(</span>code<span style="color:#f92672">=</span>1, message<span style="color:#f92672">=</span>Open local milvus failed<span style="color:#f92672">)</span>&gt;
+</span></span></code></pre></div><p>原来是不允多个进程读取同一个db个文件，但是我读取向量数据的需求是<strong>只读</strong>，<strong>不涉及写向量数据库</strong>，不存在锁的问题。这就好办了，利用linux的共享内存<code>/dev/shm</code>。进程启动时先把向量数据库db文件复制一份到共享内存，再读取共享内存那份数据就可以了。但是注意要做好清理工作，否则会造成内存泄漏（<code>/dev/shm</code>目录下一堆db文件）。</p>
+<p>代码实现如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> shutil
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pymilvus <span style="color:#f92672">import</span> MilvusClient
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Demo</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 省略其他初始化代码</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">setup</span>(slef):
+</span></span><span style="display:flex;"><span>        pid <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getpid()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        origin_vector_db_path <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/path/to&#34;</span>
+</span></span><span style="display:flex;"><span>        vector_db_name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;milvus_demo.db&#34;</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>db_file_path <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;/dev/shm/pid-</span><span style="color:#e6db74">{</span>pid<span style="color:#e6db74">}</span><span style="color:#e6db74">-</span><span style="color:#e6db74">{</span>vector_db_name<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>db_lock_file_path <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;/dev/shm/.pid-</span><span style="color:#e6db74">{</span>pid<span style="color:#e6db74">}</span><span style="color:#e6db74">-</span><span style="color:#e6db74">{</span>vector_db_name<span style="color:#e6db74">}</span><span style="color:#e6db74">.lock&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        logger<span style="color:#f92672">.</span>info(
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;using temp vector db file: `</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>db_file_path<span style="color:#e6db74">}</span><span style="color:#e6db74">` for multiple process,&#34;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34; we will remove it when service is stop.&#34;</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 移动 db 文件到 /dev/</span>
+</span></span><span style="display:flex;"><span>        shutil<span style="color:#f92672">.</span>copy(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>origin_vector_db_path<span style="color:#e6db74">}</span><span style="color:#e6db74">/</span><span style="color:#e6db74">{</span>vector_db_name<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>, self<span style="color:#f92672">.</span>db_file_path)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 多进程加载</span>
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>client <span style="color:#f92672">=</span> MilvusClient(self<span style="color:#f92672">.</span>db_file_path)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_up</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        析构函数，在进程终止时删除共享目录下的 db file
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>client<span style="color:#f92672">.</span>close()
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> _:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>exists(self<span style="color:#f92672">.</span>db_file_path):
+</span></span><span style="display:flex;"><span>            os<span style="color:#f92672">.</span>remove(self<span style="color:#f92672">.</span>db_file_path)
+</span></span><span style="display:flex;"><span>            logger<span style="color:#f92672">.</span>info(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;removed `</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>db_file_path<span style="color:#e6db74">}</span><span style="color:#e6db74">`&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>exists(self<span style="color:#f92672">.</span>db_lock_file_path):
+</span></span><span style="display:flex;"><span>            os<span style="color:#f92672">.</span>remove(self<span style="color:#f92672">.</span>db_lock_file_path)
+</span></span><span style="display:flex;"><span>            logger<span style="color:#f92672">.</span>info(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;removed `</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>db_lock_file_path<span style="color:#e6db74">}</span><span style="color:#e6db74">`&#34;</span>)
+</span></span></code></pre></div><p>大功告成！</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+	const mainArticleElement = document.querySelector(".main-article");
+        renderMathInElement(mainArticleElement, {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredClasses: ["gist"]
+        });})
+</script>
+
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2018 - 
+        
+        2025 Charent的博客
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.30.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

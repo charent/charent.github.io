@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://charent.github.io/</loc>
-    <lastmod>2025-01-12T00:00:00+00:00</lastmod>
+    <lastmod>2025-07-09T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -16,7 +16,7 @@
                 />
   </url><url>
     <loc>https://charent.github.io/categories/</loc>
-    <lastmod>2025-01-12T00:00:00+00:00</lastmod>
+    <lastmod>2025-07-09T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -28,8 +28,17 @@
                 href="https://charent.github.io/categories/"
                 />
   </url><url>
+    <loc>https://charent.github.io/post/milvuslite%E5%A4%9A%E8%BF%9B%E7%A8%8B%E5%B9%B6%E5%8F%91%E6%94%AF%E6%8C%81%E5%8F%AA%E8%AF%BB/</loc>
+    <lastmod>2025-07-09T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://charent.github.io/post/</loc>
-    <lastmod>2025-01-12T00:00:00+00:00</lastmod>
+    <lastmod>2025-07-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://charent.github.io/categories/%E5%A4%9A%E8%BF%9B%E7%A8%8B/</loc>
+    <lastmod>2025-07-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://charent.github.io/categories/%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2/</loc>
+    <lastmod>2025-07-09T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://charent.github.io/post/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%87%BA%E7%8E%B0loss%E5%B0%96%E5%B3%B0/</loc>
     <lastmod>2025-01-12T00:00:00+00:00</lastmod>

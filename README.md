@@ -20,7 +20,7 @@ git clone --depth 1 https://github.com/CaiJimmy/hugo-theme-stack
 - 启动hugo服务：
 ```bash
 # windows 
-./run.bat
+run.bat
 
 # 或者
 hugo server --theme=hugo-theme-stack --buildDrafts --bind=127.0.0.1 --baseURL=http://127.0.0.1 --port=8123
@@ -37,7 +37,7 @@ hugo server --theme=hugo-theme-stack --buildDrafts --bind=127.0.0.1 --baseURL=ht
 
 # windows
 # 该脚本将生成静态文件到docs文件夹（需要在GitHub仓库中设置为docs）
-./build.bat
+build.bat
 
 # 推送到github
 
